@@ -2,29 +2,29 @@ from Presets import *
 
 
 def display(screen, bodies):
-    #clear last frame
+    # Clear last frame
     screen.fill(bg_color)
 
-    #display all bodies
+    # Display all bodies
     for b in bodies:
         #screen.blit(b.image, b.position)
         b.draw_on(screen)
 
-    #flip display
+    # Update display
     pg.display.update()
 
 
 
 def main():
 
-    # construct bodies list
+    # Construct bodies list
     # bodies = [
     #     Body(10, 10, [200, 200], [0, 0]),
     #     Body(10, 20, [60, 60], [0, 0]),
     #     Body(10, 50, [100, 150], [0, 0])
     # ]
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.01, 100, 1, 10, 100, 400)
+    # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    bodies = star_system(1000, 0.04, 100, 1, 10, 100, 400)
 
 
     # initialize screen
