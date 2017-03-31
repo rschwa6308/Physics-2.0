@@ -23,11 +23,11 @@ def main():
     #     Body(10, 20, [60, 60], [0, 0]),
     #     Body(10, 50, [100, 150], [0, 0])
     # ]
-    bodies = star_system(10000, 30, 100, 5, 10, 50, 250)
+    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    bodies = star_system(1000, 0.01, 100, 1, 10, 100, 400)
 
 
     # initialize screen
-    width, height = 800, 600
     screen = pg.display.set_mode((width, height))
 
     # initialize game clock and set tick to 60
@@ -36,6 +36,7 @@ def main():
 
     done = False
     while not done:
+        clock.tick(60)
         # user input
         for event in pg.event.get():
             if event.type == pg.QUIT:

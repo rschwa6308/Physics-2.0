@@ -7,19 +7,21 @@ from Constants import *
 
 
 class Body:
-    def __init__(self, mass, radius, position, velocity, color=None):
+    def __init__(self, mass, position, velocity, density=Density, color=None):
         self.mass = mass
-        self.radius = radius
+        self.radius = int(round((mass / density) ** 0.333333))
 
         self.position = position
         self.velocity = velocity
 
+        self.density = density
+
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
 
-        self.image = pg.Surface((radius*2, radius*2))
-        self.image.fill(bg_color)
-        self.image.set_alpha(255)
-        pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
+        # self.image = pg.Surface((radius*2, radius*2))
+        # self.image.fill(bg_color)
+        # self.image.set_alpha(255)
+        # pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)
@@ -41,7 +43,7 @@ class Body:
         return (x_accel , y_accel)
 
     def test_collision(self, other):
-        return (abs(other.position[0] - self.position[0]) ** 2 + abs(other.position[1] - self.position[1]) ** 2) ** 0.5 < (self.radius + other.radius) * 0.5        #'...) * 0.5' gives collosion tolerance equal to the mean radius
+        return (abs(other.position[0] - self.position[0]) ** 2 + abs(other.position[1] - self.position[1]) ** 2) ** 0.5 < (self.radius + other.radius) * 1.0        #'...) * 0.5' gives collosion tolerance equal to the mean radius, '1.0' gives zero-tolerance
 
     def merge(self, other):
         # print "merge!"
@@ -51,8 +53,8 @@ class Body:
         self.velocity[0] = (self.velocity[0]*self.mass + other.velocity[0]*other.mass) / (self.mass + other.mass)
         self.velocity[1] = (self.velocity[1] * self.mass + other.velocity[1] * other.mass) / (self.mass + other.mass)
 
-        self.radius = max(self.radius, other.radius) * (float(self.mass + other.mass) / self.mass) ** 0.3333333
-        self.radius = int(self.radius)
+        avg_density = (self.density * self.mass + other.density * other.mass) / (self.mass + other.mass)
+        self.radius = int(round(((self.mass + other.mass) / avg_density) ** 0.333333))
 
         self.color = ((self.color[0]*self.mass + other.color[0]*other.mass)/(self.mass + other.mass),
                       (self.color[1]*self.mass + other.color[1]*other.mass)/(self.mass + other.mass),
