@@ -22,7 +22,7 @@ class Body:
         pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def draw_on(self, screen):
-        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)       # FIX THIS
+        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)
 
     def effect_of(self, other):
         M = other.mass
@@ -34,13 +34,31 @@ class Body:
         magnitude = (G * M) / (r ** 2)
         x_accel = magnitude * cos(angle)
         y_accel = magnitude * sin(angle)
-        # if x_distance < 0:
-        #     x_accel *= -1
-        # if y_distance < 0:
-        #     y_accel *= -1
+        # set a ceiling on body acceleration
+        x_accel = min(x_accel, 100)
+        y_accel = min(y_accel, 100)
 
         return (x_accel , y_accel)
 
+    def test_collision(self, other):
+        return (abs(other.position[0] - self.position[0]) ** 2 + abs(other.position[1] - self.position[1]) ** 2) ** 0.5 < (self.radius + other.radius) * 0.5        #'...) * 0.5' gives collosion tolerance equal to the mean radius
+
+    def merge(self, other):
+        # print "merge!"
+        self.position[0] = (self.position[0]*self.mass + other.position[0]*other.mass) / (self.mass + other.mass)
+        self.position[1] = (self.position[1] * self.mass + other.position[1] * other.mass) / (self.mass + other.mass)
+
+        self.velocity[0] = (self.velocity[0]*self.mass + other.velocity[0]*other.mass) / (self.mass + other.mass)
+        self.velocity[1] = (self.velocity[1] * self.mass + other.velocity[1] * other.mass) / (self.mass + other.mass)
+
+        self.radius = max(self.radius, other.radius) * (float(self.mass + other.mass) / self.mass) ** 0.3333333
+        self.radius = int(self.radius)
+
+        self.color = ((self.color[0]*self.mass + other.color[0]*other.mass)/(self.mass + other.mass),
+                      (self.color[1]*self.mass + other.color[1]*other.mass)/(self.mass + other.mass),
+                      (self.color[2]*self.mass + other.color[2]*other.mass)/(self.mass + other.mass))
+
+        self.mass += other.mass
 
     def apply_acceleration(self, acceleration):
         self.velocity[0] += acceleration[0]

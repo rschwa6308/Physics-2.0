@@ -20,10 +20,10 @@ def main():
     # construct bodies list
     # bodies = [
     #     Body(10, 10, [200, 200], [0, 0]),
-    #     Body(10, 10, [60, 60], [0, 0]),
-    #     Body(10, 10, [100, 150], [0, 0])
+    #     Body(10, 20, [60, 60], [0, 0]),
+    #     Body(10, 50, [100, 150], [0, 0])
     # ]
-    bodies = star_system(500, 30, 100, 2, 5, 40, 100)
+    bodies = star_system(10000, 30, 100, 5, 10, 50, 250)
 
 
     # initialize screen
@@ -48,8 +48,12 @@ def main():
         for body in bodies:
             for other in bodies:
                 if other is not body:
-                    acceleration = body.effect_of(other)
-                    body.apply_acceleration(acceleration)
+                    if body.test_collision(other):
+                        body.merge(other)
+                        bodies.remove(other)
+                    else:
+                        acceleration = body.effect_of(other)
+                        body.apply_acceleration(acceleration)
 
         # apply velocity (update position)
         for body in bodies:
