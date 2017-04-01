@@ -1,4 +1,5 @@
 from Presets import *
+from Constants import *
 
 
 def display(screen, bodies):
@@ -17,6 +18,8 @@ def display(screen, bodies):
 
 def main():
 
+    global width, height
+
     # Construct bodies list
     # bodies = [
     #     Body(10, 10, [200, 200], [0, 0]),
@@ -26,26 +29,54 @@ def main():
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(1000, 0.04, 100, 1, 10, 100, 400)
 
+    
+    # Initialize screen
+    icon = pg.image.load('AtomIcon.png')
+    pg.display.set_icon(icon)
+    screen = pg.display.set_mode((width, height), pg.RESIZABLE)
+    pg.display.set_caption("Physics Simulator 2.0")
+    
 
-    # initialize screen
-    screen = pg.display.set_mode((width, height))
-
-    # initialize game clock and set tick to 60
+    # Initialize game clock and set tick to 60
     clock = pg.time.Clock()
     clock.tick(60)
 
+    scroll = [0,0]
+    scroll_right, scroll_left, scroll_down, scroll_up = 0,0,0,0
+    scroll_constant = 2.5
     done = False
     while not done:
         clock.tick(60)
         # user input
         for event in pg.event.get():
-            if event.type == pg.QUIT:
+            if event.type == pg.VIDEORESIZE:
+                
+                width, height = event.w, event.h
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_d:
+                    scroll_right = 1 
+                elif event.key == pg.K_a:
+                    scroll_left = 1
+                elif event.key == pg.K_w:
+                    scroll_up = 1
+                elif event.key == pg.K_s:
+                    scroll_down = 1
+            elif event.type == pg.KEYUP:
+                if event.key == pg.K_d:
+                    scroll_right = 0
+                elif event.key == pg.K_a:
+                    scroll_left = 0
+                elif event.key == pg.K_w:
+                    scroll_up = 0
+                elif event.key == pg.K_s:
+                    scroll_down = 0
+            elif event.type == pg.QUIT:
                 done = True
 
-        # display current frame
+        # Display current frame
         display(screen, bodies)
 
-        # calculate forces and apply acceleration
+        # Calculate forces and apply acceleration
         for body in bodies:
             for other in bodies:
                 if other is not body:
@@ -56,17 +87,29 @@ def main():
                         acceleration = body.effect_of(other)
                         body.apply_acceleration(acceleration)
 
-        # apply velocity (update position)
+        # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity()
+            body.position[0] += scroll[0]
+            body.position[1] += scroll[1]
 
+
+        # Accelerate scrolling
+        if scroll_right:
+            scroll[0] -= scroll_constant
+        if scroll_left:
+            scroll[0] += scroll_constant
+        if scroll_up:
+            scroll[1] += scroll_constant    
+        if scroll_down:
+            scroll[1] -= scroll_constant
+        # Decelerate scrolling
+        if scroll[0]:
+            scroll[0] -= abs(scroll[0])/scroll[0]
+        if scroll[1]:
+            scroll[1] -= abs(scroll[1])/scroll[1]
 
     pg.quit()
-
-
-
-
-
 
 
 
