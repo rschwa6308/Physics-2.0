@@ -1,5 +1,49 @@
+import Tkinter as tk
+
 from Presets import *
 from Constants import *
+
+
+
+
+class Settings:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Universe Settings")
+
+        self.root.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.alive = True
+
+        tk.Label(self.root, text="Slide to change G").pack()
+        self.gravity_slider = tk.Scale(self.root, from_=0, to = 100, orient=tk.HORIZONTAL, length=200)
+        self.gravity_slider.set(G*100)
+        self.gravity_slider.pack()
+
+        tk.Label(self.root, text="Slide to change clock speed").pack()
+        self.time_slider = tk.Scale(self.root, from_=1, to=300, orient=tk.HORIZONTAL, length=200)
+        self.time_slider.set(60)
+        self.time_slider.pack()
+
+    def get_gravity(self):
+        try:
+            return self.gravity_slider.get() / 100.0
+        except:
+            return G
+
+    def get_time(self):
+        try:
+            return self.time_slider.get()
+        except:
+            return 60
+
+    def update(self):
+        self.root.update()
+
+    def destroy(self):
+        self.alive = False
+        self.root.destroy()
+
+
 
 
 def display(screen, bodies):
@@ -18,14 +62,23 @@ def display(screen, bodies):
 
 def main():
 
+<<<<<<< HEAD
     global width, height
 
     # Construct bodies list
+=======
+    # initialize tkinter window
+    settings_window = Settings()
+
+
+    # construct bodies list
+>>>>>>> refs/remotes/rschwa6308/master
     # bodies = [
-    #     Body(10, 10, [200, 200], [0, 0]),
-    #     Body(10, 20, [60, 60], [0, 0]),
-    #     Body(10, 50, [100, 150], [0, 0])
+    #     Body(1000, [1000, 500], [0, 0]),
+    #     Body(1000, [60, 800], [0, 0]),
+    #     Body(1000, [500, 150], [0, 0])
     # ]
+<<<<<<< HEAD
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(1000, 0.04, 100, 1, 10, 100, 400)
 
@@ -38,15 +91,35 @@ def main():
     
 
     # Initialize game clock and set tick to 60
+=======
+    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    bodies = star_system(100, 0.001, 100, 1, 10, 100, 400)
+
+
+    # initialize screen
+    screen = pg.display.set_mode((width, height))
+    pg.display.set_caption("Physics Simulator")
+    icon = pg.image.load("Assets/physics.png")
+    pg.display.set_icon(icon)
+
+
+    # initialize game clock and set tick to 60
+>>>>>>> refs/remotes/rschwa6308/master
     clock = pg.time.Clock()
-    clock.tick(60)
+    fps = 60
 
     scroll = [0,0]
     scroll_right, scroll_left, scroll_down, scroll_up = 0,0,0,0
     scroll_constant = 2.5
     done = False
     while not done:
-        clock.tick(60)
+        clock.tick(fps)
+
+        if settings_window.alive:           # update tk window if alive
+            settings_window.update()
+            G = settings_window.get_gravity()
+            fps = settings_window.get_time()
+
         # user input
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -84,7 +157,7 @@ def main():
                         body.merge(other)
                         bodies.remove(other)
                     else:
-                        acceleration = body.effect_of(other)
+                        acceleration = body.effect_of(other, G)
                         body.apply_acceleration(acceleration)
 
         # Apply velocity (update position)
@@ -110,6 +183,7 @@ def main():
             scroll[1] -= abs(scroll[1])/scroll[1]
 
     pg.quit()
+    if settings_window.alive: settings_window.destroy()         # destroy tk window if alive
 
 
 

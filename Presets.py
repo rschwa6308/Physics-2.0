@@ -24,5 +24,4 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
         planet = Body(mass, position, velocity)
         bodies.append(planet)
 
-
     return bodies

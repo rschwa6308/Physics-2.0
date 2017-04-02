@@ -27,7 +27,7 @@ class Body:
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)
 
-    def effect_of(self, other):
+    def effect_of(self, other, G):
         M = other.mass
         x_distance = other.position[0]-self.position[0]
         y_distance = other.position[1] - self.position[1]
@@ -51,8 +51,13 @@ class Body:
         self.position = [(self.position[x]*self.mass + other.position[x]*other.mass) / total_mass for x in (0,1)]
         self.velocity = [(self.velocity[x]*self.mass + other.velocity[x]*other.mass) / total_mass for x in (0,1)]
 
+<<<<<<< HEAD
         avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
         self.radius = int((total_mass/avg_density)**(1/3))
+=======
+        avg_density = (self.density * self.mass + other.density * other.mass) / (self.mass + other.mass)
+        self.radius = max(max(int(round(((self.mass + other.mass) / avg_density) ** 0.333333)), self.radius), other.radius)
+>>>>>>> refs/remotes/rschwa6308/master
 
         self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
 
