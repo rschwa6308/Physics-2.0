@@ -46,18 +46,12 @@ class Body:
         return V2(other.position).distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
         
     def merge(self, other):
-        # print "merge!"
         total_mass = self.mass + other.mass
         self.position = [(self.position[x]*self.mass + other.position[x]*other.mass) / total_mass for x in (0,1)]
         self.velocity = [(self.velocity[x]*self.mass + other.velocity[x]*other.mass) / total_mass for x in (0,1)]
 
-<<<<<<< HEAD
         avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
         self.radius = int((total_mass/avg_density)**(1/3))
-=======
-        avg_density = (self.density * self.mass + other.density * other.mass) / (self.mass + other.mass)
-        self.radius = max(max(int(round(((self.mass + other.mass) / avg_density) ** 0.333333)), self.radius), other.radius)
->>>>>>> refs/remotes/rschwa6308/master
 
         self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
 

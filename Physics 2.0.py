@@ -1,10 +1,7 @@
-import Tkinter as tk
+import tkinter as tk
 
 from Presets import *
 from Constants import *
-
-
-
 
 class Settings:
     def __init__(self):
@@ -52,7 +49,6 @@ def display(screen, bodies):
 
     # Display all bodies
     for b in bodies:
-        #screen.blit(b.image, b.position)
         b.draw_on(screen)
 
     # Update display
@@ -61,24 +57,16 @@ def display(screen, bodies):
 
 
 def main():
-
-<<<<<<< HEAD
     global width, height
-
-    # Construct bodies list
-=======
-    # initialize tkinter window
+    
+    # Initialize tkinter window
     settings_window = Settings()
-
-
-    # construct bodies list
->>>>>>> refs/remotes/rschwa6308/master
+    # Construct bodies list
     # bodies = [
     #     Body(1000, [1000, 500], [0, 0]),
     #     Body(1000, [60, 800], [0, 0]),
     #     Body(1000, [500, 150], [0, 0])
     # ]
-<<<<<<< HEAD
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(1000, 0.04, 100, 1, 10, 100, 400)
 
@@ -87,24 +75,8 @@ def main():
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
-    pg.display.set_caption("Physics Simulator 2.0")
+    pg.display.set_caption("Physics Simulator 2")
     
-
-    # Initialize game clock and set tick to 60
-=======
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(100, 0.001, 100, 1, 10, 100, 400)
-
-
-    # initialize screen
-    screen = pg.display.set_mode((width, height))
-    pg.display.set_caption("Physics Simulator")
-    icon = pg.image.load("Assets/physics.png")
-    pg.display.set_icon(icon)
-
-
-    # initialize game clock and set tick to 60
->>>>>>> refs/remotes/rschwa6308/master
     clock = pg.time.Clock()
     fps = 60
 
@@ -115,15 +87,13 @@ def main():
     while not done:
         clock.tick(fps)
 
-        if settings_window.alive:           # update tk window if alive
+        if settings_window.alive:
             settings_window.update()
             G = settings_window.get_gravity()
             fps = settings_window.get_time()
 
-        # user input
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
-                
                 width, height = event.w, event.h
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_d:
@@ -183,7 +153,7 @@ def main():
             scroll[1] -= abs(scroll[1])/scroll[1]
 
     pg.quit()
-    if settings_window.alive: settings_window.destroy()         # destroy tk window if alive
+    if settings_window.alive: settings_window.destroy()
 
 
 
