@@ -1,4 +1,32 @@
+import Tkinter as tk
+
 from Presets import *
+
+
+
+
+class Settings:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Universe Settings")
+
+        self.root.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.alive = True
+
+        tk.Label(self.root, text="Slide to change G").pack()
+        self.gravity_slider = tk.Scale(self.root, from_=0, to = 100, orient=tk.HORIZONTAL, length=200)
+        self.gravity_slider.set(G*100)
+        self.gravity_slider.pack()
+
+
+    def update(self):
+        self.root.update()
+
+    def destroy(self):
+        self.alive = False
+        self.root.destroy()
+
+
 
 
 def display(screen, bodies):
@@ -17,6 +45,10 @@ def display(screen, bodies):
 
 def main():
 
+    # initialize tkinter window
+    settings_window = Settings()
+
+
     # construct bodies list
     # bodies = [
     #     Body(10, 10, [200, 200], [0, 0]),
@@ -29,14 +61,25 @@ def main():
 
     # initialize screen
     screen = pg.display.set_mode((width, height))
+    pg.display.set_caption("Physics Simulator")
+    icon = pg.image.load("Assets/physics.png")
+    pg.display.set_icon(icon)
+
 
     # initialize game clock and set tick to 60
     clock = pg.time.Clock()
-    clock.tick(60)
 
     done = False
     while not done:
         clock.tick(60)
+
+        if settings_window.alive:           # update tk window if alive
+            settings_window.update()
+            try:
+                G = settings_window.gravity_slider.get() / 100.0
+            except:
+                pass
+
         # user input
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -53,7 +96,7 @@ def main():
                         body.merge(other)
                         bodies.remove(other)
                     else:
-                        acceleration = body.effect_of(other)
+                        acceleration = body.effect_of(other, G)
                         body.apply_acceleration(acceleration)
 
         # apply velocity (update position)
@@ -62,6 +105,7 @@ def main():
 
 
     pg.quit()
+    if settings_window.alive: settings_window.destroy()         # destroy tk window if alive
 
 
 

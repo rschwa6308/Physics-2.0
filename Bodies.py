@@ -26,7 +26,7 @@ class Body:
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)
 
-    def effect_of(self, other):
+    def effect_of(self, other, G):
         M = other.mass
         x_distance = other.position[0]-self.position[0]
         y_distance = other.position[1] - self.position[1]
