@@ -2,7 +2,7 @@
 
 Remake of simple 2D n-body gravity simulator
 
-# H1 Improvements from original physics simulator
+## Improvements from original physics simulator
 - Improved performance
 - Better code structure
 - Precise physics
