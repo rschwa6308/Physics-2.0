@@ -18,6 +18,22 @@ class Settings:
         self.gravity_slider.set(G*100)
         self.gravity_slider.pack()
 
+        tk.Label(self.root, text="Slide to change clock speed").pack()
+        self.time_slider = tk.Scale(self.root, from_=1, to=300, orient=tk.HORIZONTAL, length=200)
+        self.time_slider.set(60)
+        self.time_slider.pack()
+
+    def get_gravity(self):
+        try:
+            return self.gravity_slider.get() / 100.0
+        except:
+            return G
+
+    def get_time(self):
+        try:
+            return self.time_slider.get()
+        except:
+            return 60
 
     def update(self):
         self.root.update()
@@ -51,12 +67,12 @@ def main():
 
     # construct bodies list
     # bodies = [
-    #     Body(10, 10, [200, 200], [0, 0]),
-    #     Body(10, 20, [60, 60], [0, 0]),
-    #     Body(10, 50, [100, 150], [0, 0])
+    #     Body(1000, [1000, 500], [0, 0]),
+    #     Body(1000, [60, 800], [0, 0]),
+    #     Body(1000, [500, 150], [0, 0])
     # ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.01, 100, 1, 10, 100, 400)
+    bodies = star_system(100, 0.001, 100, 1, 10, 100, 400)
 
 
     # initialize screen
@@ -68,17 +84,16 @@ def main():
 
     # initialize game clock and set tick to 60
     clock = pg.time.Clock()
+    fps = 60
 
     done = False
     while not done:
-        clock.tick(60)
+        clock.tick(fps)
 
         if settings_window.alive:           # update tk window if alive
             settings_window.update()
-            try:
-                G = settings_window.gravity_slider.get() / 100.0
-            except:
-                pass
+            G = settings_window.get_gravity()
+            fps = settings_window.get_time()
 
         # user input
         for event in pg.event.get():

@@ -54,7 +54,7 @@ class Body:
         self.velocity[1] = (self.velocity[1] * self.mass + other.velocity[1] * other.mass) / (self.mass + other.mass)
 
         avg_density = (self.density * self.mass + other.density * other.mass) / (self.mass + other.mass)
-        self.radius = int(round(((self.mass + other.mass) / avg_density) ** 0.333333))
+        self.radius = max(max(int(round(((self.mass + other.mass) / avg_density) ** 0.333333)), self.radius), other.radius)
 
         self.color = ((self.color[0]*self.mass + other.color[0]*other.mass)/(self.mass + other.mass),
                       (self.color[1]*self.mass + other.color[1]*other.mass)/(self.mass + other.mass),
