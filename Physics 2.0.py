@@ -50,12 +50,12 @@ def display(screen, bodies, camera):
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
-        x = (int(b.position[0]) - cam_position[0])
-        x = int((x - width / 2) * cam_scale + width / 2)
-        y = int(b.position[1]) - cam_position[1]
-        y = int((y - height / 2) * cam_scale + height / 2)
-        radius = int(b.radius * cam_scale)
-        pg.draw.circle(screen, b.color, [x, y], radius, 0)
+        x = b.position[0] - cam_position[0]
+        x = (x - width / 2) * cam_scale + width / 2
+        y = b.position[1] - cam_position[1]
+        y = (y - height / 2) * cam_scale + height / 2
+        radius = b.radius * cam_scale
+        pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
         
     # Update display
     pg.display.update()
@@ -92,7 +92,7 @@ def main():
     clock = pg.time.Clock()
     fps = 60
 
-    scroll = [0,0]
+    scroll = V2(0,0)
     scroll_right, scroll_left, scroll_down, scroll_up = 0,0,0,0
     scroll_constant = 2.5
     done = False
@@ -173,8 +173,7 @@ def main():
         # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity()
-            body.position[0] += scroll[0]
-            body.position[1] += scroll[1]
+            body.position += scroll
 
 
         # Accelerate scrolling

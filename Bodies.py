@@ -1,7 +1,7 @@
 from random import randint
 import pygame as pg
 from pygame.math import Vector2 as V2
-from math import atan2, sin, cos, hypot
+from math import hypot
 
 from Constants import *
 
@@ -11,8 +11,8 @@ class Body:
         self.mass = mass
         self.radius = int((mass/density)**(1/3))
 
-        self.position = position
-        self.velocity = velocity
+        self.position = V2(position)
+        self.velocity = V2(velocity)
 
         self.density = density
 
@@ -28,26 +28,18 @@ class Body:
 
     def effect_of(self, other, G):
         M = other.mass
-        x_distance = other.position[0]-self.position[0]
-        y_distance = other.position[1] - self.position[1]
-        r = hypot(x_distance, y_distance)
-        angle = atan2(y_distance, x_distance)
-        magnitude = (G * M) / (r ** 2)
-        x_accel = magnitude * cos(angle)
-        y_accel = magnitude * sin(angle)
-        # set a ceiling on body acceleration
-        # x_accel = min(x_accel, 100)
-        # y_accel = min(y_accel, 100)
-
-        return (x_accel , y_accel)
+        x,y = (other.position[a]-self.position[a] for a in (0,1))
+        r = hypot(x,y)
+        acc = G*M/r**3
+        return V2(acc * x, acc * y)
 
     def test_collision(self, other):
-        return V2(other.position).distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
+        return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
         
     def merge(self, other):
         total_mass = self.mass + other.mass
-        self.position = [(self.position[x]*self.mass + other.position[x]*other.mass) / total_mass for x in (0,1)]
-        self.velocity = [(self.velocity[x]*self.mass + other.velocity[x]*other.mass) / total_mass for x in (0,1)]
+        self.position = V2([(self.position[x]*self.mass + other.position[x]*other.mass) / total_mass for x in (0,1)])
+        self.velocity = V2([(self.velocity[x]*self.mass + other.velocity[x]*other.mass) / total_mass for x in (0,1)])
 
         avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
         self.radius = int((total_mass/avg_density)**(1/3))
@@ -57,9 +49,7 @@ class Body:
         self.mass = total_mass
 
     def apply_acceleration(self, acceleration):
-        self.velocity[0] += acceleration[0]
-        self.velocity[1] += acceleration[1]
+        self.velocity += acceleration
 
     def apply_velocity(self):
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.position += self.velocity
