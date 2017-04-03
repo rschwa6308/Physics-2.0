@@ -7,3 +7,15 @@ Remake of simple 2D n-body gravity simulator
 - Better code structure
 - Precise physics
 - Live simulation settings window
+- Ability to zoom (antialiased)
+
+
+## Controls
+Action | Control
+---|---
+camera left | left
+camera right | right
+camera up | up
+camera down | down
+zoom in | scroll up
+zoom out | scroll down
