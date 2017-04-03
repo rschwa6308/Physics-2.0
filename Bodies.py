@@ -1,6 +1,6 @@
 from random import randint
 import pygame as pg
-from math import atan2, sin, cos
+from math import atan2, sin, cos, hypot
 
 from Constants import *
 
@@ -30,7 +30,7 @@ class Body:
         x_distance = other.position[0]-self.position[0]
         y_distance = other.position[1] - self.position[1]
         # distance_ratio = float(x_distance) / float(y_distance)
-        r = (x_distance**2 + y_distance**2) ** 0.5
+        r = hypot(x_distance, y_distance)
         angle = atan2(y_distance, x_distance)
         magnitude = (G * M) / (r ** 2)
         x_accel = magnitude * cos(angle)
@@ -42,7 +42,7 @@ class Body:
         return (x_accel , y_accel)
 
     def test_collision(self, other):
-        return (abs(other.position[0] - self.position[0]) ** 2 + abs(other.position[1] - self.position[1]) ** 2) ** 0.5 < (self.radius + other.radius) * 1.0        #'...) * 0.5' gives collosion tolerance equal to the mean radius, '1.0' gives zero-tolerance
+        return hypot(abs(other.position[0] - self.position[0]), abs(other.position[1] - self.position[1])) < (self.radius + other.radius) * 1.0        #'...) * 0.5' gives collosion tolerance equal to the mean radius, '1.0' gives zero-tolerance
 
     def merge(self, other):
         # print "merge!"
