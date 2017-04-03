@@ -40,11 +40,12 @@ class Settings:
         self.alive = False
         self.root.destroy()
 
-def display(screen, bodies, (cam_position, cam_scale)):
+def display(screen, bodies, camera):
     #clear last frame
     screen.fill(bg_color)           # comment out this line for a fun time ;)
 
     # Display all bodies
+    cam_position, cam_scale = camera
     for b in bodies:
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
@@ -82,7 +83,7 @@ def main():
     # ]
 
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.01, 150, 1, 10, 100, 500, planet_density=0.1)
+    bodies = star_system(1000, 0.04, 150, 1, 10, 100, 500, planet_density=0.1)
     
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
@@ -117,6 +118,14 @@ def main():
                     scroll_up = 1
                 elif event.key == pg.K_s:
                     scroll_down = 1
+                elif event.key == pg.K_LEFT:
+                    cam_velocity[0] = -3 / cam_scale
+                elif event.key == pg.K_RIGHT:
+                    cam_velocity[0] = 3  / cam_scale
+                elif event.key == pg.K_UP:
+                    cam_velocity[1] = -3 / cam_scale
+                elif event.key == pg.K_DOWN:
+                    cam_velocity[1] = 3 / cam_scale
             elif event.type == pg.KEYUP:
                 if event.key == pg.K_d:
                     scroll_right = 0
@@ -126,26 +135,16 @@ def main():
                     scroll_up = 0
                 elif event.key == pg.K_s:
                     scroll_down = 0
+                elif event.key == pg.K_LEFT:
+                    cam_velocity[0] = 0
+                elif event.key == pg.K_RIGHT:
+                    cam_velocity[0] = 0
+                elif event.key == pg.K_UP:
+                    cam_velocity[1] = 0
+                elif event.key == pg.K_DOWN:
+                    cam_velocity[1] = 0
             elif event.type == pg.QUIT:
                 done = True
-            elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_LEFT:
-                    cam_velocity[0] = -3 / cam_scale
-                elif event.key == pg.K_RIGHT:
-                    cam_velocity[0] = 3  / cam_scale
-                elif event.key == pg.K_UP:
-                    cam_velocity[1] = -3 / cam_scale
-                elif event.key == pg.K_DOWN:
-                    cam_velocity[1] = 3 / cam_scale
-            elif event.type == pg.KEYUP:
-                if event.key == pg.K_LEFT:
-                    cam_velocity[0] = 0
-                elif event.key == pg.K_RIGHT:
-                    cam_velocity[0] = 0
-                elif event.key == pg.K_UP:
-                    cam_velocity[1] = 0
-                elif event.key == pg.K_DOWN:
-                    cam_velocity[1] = 0
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 4:
                     cam_scale *= 1.1
