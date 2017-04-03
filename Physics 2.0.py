@@ -50,6 +50,7 @@ def display(screen, bodies, camera):
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
+        print width, height
         x = (int(b.position[0]) - cam_position[0])
         x = int((x - width / 2) * cam_scale + width / 2)
         y = int(b.position[1]) - cam_position[1]
@@ -73,7 +74,6 @@ def main():
     cam_velocity = [0, 0]
     cam_scale = 1
 
-
     # construct bodies list
 
     # bodies = [
@@ -81,8 +81,7 @@ def main():
     #     Body(1000, [60, 800], [0, 0]),
     #     Body(1000, [500, 150], [0, 0])
     # ]
-
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(1000, 0.04, 150, 1, 10, 100, 500, planet_density=0.1)
     
     # Initialize screen
@@ -90,7 +89,7 @@ def main():
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2")
-    
+
     clock = pg.time.Clock()
     fps = 60
 
