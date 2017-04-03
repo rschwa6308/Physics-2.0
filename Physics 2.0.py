@@ -45,14 +45,21 @@ class Settings:
 
 
 
-def display(screen, bodies):
+def display(screen, bodies, (cam_position, cam_scale)):
     #clear last frame
     screen.fill(bg_color)
 
     #display all bodies
     for b in bodies:
         #screen.blit(b.image, b.position)
-        b.draw_on(screen)
+        # b.draw_on(screen)
+        # calculate coordinates and radius adjusted for camera
+        x = (int(b.position[0]) - cam_position[0])
+        x = int((x - width / 2) * cam_scale + width / 2)
+        y = int(b.position[1]) - cam_position[1]
+        y = int((y - height / 2) * cam_scale + height / 2)
+        radius = int(b.radius * cam_scale)
+        pg.draw.circle(screen, b.color, [x, y], radius, 0)
 
     #flip display
     pg.display.update()
@@ -64,6 +71,11 @@ def main():
     # initialize tkinter window
     settings_window = Settings()
 
+    # initialize camera variables
+    cam_position = [0, 0]
+    cam_velocity = [0, 0]
+    cam_scale = 1
+
 
     # construct bodies list
     # bodies = [
@@ -72,7 +84,7 @@ def main():
     #     Body(1000, [500, 150], [0, 0])
     # ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(100, 0.001, 100, 1, 10, 100, 400)
+    bodies = star_system(100, 0.001, 10, 1, 10, 100, 400)
 
 
     # initialize screen
@@ -99,9 +111,40 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 done = True
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_LEFT:
+                    cam_velocity[0] = -3 / cam_scale
+                elif event.key == pg.K_RIGHT:
+                    cam_velocity[0] = 3  / cam_scale
+                elif event.key == pg.K_UP:
+                    cam_velocity[1] = -3 / cam_scale
+                elif event.key == pg.K_DOWN:
+                    cam_velocity[1] = 3 / cam_scale
+            elif event.type == pg.KEYUP:
+                if event.key == pg.K_LEFT:
+                    cam_velocity[0] = 0
+                elif event.key == pg.K_RIGHT:
+                    cam_velocity[0] = 0
+                elif event.key == pg.K_UP:
+                    cam_velocity[1] = 0
+                elif event.key == pg.K_DOWN:
+                    cam_velocity[1] = 0
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 4:
+                    cam_scale *= 1.1
+                    cam_scale = min(cam_scale, 100)
+                elif event.button == 5:
+                    cam_scale /= 1.1
+                    cam_scale = max(cam_scale, 0.01)
+
+
+        # apply velocity to camera
+        cam_position[0] += cam_velocity[0]
+        cam_position[1] += cam_velocity[1]
+
 
         # display current frame
-        display(screen, bodies)
+        display(screen, bodies, (cam_position, cam_scale))
 
         # calculate forces and apply acceleration
         for body in bodies:

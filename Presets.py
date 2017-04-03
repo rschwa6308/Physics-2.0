@@ -2,6 +2,7 @@ from random import uniform
 from math import pi
 
 from Bodies import *
+from Colors import *
 
 
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True):

@@ -2,14 +2,13 @@ from random import randint
 import pygame as pg
 from math import atan2, sin, cos
 
-from Colors import *
 from Constants import *
 
 
 class Body:
     def __init__(self, mass, position, velocity, density=Density, color=None):
         self.mass = mass
-        self.radius = int(round((mass / density) ** 0.333333))
+        self.radius = (mass / density) ** 0.333333
 
         self.position = position
         self.velocity = velocity
@@ -24,7 +23,7 @@ class Body:
         # pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def draw_on(self, screen):
-        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)
+        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), int(self.radius), 0)
 
     def effect_of(self, other, G):
         M = other.mass
@@ -54,7 +53,7 @@ class Body:
         self.velocity[1] = (self.velocity[1] * self.mass + other.velocity[1] * other.mass) / (self.mass + other.mass)
 
         avg_density = (self.density * self.mass + other.density * other.mass) / (self.mass + other.mass)
-        self.radius = max(max(int(round(((self.mass + other.mass) / avg_density) ** 0.333333)), self.radius), other.radius)
+        self.radius = max(max(((self.mass + other.mass) / avg_density) ** 0.333333, self.radius), other.radius)
 
         self.color = ((self.color[0]*self.mass + other.color[0]*other.mass)/(self.mass + other.mass),
                       (self.color[1]*self.mass + other.color[1]*other.mass)/(self.mass + other.mass),
