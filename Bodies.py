@@ -3,7 +3,6 @@ import pygame as pg
 from pygame.math import Vector2 as V2
 from math import atan2, sin, cos, hypot
 
-from Colors import *
 from Constants import *
 
 
@@ -25,7 +24,7 @@ class Body:
         # pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def draw_on(self, screen):
-        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), self.radius, 0)
+        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), int(self.radius), 0)
 
     def effect_of(self, other, G):
         M = other.mass

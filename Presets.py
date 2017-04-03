@@ -2,9 +2,10 @@ from random import uniform
 from math import pi
 
 from Bodies import *
+from Colors import *
 
 
-def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True):
+def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
     star = Body(star_mass, [width/2, height/2], [0, 0], star_density, yellow)
@@ -21,7 +22,7 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
             velocity = [speed * sin(angle), speed * cos(angle)]
         else:
             velocity = [uniform(-2, 2), uniform(-2, 2)]
-        planet = Body(mass, position, velocity)
+        planet = Body(mass, position, velocity, density=planet_density)
         bodies.append(planet)
 
     return bodies

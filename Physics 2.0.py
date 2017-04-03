@@ -12,7 +12,7 @@ class Settings:
         self.alive = True
 
         tk.Label(self.root, text="Slide to change G").pack()
-        self.gravity_slider = tk.Scale(self.root, from_=0, to = 100, orient=tk.HORIZONTAL, length=200)
+        self.gravity_slider = tk.Scale(self.root, from_=0, to = 1000, orient=tk.HORIZONTAL, length=200)
         self.gravity_slider.set(G*100)
         self.gravity_slider.pack()
 
@@ -40,17 +40,22 @@ class Settings:
         self.alive = False
         self.root.destroy()
 
-
-
-
-def display(screen, bodies):
-    # Clear last frame
-    screen.fill(bg_color)
+def display(screen, bodies, (cam_position, cam_scale)):
+    #clear last frame
+    screen.fill(bg_color)           # comment out this line for a fun time ;)
 
     # Display all bodies
     for b in bodies:
-        b.draw_on(screen)
-
+        #screen.blit(b.image, b.position)
+        # b.draw_on(screen)
+        # calculate coordinates and radius adjusted for camera
+        x = (int(b.position[0]) - cam_position[0])
+        x = int((x - width / 2) * cam_scale + width / 2)
+        y = int(b.position[1]) - cam_position[1]
+        y = int((y - height / 2) * cam_scale + height / 2)
+        radius = int(b.radius * cam_scale)
+        pg.draw.circle(screen, b.color, [x, y], radius, 0)
+        
     # Update display
     pg.display.update()
 
@@ -61,15 +66,23 @@ def main():
     
     # Initialize tkinter window
     settings_window = Settings()
-    # Construct bodies list
+
+    # initialize camera variables
+    cam_position = [0, 0]
+    cam_velocity = [0, 0]
+    cam_scale = 1
+
+
+    # construct bodies list
+
     # bodies = [
     #     Body(1000, [1000, 500], [0, 0]),
     #     Body(1000, [60, 800], [0, 0]),
     #     Body(1000, [500, 150], [0, 0])
     # ]
-    # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.04, 100, 1, 10, 100, 400)
 
+    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    bodies = star_system(1000, 0.01, 150, 1, 10, 100, 500, planet_density=0.1)
     
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
@@ -115,9 +128,39 @@ def main():
                     scroll_down = 0
             elif event.type == pg.QUIT:
                 done = True
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_LEFT:
+                    cam_velocity[0] = -3 / cam_scale
+                elif event.key == pg.K_RIGHT:
+                    cam_velocity[0] = 3  / cam_scale
+                elif event.key == pg.K_UP:
+                    cam_velocity[1] = -3 / cam_scale
+                elif event.key == pg.K_DOWN:
+                    cam_velocity[1] = 3 / cam_scale
+            elif event.type == pg.KEYUP:
+                if event.key == pg.K_LEFT:
+                    cam_velocity[0] = 0
+                elif event.key == pg.K_RIGHT:
+                    cam_velocity[0] = 0
+                elif event.key == pg.K_UP:
+                    cam_velocity[1] = 0
+                elif event.key == pg.K_DOWN:
+                    cam_velocity[1] = 0
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 4:
+                    cam_scale *= 1.1
+                    cam_scale = min(cam_scale, 100)
+                elif event.button == 5:
+                    cam_scale /= 1.1
+                    cam_scale = max(cam_scale, 0.01)
 
-        # Display current frame
-        display(screen, bodies)
+
+        # apply velocity to camera
+        cam_position[0] += cam_velocity[0]
+        cam_position[1] += cam_velocity[1]
+
+        # display current frame
+        display(screen, bodies, (cam_position, cam_scale))
 
         # Calculate forces and apply acceleration
         for body in bodies:
