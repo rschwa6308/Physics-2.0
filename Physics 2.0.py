@@ -1,6 +1,8 @@
 import Tkinter as tk
 
 from Presets import *
+from Constants import *
+
 
 
 
@@ -54,6 +56,7 @@ def display(screen, bodies, (cam_position, cam_scale)):
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
+        print width, height
         x = (int(b.position[0]) - cam_position[0])
         x = int((x - width / 2) * cam_scale + width / 2)
         y = int(b.position[1]) - cam_position[1]
@@ -76,7 +79,6 @@ def main():
     cam_velocity = [0, 0]
     cam_scale = 1
 
-
     # construct bodies list
     # bodies = [
     #     Body(1000, [1000, 500], [0, 0]),
@@ -84,14 +86,15 @@ def main():
     #     Body(1000, [500, 150], [0, 0])
     # ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.01, 150, 1, 10, 100, 500, planet_density=0.1)
+    bodies = star_system(1000, 0.01, 10, 1, 10, 100, 500, planet_density=0.1)
 
 
     # initialize screen
-    screen = pg.display.set_mode((width, height))
+    width, height = 700, 600
+    screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator")
-    icon = pg.image.load("Assets/physics.png")
-    pg.display.set_icon(icon)
+    # icon = pg.image.load("Assets/physics.png")        FIX THIS
+    # pg.display.set_icon(icon)
 
 
     # initialize game clock and set tick to 60
@@ -111,6 +114,8 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 done = True
+            elif event.type == pg.VIDEORESIZE:
+                width, height = event.w, event.h
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_LEFT:
                     cam_velocity[0] = -3 / cam_scale
