@@ -50,7 +50,6 @@ def display(screen, bodies, camera):
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
-        print width, height
         x = (int(b.position[0]) - cam_position[0])
         x = int((x - width / 2) * cam_scale + width / 2)
         y = int(b.position[1]) - cam_position[1]
