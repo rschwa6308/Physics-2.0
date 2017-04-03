@@ -1,6 +1,7 @@
 from random import randint
 import pygame as pg
-from math import atan2, sin, cos
+from pygame.math import Vector2 as V2
+from math import hypot
 
 from Constants import *
 
@@ -8,10 +9,10 @@ from Constants import *
 class Body:
     def __init__(self, mass, position, velocity, density=Density, color=None):
         self.mass = mass
-        self.radius = (mass / density) ** 0.333333
+        self.radius = int((mass/density)**(1/3))
 
-        self.position = position
-        self.velocity = velocity
+        self.position = V2(position)
+        self.velocity = V2(velocity)
 
         self.density = density
 
@@ -27,44 +28,28 @@ class Body:
 
     def effect_of(self, other, G):
         M = other.mass
-        x_distance = other.position[0]-self.position[0]
-        y_distance = other.position[1] - self.position[1]
-        # distance_ratio = float(x_distance) / float(y_distance)
-        r = (x_distance**2 + y_distance**2) ** 0.5
-        angle = atan2(y_distance, x_distance)
-        magnitude = (G * M) / (r ** 2)
-        x_accel = magnitude * cos(angle)
-        y_accel = magnitude * sin(angle)
-        # set a ceiling on body acceleration
-        x_accel = min(x_accel, 100)
-        y_accel = min(y_accel, 100)
-
-        return (x_accel , y_accel)
+        x,y = (other.position[a]-self.position[a] for a in (0,1))
+        r = hypot(x,y)
+        acc = G*M/r**3
+        return V2(acc * x, acc * y)
 
     def test_collision(self, other):
-        return (abs(other.position[0] - self.position[0]) ** 2 + abs(other.position[1] - self.position[1]) ** 2) ** 0.5 < (self.radius + other.radius) * 1.0        #'...) * 0.5' gives collosion tolerance equal to the mean radius, '1.0' gives zero-tolerance
-
+        return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
+        
     def merge(self, other):
-        # print "merge!"
-        self.position[0] = (self.position[0]*self.mass + other.position[0]*other.mass) / (self.mass + other.mass)
-        self.position[1] = (self.position[1] * self.mass + other.position[1] * other.mass) / (self.mass + other.mass)
+        total_mass = self.mass + other.mass
+        self.position = V2([(self.position[x]*self.mass + other.position[x]*other.mass) / total_mass for x in (0,1)])
+        self.velocity = V2([(self.velocity[x]*self.mass + other.velocity[x]*other.mass) / total_mass for x in (0,1)])
 
-        self.velocity[0] = (self.velocity[0]*self.mass + other.velocity[0]*other.mass) / (self.mass + other.mass)
-        self.velocity[1] = (self.velocity[1] * self.mass + other.velocity[1] * other.mass) / (self.mass + other.mass)
+        avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
+        self.radius = int((total_mass/avg_density)**(1/3))
 
-        avg_density = (self.density * self.mass + other.density * other.mass) / (self.mass + other.mass)
-        self.radius = max(max(((self.mass + other.mass) / avg_density) ** 0.333333, self.radius), other.radius)
+        self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
 
-        self.color = ((self.color[0]*self.mass + other.color[0]*other.mass)/(self.mass + other.mass),
-                      (self.color[1]*self.mass + other.color[1]*other.mass)/(self.mass + other.mass),
-                      (self.color[2]*self.mass + other.color[2]*other.mass)/(self.mass + other.mass))
-
-        self.mass += other.mass
+        self.mass = total_mass
 
     def apply_acceleration(self, acceleration):
-        self.velocity[0] += acceleration[0]
-        self.velocity[1] += acceleration[1]
+        self.velocity += acceleration
 
     def apply_velocity(self):
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.position += self.velocity
