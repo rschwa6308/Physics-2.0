@@ -14,7 +14,7 @@ class Settings:
         self.alive = True
 
         tk.Label(self.root, text="Slide to change G").pack()
-        self.gravity_slider = tk.Scale(self.root, from_=0, to = 100, orient=tk.HORIZONTAL, length=200)
+        self.gravity_slider = tk.Scale(self.root, from_=0, to = 1000, orient=tk.HORIZONTAL, length=200)
         self.gravity_slider.set(G*100)
         self.gravity_slider.pack()
 
@@ -47,7 +47,7 @@ class Settings:
 
 def display(screen, bodies, (cam_position, cam_scale)):
     #clear last frame
-    screen.fill(bg_color)
+    screen.fill(bg_color)           # comment out this line for a fun time ;)
 
     #display all bodies
     for b in bodies:
@@ -84,7 +84,7 @@ def main():
     #     Body(1000, [500, 150], [0, 0])
     # ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(100, 0.001, 10, 1, 10, 100, 400)
+    bodies = star_system(1000, 0.01, 150, 1, 10, 100, 500, planet_density=0.1)
 
 
     # initialize screen
