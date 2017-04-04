@@ -26,11 +26,10 @@ class Body:
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), int(self.radius), 0)
 
-    def effect_of(self, other, G):
-        M = other.mass
+    def force_of(self, other, G):
         x,y = (other.position[a]-self.position[a] for a in (0,1))
         r = hypot(x,y)
-        acc = G*M/r**3
+        acc = G/r**3
         return V2(acc * x, acc * y)
 
     def test_collision(self, other):

@@ -161,16 +161,18 @@ def main():
         display(screen, bodies, (cam_position, cam_scale))
 
         # Calculate forces and apply acceleration
-        for body in bodies:
-            for other in bodies:
-                if other is not body:
-                    if body.test_collision(other):
-                        body.merge(other)
-                        bodies.remove(other)
-                    else:
-                        acceleration = body.effect_of(other, G)
-                        body.apply_acceleration(acceleration)
-
+        for b in range(len(bodies)):
+            for o in range(len(bodies)-1,b,-1):
+                if bodies[b].test_collision(bodies[o]):
+                    bodies[b].merge(bodies[o])
+                    bodies.pop(o)
+                else:
+                    force = bodies[b].force_of(bodies[o],G)
+                    acc = bodies[o].mass * force
+                    acc2 = bodies[b].mass * force
+                    bodies[b].apply_acceleration(acc)
+                    bodies[o].apply_acceleration(-acc2)
+        
         # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity()
