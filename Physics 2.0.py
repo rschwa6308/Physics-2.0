@@ -60,8 +60,6 @@ def display(screen, bodies, camera):
     # Update display
     pg.display.update()
 
-
-
 def main():
     global width, height
     
@@ -82,7 +80,8 @@ def main():
     # ]
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     # bodies = star_system(10000, 0.04, 500, 1, 10, 100, 3000, planet_density=0.1)
-    bodies = binary_system(1000, 800, 300, 2, 10)
+    # (star_mass_a, star_mass_b, planets, min_mass, max_mass)
+    bodies = binary_system(1000, 800, 100, 2, 10)
     
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
