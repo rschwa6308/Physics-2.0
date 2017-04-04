@@ -32,6 +32,14 @@ class Body:
         acc = G/r**3
         return V2(acc * x, acc * y)
 
+    def force_of(self, other, G):
+        M = other.mass
+        m = self.mass
+        x, y = (other.position[a] - self.position[a] for a in (0, 1))
+        r = hypot(x, y)
+        force = G * M * m / r ** 3
+        return V2(force * x, force * y)
+
     def test_collision(self, other):
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
         

@@ -2,6 +2,7 @@ import tkinter as tk
 
 from Presets import *
 from Constants import *
+from itertools import combinations
 
 class Settings:
     def __init__(self):
@@ -40,6 +41,7 @@ class Settings:
         self.alive = False
         self.root.destroy()
 
+
 def display(screen, bodies, camera):
     #clear last frame
     screen.fill(bg_color)           # comment out this line for a fun time ;)
@@ -56,7 +58,7 @@ def display(screen, bodies, camera):
         y = (y - height / 2) * cam_scale + height / 2
         radius = b.radius * cam_scale
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
-        
+
     # Update display
     pg.display.update()
 
@@ -64,7 +66,7 @@ def display(screen, bodies, camera):
 
 def main():
     global width, height
-    
+
     # Initialize tkinter window
     settings_window = Settings()
 
@@ -82,9 +84,9 @@ def main():
     # ]
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(1000, 0.04, 150, 1, 10, 100, 500, planet_density=0.1)
-    
+
     # Initialize screen
-    icon = pg.image.load('AtomIcon.png')
+    icon = pg.image.load('AtomIconPink.png')
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2")
@@ -110,7 +112,7 @@ def main():
                 screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_d:
-                    scroll_right = 1 
+                    scroll_right = 1
                 elif event.key == pg.K_a:
                     scroll_left = 1
                 elif event.key == pg.K_w:
@@ -161,18 +163,27 @@ def main():
         display(screen, bodies, (cam_position, cam_scale))
 
         # Calculate forces and apply acceleration
-        for b in range(len(bodies)):
-            for o in range(len(bodies)-1,b,-1):
-                if bodies[b].test_collision(bodies[o]):
-                    bodies[b].merge(bodies[o])
-                    bodies.pop(o)
-                else:
-                    force = bodies[b].force_of(bodies[o],G)
-                    acc = bodies[o].mass * force
-                    acc2 = bodies[b].mass * force
-                    bodies[b].apply_acceleration(acc)
-                    bodies[o].apply_acceleration(-acc2)
-        
+        # for body in bodies:
+        #     for other in bodies:
+        #         if other is not body:
+        #             if body.test_collision(other):
+        #                 body.merge(other)
+        #                 bodies.remove(other)
+        #             else:
+        #                 acceleration = body.effect_of(other, G)
+        #                 body.apply_acceleration(acceleration)
+        combs = combinations(bodies, 2)
+        for pair in combs:
+            force = pair[0].force_of(pair[1], G)
+            pair[0].apply_acceleration(force / pair[0].mass)
+            pair[1].apply_acceleration(force * -1 / pair[1].mass)
+            if pair[0].test_collision(pair[1]):
+                pair[0].merge(pair[1])
+                bodies.remove(pair[1])
+
+
+
+
         # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity()
@@ -185,7 +196,7 @@ def main():
         if scroll_left:
             scroll[0] += scroll_constant
         if scroll_up:
-            scroll[1] += scroll_constant    
+            scroll[1] += scroll_constant
         if scroll_down:
             scroll[1] -= scroll_constant
         # Decelerate scrolling
