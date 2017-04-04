@@ -81,7 +81,7 @@ def main():
     #     Body(1000, [500, 150], [0, 0])
     # ]
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.04, 150, 1, 10, 100, 500, planet_density=0.1)
+    bodies = star_system(10000, 0.04, 200, 1, 10, 100, 500, planet_density=0.1)
     
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')

@@ -48,3 +48,6 @@ Temporary Items
 
 # Python binaries
 *.pyc
+
+# Pycharm documentation
+*.idea
