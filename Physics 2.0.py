@@ -107,6 +107,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
                 width, height = event.w, event.h
+                screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_d:
                     scroll_right = 1 
