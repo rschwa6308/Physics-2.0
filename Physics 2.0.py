@@ -84,7 +84,7 @@ def main():
     bodies = star_system(10000, 0.04, 200, 1, 10, 100, 500, planet_density=0.1)
     
     # Initialize screen
-    icon = pg.image.load('AtomIcon.png')
+    icon = pg.image.load('AtomIconPink.png')
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2")
