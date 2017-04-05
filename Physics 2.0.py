@@ -1,4 +1,5 @@
 import tkinter as tk
+import os
 
 from Presets import *
 from Constants import *
@@ -20,6 +21,8 @@ class Settings:
         self.time_slider = tk.Scale(self.root, from_=1, to=300, orient=tk.HORIZONTAL, length=200)
         self.time_slider.set(60)
         self.time_slider.pack()
+
+        self.root.geometry('%dx%d+%d+%d' % (220, 150, monitor_width/2 - width/2 - 240, monitor_height/2 - height/2 - 20))
 
     def get_gravity(self):
         try:
@@ -81,8 +84,11 @@ def main():
     #     Body(1000, [500, 150], [0, 0])
     # ]
     # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(10000, 0.04, 200, 1, 10, 100, 3000, planet_density=0.1)
+    bodies = star_system(5000, 0.04, 150, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
+
+    # center display in monitor
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
     
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
