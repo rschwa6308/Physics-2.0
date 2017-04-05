@@ -37,8 +37,8 @@ class Body:
         
     def merge(self, other):
         total_mass = self.mass + other.mass
-        self.position = V2([(self.position[x]*self.mass + other.position[x]*other.mass) / total_mass for x in (0,1)])
-        self.velocity = V2([(self.velocity[x]*self.mass + other.velocity[x]*other.mass) / total_mass for x in (0,1)])
+        self.position = (self.position*self.mass + other.position*other.mass) / total_mass
+        self.velocity = (self.velocity*self.mass + other.velocity*other.mass) / total_mass
 
         avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
         self.radius = int((total_mass/avg_density)**(1/3))

@@ -4,7 +4,6 @@ from math import pi, sin, cos, sqrt
 from Bodies import *
 from Colors import *
 
-
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
@@ -31,14 +30,13 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
 def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):
     bodies = []
 
-    star_a = Body(star_mass_a, [0, 0], [0, 0], density=0.01)
-    star_b = Body(star_mass_a, [0, 0], [0, 0], density=0.01)
+    star_a = Body(star_mass_a, [0, 0], [0, 0], density=0.04)
+    star_b = Body(star_mass_a, [0, 0], [0, 0], density=0.04)
 
     star_a.position = V2([width/2 - 4*star_a.radius, height/2])
     star_b.position = V2([width/2 + 4*star_b.radius, height/2])
 
     distance = abs(star_b.position[0] - star_a.position[0])
-    print(distance)
 
     star_a.velocity = V2([0, sqrt(G * star_mass_b / distance)])
     star_b.velocity = V2([0, -1 * sqrt(G * star_mass_a / distance)])
@@ -53,7 +51,6 @@ def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):
         velocity = [uniform(-1, 1), uniform(-1, 1)]
 
         planet = Body(mass, position, velocity)
-        # print(mass, position, velocity)
         bodies.append(planet)
 
     return bodies

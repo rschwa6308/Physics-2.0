@@ -63,8 +63,6 @@ def display(screen, bodies, camera):
     # Update display
     pg.display.update()
 
-
-
 def main():
     global width, height
     
@@ -83,7 +81,7 @@ def main():
 ##         Body(1000, [60, 800], [0, -1]),
 ##         Body(1000, [500, 150], [0, 0])
 ##    ]
-    # (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(5000, 0.04, 150, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
 
