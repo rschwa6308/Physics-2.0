@@ -53,7 +53,7 @@ def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):
         velocity = [uniform(-1, 1), uniform(-1, 1)]
 
         planet = Body(mass, position, velocity)
-        print(mass, position, velocity)
+        # print(mass, position, velocity)
         bodies.append(planet)
 
     return bodies
