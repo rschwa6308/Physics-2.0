@@ -118,7 +118,7 @@ def main():
     scroll_constant = 2.5
     done = False
     while not done:
-        clock.tick(60)
+        clock.tick(clock_speed)
 
         if settings_window.alive:
             settings_window.update()
