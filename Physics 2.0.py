@@ -4,6 +4,8 @@ import os
 from Presets import *
 from Constants import *
 
+
+
 class Settings:
     def __init__(self):
         self.root = tk.Tk()
@@ -22,7 +24,13 @@ class Settings:
         self.time_slider.set(100)
         self.time_slider.pack()
 
-        self.root.geometry('%dx%d+%d+%d' % (220, 150, monitor_width/2 - width/2 - 240, monitor_height/2 - height/2 - 20))
+        self.bodies_label_text = tk.StringVar()
+        self.bodies_label = tk.Label(self.root, textvariable=self.bodies_label_text)
+        self.bodies_label.pack()
+
+        tk.Button(self.root, text="Quit", command=self.quit).pack()
+
+        self.root.geometry('%dx%d+%d+%d' % (220, 180, monitor_width/2 - width/2 - 240, monitor_height/2 - height/2 - 20))
 
     def get_gravity(self):
         try:
@@ -35,6 +43,14 @@ class Settings:
             return self.time_slider.get() / 100.0
         except:
             return 1
+        
+    def set_bodies(self, n):
+        self.bodies_label_text.set("Bodies: " + str(n))
+
+    def quit(self):
+        self.destroy()
+        pg.quit()
+        quit()
 
     def update(self):
         self.root.update()
@@ -79,8 +95,11 @@ def main():
 ##         Body(1000, [500, 150], [0, 0])
 ##    ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(5000, 0.04, 150, 1, 10, 75, 500, planet_density=0.4)
+    bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
+
+    # Initialize body count
+    settings_window.set_bodies(len(bodies))
 
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -164,6 +183,8 @@ def main():
                 if bodies[b].test_collision(bodies[o]):
                     bodies[b].merge(bodies[o])
                     bodies.pop(o)
+                    if settings_window.alive:
+                        settings_window.set_bodies(len(bodies))
                 else:
                     force = bodies[b].force_of(bodies[o],G)
                     acc = bodies[o].mass * force * time_factor
