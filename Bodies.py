@@ -34,7 +34,7 @@ class Body:
 
     def test_collision(self, other):
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
-        
+
     def merge(self, other):
         total_mass = self.mass + other.mass
         self.position = (self.position*self.mass + other.position*other.mass) / total_mass
@@ -50,5 +50,5 @@ class Body:
     def apply_acceleration(self, acceleration):
         self.velocity += acceleration
 
-    def apply_velocity(self):
-        self.position += self.velocity
+    def apply_velocity(self, time_factor):
+        self.position += self.velocity * time_factor
