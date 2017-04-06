@@ -44,48 +44,20 @@ class Settings:
         self.root.destroy()
 
 def display(screen, bodies, camera):
-    #clear last frame
+    # Clear last frame
     screen.fill(bg_color)           # comment out this line for a fun time ;)
-
     # Display all bodies
     cam_position, cam_scale = camera
     for b in bodies:
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-        x = (int(b.position[0]) - cam_position[0])
-        x = int((x - width / 2) * cam_scale + width / 2)
-        y = int(b.position[1]) - cam_position[1]
-        y = int((y - height / 2) * cam_scale + height / 2)
-        radius = int(b.radius * cam_scale)
-        pg.draw.circle(screen, b.color, [x, y], radius, 0)
-
->>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
         x = b.position[0] - cam_position[0]
         x = (x - width / 2) * cam_scale + width / 2
         y = b.position[1] - cam_position[1]
         y = (y - height / 2) * cam_scale + height / 2
         radius = b.radius * cam_scale
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
-        
-    # Update display
-<<<<<<< HEAD
-=======
-        x = (int(b.position[0]) - cam_position[0])
-        x = int((x - width / 2) * cam_scale + width / 2)
-        y = int(b.position[1]) - cam_position[1]
-        y = int((y - height / 2) * cam_scale + height / 2)
-        radius = int(b.radius * cam_scale)
-        pg.draw.circle(screen, b.color, [x, y], radius, 0)
-
-    #flip display
->>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
-=======
->>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
     pg.display.update()
 
 def main():
@@ -94,23 +66,12 @@ def main():
     # Initialize tkinter window
     settings_window = Settings()
 
-    # initialize camera variables
+    # Initialize camera variables
     cam_position = [0, 0]
     cam_velocity = [0, 0]
     cam_scale = 1
 
-    # construct bodies list
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    # bodies = [
-    #     Body(1000, [1000, 500], [0, 0]),
-    #     Body(1000, [60, 800], [0, 0]),
-    #     Body(1000, [500, 150], [0, 0])
-    # ]
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.01, 100, 1, 10, 100, 500, planet_density=0.1)
->>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
+    # Construct bodies list
 
 ##    bodies = [
 ##         Body(1000, [1000, 500], [1, 0]),
@@ -121,29 +82,12 @@ def main():
     bodies = star_system(5000, 0.04, 150, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
 
-    # center display in monitor
+    # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
     
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
-<<<<<<< HEAD
-=======
-    # bodies = [
-    #     Body(1000, [1000, 500], [0, 0]),
-    #     Body(1000, [60, 800], [0, 0]),
-    #     Body(1000, [500, 150], [0, 0])
-    # ]
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(1000, 0.01, 100, 1, 10, 100, 500, planet_density=0.1)
-
-
-    # initialize screen
-    width, height = 1000, 800
->>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
-=======
-
->>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2")
 
@@ -210,12 +154,9 @@ def main():
                     cam_scale /= 1.1
                     cam_scale = max(cam_scale, 0.01)
 
-        # apply velocity to camera
+        # Apply velocity to camera
         cam_position[0] += cam_velocity[0]
         cam_position[1] += cam_velocity[1]
-
-        # display current frame
-        display(screen, bodies, (cam_position, cam_scale))
 
         # Calculate forces and apply acceleration
         for b in range(len(bodies)):
@@ -229,6 +170,9 @@ def main():
                     acc2 = bodies[b].mass * force * time_factor
                     bodies[b].apply_acceleration(acc)
                     bodies[o].apply_acceleration(-acc2)
+
+        # Display current frame
+        display(screen, bodies, (cam_position, cam_scale))
         
         # Apply velocity (update position)
         for body in bodies:
