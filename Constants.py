@@ -8,7 +8,7 @@ Density = 0.1
 try:
     # Windows
     import ctypes
-    dim = ctypes.cdll.user32.GetSystemMetrics
+    dim = ctypes.windll.user32.GetSystemMetrics
     monitor_width, monitor_height = dim(0), dim(1)
 except:
     # Linux
