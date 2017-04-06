@@ -1,11 +1,8 @@
-import Tkinter as tk
+import tkinter as tk
+import os
 
 from Presets import *
 from Constants import *
-
-
-
-
 
 class Settings:
     def __init__(self):
@@ -24,6 +21,8 @@ class Settings:
         self.time_slider = tk.Scale(self.root, from_=1, to=300, orient=tk.HORIZONTAL, length=200)
         self.time_slider.set(60)
         self.time_slider.pack()
+
+        self.root.geometry('%dx%d+%d+%d' % (220, 150, monitor_width/2 - width/2 - 240, monitor_height/2 - height/2 - 20))
 
     def get_gravity(self):
         try:
@@ -44,18 +43,17 @@ class Settings:
         self.alive = False
         self.root.destroy()
 
-
-
-
-def display(screen, bodies, (cam_position, cam_scale)):
+def display(screen, bodies, camera):
     #clear last frame
     screen.fill(bg_color)           # comment out this line for a fun time ;)
 
-    #display all bodies
+    # Display all bodies
+    cam_position, cam_scale = camera
     for b in bodies:
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
+<<<<<<< HEAD
         x = (int(b.position[0]) - cam_position[0])
         x = int((x - width / 2) * cam_scale + width / 2)
         y = int(b.position[1]) - cam_position[1]
@@ -64,13 +62,22 @@ def display(screen, bodies, (cam_position, cam_scale)):
         pg.draw.circle(screen, b.color, [x, y], radius, 0)
 
     #flip display
+=======
+        x = b.position[0] - cam_position[0]
+        x = (x - width / 2) * cam_scale + width / 2
+        y = b.position[1] - cam_position[1]
+        y = (y - height / 2) * cam_scale + height / 2
+        radius = b.radius * cam_scale
+        pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
+        
+    # Update display
+>>>>>>> refs/remotes/origin/master
     pg.display.update()
 
-
-
 def main():
-
-    # initialize tkinter window
+    global width, height
+    
+    # Initialize tkinter window
     settings_window = Settings()
 
     # initialize camera variables
@@ -79,6 +86,7 @@ def main():
     cam_scale = 1
 
     # construct bodies list
+<<<<<<< HEAD
     # bodies = [
     #     Body(1000, [1000, 500], [0, 0]),
     #     Body(1000, [60, 800], [0, 0]),
@@ -90,33 +98,56 @@ def main():
 
     # initialize screen
     width, height = 1000, 800
+=======
+
+##    bodies = [
+##         Body(1000, [1000, 500], [1, 0]),
+##         Body(1000, [60, 800], [0, -1]),
+##         Body(1000, [500, 150], [0, 0])
+##    ]
+    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    bodies = star_system(5000, 0.04, 150, 1, 10, 75, 500, planet_density=0.4)
+    # bodies = binary_system(1000, 800, 150, 2, 10)
+
+    # center display in monitor
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
+    
+    # Initialize screen
+    icon = pg.image.load('AtomIcon.png')
+    pg.display.set_icon(icon)
+>>>>>>> refs/remotes/origin/master
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
-    pg.display.set_caption("Physics Simulator")
-    # icon = pg.image.load("Assets/physics.png")        FIX THIS
-    # pg.display.set_icon(icon)
+    pg.display.set_caption("Physics Simulator 2")
 
-
-    # initialize game clock and set tick to 60
     clock = pg.time.Clock()
     fps = 60
 
+    scroll = V2(0,0)
+    scroll_right, scroll_left, scroll_down, scroll_up = 0,0,0,0
+    scroll_constant = 2.5
     done = False
     while not done:
         clock.tick(fps)
 
-        if settings_window.alive:           # update tk window if alive
+        if settings_window.alive:
             settings_window.update()
             G = settings_window.get_gravity()
             fps = settings_window.get_time()
 
-        # user input
         for event in pg.event.get():
-            if event.type == pg.QUIT:
-                done = True
-            elif event.type == pg.VIDEORESIZE:
+            if event.type == pg.VIDEORESIZE:
                 width, height = event.w, event.h
+                screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_LEFT:
+                if event.key == pg.K_d:
+                    scroll_right = 1 
+                elif event.key == pg.K_a:
+                    scroll_left = 1
+                elif event.key == pg.K_w:
+                    scroll_up = 1
+                elif event.key == pg.K_s:
+                    scroll_down = 1
+                elif event.key == pg.K_LEFT:
                     cam_velocity[0] = -3 / cam_scale
                 elif event.key == pg.K_RIGHT:
                     cam_velocity[0] = 3  / cam_scale
@@ -125,7 +156,15 @@ def main():
                 elif event.key == pg.K_DOWN:
                     cam_velocity[1] = 3 / cam_scale
             elif event.type == pg.KEYUP:
-                if event.key == pg.K_LEFT:
+                if event.key == pg.K_d:
+                    scroll_right = 0
+                elif event.key == pg.K_a:
+                    scroll_left = 0
+                elif event.key == pg.K_w:
+                    scroll_up = 0
+                elif event.key == pg.K_s:
+                    scroll_down = 0
+                elif event.key == pg.K_LEFT:
                     cam_velocity[0] = 0
                 elif event.key == pg.K_RIGHT:
                     cam_velocity[0] = 0
@@ -133,6 +172,8 @@ def main():
                     cam_velocity[1] = 0
                 elif event.key == pg.K_DOWN:
                     cam_velocity[1] = 0
+            elif event.type == pg.QUIT:
+                done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 4:
                     cam_scale *= 1.1
@@ -146,33 +187,45 @@ def main():
         cam_position[0] += cam_velocity[0]
         cam_position[1] += cam_velocity[1]
 
-
         # display current frame
         display(screen, bodies, (cam_position, cam_scale))
 
-        # calculate forces and apply acceleration
-        for body in bodies:
-            for other in bodies:
-                if other is not body:
-                    if body.test_collision(other):
-                        body.merge(other)
-                        bodies.remove(other)
-                    else:
-                        acceleration = body.effect_of(other, G)
-                        body.apply_acceleration(acceleration)
-
-        # apply velocity (update position)
+        # Calculate forces and apply acceleration
+        for b in range(len(bodies)):
+            for o in range(len(bodies)-1,b,-1):
+                if bodies[b].test_collision(bodies[o]):
+                    bodies[b].merge(bodies[o])
+                    bodies.pop(o)
+                else:
+                    force = bodies[b].force_of(bodies[o],G)
+                    acc = bodies[o].mass * force
+                    acc2 = bodies[b].mass * force
+                    bodies[b].apply_acceleration(acc)
+                    bodies[o].apply_acceleration(-acc2)
+        
+        # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity()
+            body.position += scroll
 
+
+        # Accelerate scrolling
+        if scroll_right:
+            scroll[0] -= scroll_constant
+        if scroll_left:
+            scroll[0] += scroll_constant
+        if scroll_up:
+            scroll[1] += scroll_constant    
+        if scroll_down:
+            scroll[1] -= scroll_constant
+        # Decelerate scrolling
+        if scroll[0]:
+            scroll[0] -= abs(scroll[0])/scroll[0]
+        if scroll[1]:
+            scroll[1] -= abs(scroll[1])/scroll[1]
 
     pg.quit()
-    if settings_window.alive: settings_window.destroy()         # destroy tk window if alive
-
-
-
-
-
+    if settings_window.alive: settings_window.destroy()
 
 
 
