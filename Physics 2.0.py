@@ -17,9 +17,9 @@ class Settings:
         self.gravity_slider.set(G*100)
         self.gravity_slider.pack()
 
-        tk.Label(self.root, text="Slide to change clock speed").pack()
-        self.time_slider = tk.Scale(self.root, from_=1, to=300, orient=tk.HORIZONTAL, length=200)
-        self.time_slider.set(60)
+        tk.Label(self.root, text="Slide to change time factor (%)").pack()
+        self.time_slider = tk.Scale(self.root, from_=0, to=500, orient=tk.HORIZONTAL, length=200)
+        self.time_slider.set(100)
         self.time_slider.pack()
 
         self.root.geometry('%dx%d+%d+%d' % (220, 150, monitor_width/2 - width/2 - 240, monitor_height/2 - height/2 - 20))
@@ -32,9 +32,9 @@ class Settings:
 
     def get_time(self):
         try:
-            return self.time_slider.get()
+            return self.time_slider.get() / 100.0
         except:
-            return 60
+            return 1
 
     def update(self):
         self.root.update()
@@ -54,6 +54,17 @@ def display(screen, bodies, camera):
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+        x = (int(b.position[0]) - cam_position[0])
+        x = int((x - width / 2) * cam_scale + width / 2)
+        y = int(b.position[1]) - cam_position[1]
+        y = int((y - height / 2) * cam_scale + height / 2)
+        radius = int(b.radius * cam_scale)
+        pg.draw.circle(screen, b.color, [x, y], radius, 0)
+
+>>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
         x = b.position[0] - cam_position[0]
         x = (x - width / 2) * cam_scale + width / 2
         y = b.position[1] - cam_position[1]
@@ -62,6 +73,7 @@ def display(screen, bodies, camera):
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
         
     # Update display
+<<<<<<< HEAD
 =======
         x = (int(b.position[0]) - cam_position[0])
         x = int((x - width / 2) * cam_scale + width / 2)
@@ -71,6 +83,8 @@ def display(screen, bodies, camera):
         pg.draw.circle(screen, b.color, [x, y], radius, 0)
 
     #flip display
+>>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
+=======
 >>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
     pg.display.update()
 
@@ -87,6 +101,16 @@ def main():
 
     # construct bodies list
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    # bodies = [
+    #     Body(1000, [1000, 500], [0, 0]),
+    #     Body(1000, [60, 800], [0, 0]),
+    #     Body(1000, [500, 150], [0, 0])
+    # ]
+    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
+    bodies = star_system(1000, 0.01, 100, 1, 10, 100, 500, planet_density=0.1)
+>>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
 
 ##    bodies = [
 ##         Body(1000, [1000, 500], [1, 0]),
@@ -103,6 +127,7 @@ def main():
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
+<<<<<<< HEAD
 =======
     # bodies = [
     #     Body(1000, [1000, 500], [0, 0]),
@@ -116,23 +141,26 @@ def main():
     # initialize screen
     width, height = 1000, 800
 >>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
+=======
+
+>>>>>>> refs/remotes/rschwa6308/Single-Threading-Time-Control
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2")
 
     clock = pg.time.Clock()
-    fps = 60
+    time_factor = 1
 
     scroll = V2(0,0)
-    scroll_right, scroll_left, scroll_down, scroll_up = 0,0,0,0
+    scroll_right, scroll_left, scroll_down, scroll_up = 0, 0, 0, 0
     scroll_constant = 2.5
     done = False
     while not done:
-        clock.tick(fps)
+        clock.tick(60)
 
         if settings_window.alive:
             settings_window.update()
             G = settings_window.get_gravity()
-            fps = settings_window.get_time()
+            time_factor = settings_window.get_time()
 
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -182,7 +210,6 @@ def main():
                     cam_scale /= 1.1
                     cam_scale = max(cam_scale, 0.01)
 
-
         # apply velocity to camera
         cam_position[0] += cam_velocity[0]
         cam_position[1] += cam_velocity[1]
@@ -198,16 +225,15 @@ def main():
                     bodies.pop(o)
                 else:
                     force = bodies[b].force_of(bodies[o],G)
-                    acc = bodies[o].mass * force
-                    acc2 = bodies[b].mass * force
+                    acc = bodies[o].mass * force * time_factor
+                    acc2 = bodies[b].mass * force * time_factor
                     bodies[b].apply_acceleration(acc)
                     bodies[o].apply_acceleration(-acc2)
         
         # Apply velocity (update position)
         for body in bodies:
-            body.apply_velocity()
+            body.apply_velocity(time_factor)
             body.position += scroll
-
 
         # Accelerate scrolling
         if scroll_right:
