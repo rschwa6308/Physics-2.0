@@ -34,7 +34,7 @@ class Settings:
         try:
             return self.time_slider.get() / 100.0
         except:
-            return 60
+            return 1
 
     def update(self):
         self.root.update()
