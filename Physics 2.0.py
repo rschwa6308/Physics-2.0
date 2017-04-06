@@ -17,9 +17,9 @@ class Settings:
         self.gravity_slider.set(G*100)
         self.gravity_slider.pack()
 
-        tk.Label(self.root, text="Slide to change clock speed").pack()
-        self.time_slider = tk.Scale(self.root, from_=1, to=300, orient=tk.HORIZONTAL, length=200)
-        self.time_slider.set(60)
+        tk.Label(self.root, text="Slide to change time factor (%)").pack()
+        self.time_slider = tk.Scale(self.root, from_=0, to=500, orient=tk.HORIZONTAL, length=200)
+        self.time_slider.set(100)
         self.time_slider.pack()
 
         self.root.geometry('%dx%d+%d+%d' % (220, 150, monitor_width/2 - width/2 - 240, monitor_height/2 - height/2 - 20))
@@ -32,7 +32,7 @@ class Settings:
 
     def get_time(self):
         try:
-            return self.time_slider.get()
+            return self.time_slider.get() / 100.0
         except:
             return 60
 
@@ -111,19 +111,19 @@ def main():
     pg.display.set_caption("Physics Simulator 2")
 
     clock = pg.time.Clock()
-    fps = 60
+    time_factor = 1
 
     scroll = V2(0,0)
-    scroll_right, scroll_left, scroll_down, scroll_up = 0,0,0,0
+    scroll_right, scroll_left, scroll_down, scroll_up = 0, 0, 0, 0
     scroll_constant = 2.5
     done = False
     while not done:
-        clock.tick(fps)
+        clock.tick(60)
 
         if settings_window.alive:
             settings_window.update()
             G = settings_window.get_gravity()
-            fps = settings_window.get_time()
+            time_factor = settings_window.get_time()
 
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -173,7 +173,6 @@ def main():
                     cam_scale /= 1.1
                     cam_scale = max(cam_scale, 0.01)
 
-
         # apply velocity to camera
         cam_position[0] += cam_velocity[0]
         cam_position[1] += cam_velocity[1]
@@ -189,16 +188,15 @@ def main():
                     bodies.pop(o)
                 else:
                     force = bodies[b].force_of(bodies[o],G)
-                    acc = bodies[o].mass * force
-                    acc2 = bodies[b].mass * force
+                    acc = bodies[o].mass * force * time_factor
+                    acc2 = bodies[b].mass * force * time_factor
                     bodies[b].apply_acceleration(acc)
                     bodies[o].apply_acceleration(-acc2)
         
         # Apply velocity (update position)
         for body in bodies:
-            body.apply_velocity()
+            body.apply_velocity(time_factor)
             body.position += scroll
-
 
         # Accelerate scrolling
         if scroll_right:

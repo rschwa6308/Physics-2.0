@@ -12,3 +12,5 @@ monitor_width = user32.GetSystemMetrics(0)
 monitor_height = user32.GetSystemMetrics(1)
 width, height = int(monitor_width * 0.6), int(monitor_height * 0.75)
 
+# Set simulation hard clock speed (fps)
+clock_speed = 144

@@ -70,5 +70,5 @@ class Body:
     def apply_acceleration(self, acceleration):
         self.velocity += acceleration
 
-    def apply_velocity(self):
-        self.position += self.velocity
+    def apply_velocity(self, time_factor):
+        self.position += self.velocity * time_factor
