@@ -53,7 +53,7 @@ def display(screen, bodies, camera):
         #screen.blit(b.image, b.position)
         # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
-<<<<<<< HEAD
+
         x = (int(b.position[0]) - cam_position[0])
         x = int((x - width / 2) * cam_scale + width / 2)
         y = int(b.position[1]) - cam_position[1]
@@ -61,8 +61,6 @@ def display(screen, bodies, camera):
         radius = int(b.radius * cam_scale)
         pg.draw.circle(screen, b.color, [x, y], radius, 0)
 
-    #flip display
-=======
         x = b.position[0] - cam_position[0]
         x = (x - width / 2) * cam_scale + width / 2
         y = b.position[1] - cam_position[1]
@@ -71,7 +69,6 @@ def display(screen, bodies, camera):
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
         
     # Update display
->>>>>>> refs/remotes/origin/master
     pg.display.update()
 
 def main():
@@ -86,7 +83,6 @@ def main():
     cam_scale = 1
 
     # construct bodies list
-<<<<<<< HEAD
     # bodies = [
     #     Body(1000, [1000, 500], [0, 0]),
     #     Body(1000, [60, 800], [0, 0]),
@@ -94,11 +90,6 @@ def main():
     # ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(1000, 0.01, 100, 1, 10, 100, 500, planet_density=0.1)
-
-
-    # initialize screen
-    width, height = 1000, 800
-=======
 
 ##    bodies = [
 ##         Body(1000, [1000, 500], [1, 0]),
@@ -115,7 +106,7 @@ def main():
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
->>>>>>> refs/remotes/origin/master
+
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2")
 

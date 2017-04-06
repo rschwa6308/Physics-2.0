@@ -1,11 +1,8 @@
 from random import randint
 import pygame as pg
-<<<<<<< HEAD
 from math import atan2, sin, cos, hypot
-=======
 from pygame.math import Vector2 as V2
 from math import hypot
->>>>>>> refs/remotes/origin/master
 
 from Constants import *
 
@@ -30,7 +27,6 @@ class Body:
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), int(self.radius), 0)
 
-<<<<<<< HEAD
     def effect_of(self, other, G):
         M = other.mass
         x_distance = other.position[0]-self.position[0]
@@ -50,7 +46,6 @@ class Body:
     def test_collision(self, other):
         return hypot(abs(other.position[0] - self.position[0]), abs(other.position[1] - self.position[1])) < (self.radius + other.radius) * 1.0        #'...) * 0.5' gives collosion tolerance equal to the mean radius, '1.0' gives zero-tolerance
 
-=======
     def force_of(self, other, G):
         x,y = (other.position[a]-self.position[a] for a in (0,1))
         r = hypot(x,y)
@@ -59,8 +54,7 @@ class Body:
 
     def test_collision(self, other):
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
-        
->>>>>>> refs/remotes/origin/master
+
     def merge(self, other):
         total_mass = self.mass + other.mass
         self.position = (self.position*self.mass + other.position*other.mass) / total_mass
