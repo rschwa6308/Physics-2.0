@@ -112,6 +112,9 @@ class Camera:
 def main():
     global width, height
 
+    # Initialize pygame
+    pg.init()
+
     # Initialize camera object
     camera = Camera()
 
