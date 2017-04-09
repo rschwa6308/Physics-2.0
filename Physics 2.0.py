@@ -1,5 +1,7 @@
 import tkinter as tk
 import os
+from functools import reduce
+from operator import add
 
 from Presets import *
 from Constants import *
@@ -94,19 +96,16 @@ def display(screen, bodies, cam):
 
 class Camera:
     def __init__(self):
-        self.position = [0, 0]
-        self.velocity = [0, 0]
+        self.position = V2(0,0)
+        self.velocity = V2(0,0)
         self.scale = 1
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
-        x = sum(b.position[0] * b.mass for b in bodies) / total_mass - width / 2
-        y = sum(b.position[1] * b.mass for b in bodies) / total_mass - height / 2
-        self.position = [x, y]
+        self.position = reduce(add,(b.position * b.mass for b in bodies)) / total_mass - V2(width,height) / 2
 
     def apply_velocity(self):
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        self.position += self.velocity
 
 
 def main():
