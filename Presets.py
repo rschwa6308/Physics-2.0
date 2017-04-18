@@ -7,10 +7,10 @@ from Colors import *
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
-    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, yellow)
+    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, yellow, "Star")
     bodies.append(star)
 
-    for _ in range(planets):
+    for x in range(planets):
         mass = uniform(min_mass, max_mass)
         distance = uniform(min_distance, max_distance)
         angle = uniform(-1*pi, pi)
@@ -20,7 +20,7 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
             velocity = V2(speed * sin(angle), speed * cos(angle))
         else:
             velocity = V2(uniform(-2, 2), uniform(-2, 2))
-        planet = Body(mass, position, velocity, density=planet_density)
+        planet = Body(mass, position, velocity, density=planet_density, name="planet " + str(x))
         bodies.append(planet)
 
     return bodies

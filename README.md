@@ -18,3 +18,4 @@ Action | Control
 Basic camera translation | Arrow keys
 Cinematic camera translation | WASD
 Camera zoom | Scroll wheel
+Open properties dialogue | Left click on body

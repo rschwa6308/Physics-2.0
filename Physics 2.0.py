@@ -80,23 +80,29 @@ class Body_Properties:
         self.body = body
 
         self.root = tk.Tk()
-        self.root.title("Body Properties")
+        self.root.title(self.body.name if self.body.name is not None else "Unnamed Body")
 
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.alive = True
 
-        tk.Label(self.root, text="Mass (%): ").grid(row=0)
+        tk.Label(self.root, text="Mass (%): ").grid(row=1)
         self.mass_slider = tk.Scale(self.root, from_=1, to=1000, orient=tk.HORIZONTAL, length=100)
         self.mass_slider.set(100)
-        self.mass_slider.grid(row=0, column=1)
+        self.mass_slider.grid(row=1, column=1)
 
-        self.width = 200
-        self.height = 100
-        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width, monitor_height / 2 - height / 2 + 81 + (self.height + 31) * (queue_position + 1)))
+        tk.Label(self.root, text="Density (%): ").grid(row=2)
+        self.density_slider = tk.Scale(self.root, from_=10, to=1000, orient=tk.HORIZONTAL, length=100)
+        self.density_slider.set(100)
+        self.density_slider.grid(row=2, column=1)
+
+        self.width = 250
+        self.height = 120
+        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width, monitor_height / 2 - height / 2 + 61 + (self.height + 31) * (queue_position + 1)))
 
     def update(self):
         self.root.update()
         self.body.mass = self.original.mass * (self.mass_slider.get() / 100.0)
+        self.body.density = self.original.density * (self.density_slider.get() / 100.0)
         self.body.update_radius()
 
     def destroy(self):

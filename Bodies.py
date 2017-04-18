@@ -7,7 +7,7 @@ from Constants import *
 
 
 class Body:
-    def __init__(self, mass, position, velocity, density=Density, color=None):
+    def __init__(self, mass, position, velocity, density=Density, color=None, name=None):
         self.mass = mass
         self.radius = int((mass/density)**(1/3))
 
@@ -18,13 +18,15 @@ class Body:
 
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
 
+        self.name = name
+
         # self.image = pg.Surface((radius*2, radius*2))
         # self.image.fill(bg_color)
         # self.image.set_alpha(255)
         # pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def copy(self):
-        return Body(self.mass, self.position, self.velocity, self.density, self.color)
+        return Body(self.mass, self.position, self.velocity, self.density, self.color, None if self.name is None else self.name + " copy")     # inheritance of 'name' for debugging purposes only
 
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), int(self.radius), 0)
