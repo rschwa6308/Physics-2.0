@@ -118,9 +118,12 @@ class BodyProperties:
         self.canvas.create_line((52, 2, 52, 102), fill="Dark Gray", dash=(2, 2))
         self.canvas.create_line((2, 52, 102, 52), fill="Dark Gray", dash=(2, 2))
 
-        x_vel, y_vel = self.body.velocity * 10
+        x_vel = (40 * (1 - 2**(-abs(self.body.velocity[0]))))           # TODO: include sgn of velocity
+        y_vel = (40 * (1 - 2**(-abs(self.body.velocity[1]))))
+        print(x_vel, y_vel)
         self.canvas.create_line((52, 52, 52 + x_vel, 52 + y_vel), fill="Blue", arrow="last")
-        x_acc, y_acc = self.body.acceleration * 1000000
+        x_acc = (40 * (1 - 2 ** (-self.body.acceleration[0])))
+        y_acc = (40 * (1 - 2 ** (-self.body.acceleration[1])))
         self.canvas.create_line((52, 52, 52 + x_acc, 52 + y_acc), fill="Red", arrow="last")
         self.canvas.grid(row=4, columnspan=4)
 
