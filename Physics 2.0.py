@@ -118,8 +118,10 @@ class BodyProperties:
         self.canvas.create_line((52, 2, 52, 102), fill="Dark Gray", dash=(2, 2))
         self.canvas.create_line((2, 52, 102, 52), fill="Dark Gray", dash=(2, 2))
 
-        x, y = self.body.velocity * 10
-        self.canvas.create_line((52, 52, 52 + x, 52 + y), fill="Blue", arrow="last")
+        x_vel, y_vel = self.body.velocity * 10
+        self.canvas.create_line((52, 52, 52 + x_vel, 52 + y_vel), fill="Blue", arrow="last")
+        x_acc, y_acc = self.body.acceleration * 1000000
+        self.canvas.create_line((52, 52, 52 + x_acc, 52 + y_acc), fill="Red", arrow="last")
         self.canvas.grid(row=4, columnspan=4)
 
     def update(self):
@@ -298,11 +300,11 @@ def main():
                     if settings_window.alive:
                         settings_window.set_bodies(len(bodies))
                 else:
-                    force = bodies[b].force_of(bodies[o],G)
-                    acc = bodies[o].mass * force * time_factor
-                    acc2 = bodies[b].mass * force * time_factor
-                    bodies[b].apply_acceleration(acc)
-                    bodies[o].apply_acceleration(-acc2)
+                    force = bodies[b].force_of(bodies[o], G)
+                    bodies[b].acceleration = bodies[o].mass * force
+                    bodies[o].acceleration = -bodies[b].mass * force
+                    bodies[b].apply_acceleration(time_factor)
+                    bodies[o].apply_acceleration(time_factor)
 
         # Display current frame
         display(screen, bodies, camera)

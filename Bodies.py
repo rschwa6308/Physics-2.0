@@ -13,6 +13,7 @@ class Body:
 
         self.position = V2(position)
         self.velocity = V2(velocity)
+        self.acceleration = V2(0, 0)
 
         self.density = density
 
@@ -59,8 +60,8 @@ class Body:
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
 
-    def apply_acceleration(self, acceleration):
-        self.velocity += acceleration
+    def apply_acceleration(self, time_factor):
+        self.velocity += self.acceleration * time_factor
 
     def apply_velocity(self, time_factor):
         self.position += self.velocity * time_factor
