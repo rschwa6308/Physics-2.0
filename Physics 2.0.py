@@ -76,8 +76,11 @@ class Settings:
         self.alive = False
         self.root.destroy()
 
-class Body_Properties:
-    def __init__(self, body, queue_position):
+
+class BodyProperties:
+    def __init__(self, body, queue_position, camera):
+        self.camera = camera
+
         self.original = body.copy()
         self.body = body
 
@@ -97,9 +100,14 @@ class Body_Properties:
         self.density_slider.set(100)
         self.density_slider.grid(row=2, column=1)
 
-        self.width = 250
+        tk.Button(self.root, text="Focus", command=self.focus).grid(row=3)          # TODO: change button text?
+
+        self.width = 220
         self.height = 120
         self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width, monitor_height / 2 - height / 2 + 61 + (self.height + 31) * (queue_position + 1)))
+
+    def focus(self):
+        self.camera.move_to_body(self.body)
 
     def update(self):
         self.root.update()
@@ -129,13 +137,19 @@ def display(screen, bodies, cam):
 
 class Camera:
     def __init__(self):
-        self.position = V2(0,0)
-        self.velocity = V2(0,0)
+        self.position = V2(0, 0)
+        self.velocity = V2(0, 0)
         self.scale = 1
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
         self.position = reduce(add,(b.position * b.mass for b in bodies)) / total_mass - V2(width,height) / 2
+
+    def move_to_body(self, body):
+        x, y = body.position
+        x -= width / 2
+        y -= height / 2
+        self.position = V2(x, y)
 
     def apply_velocity(self):
         self.position += self.velocity
@@ -249,14 +263,14 @@ def main():
                     for b in bodies:
                         if b.click_collision((x, y)):
                             if b not in [win.body for win in properties_windows]:
-                                properties_windows.append(Body_Properties(b, len(properties_windows)))
+                                properties_windows.append(BodyProperties(b, len(properties_windows), camera))
 
                 elif event.button == 4:
                     camera.scale *= 1.1
                     camera.scale = min(camera.scale, 100)
                 elif event.button == 5:
                     camera.scale /= 1.1
-                    camera.scale = max(camera.scale, 0.01)
+                    camera.scale = max(float(camera.scale), 0.01)
 
         # Apply velocity to camera
         camera.apply_velocity()
