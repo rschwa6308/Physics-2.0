@@ -102,18 +102,32 @@ class BodyProperties:
 
         tk.Button(self.root, text="Focus", command=self.focus).grid(row=3)          # TODO: change button text?
 
+        self.canvas = tk.Canvas(self.root, width=104, height=104)
+        self.update_canvas()
+
         self.width = 220
-        self.height = 120
-        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width, monitor_height / 2 - height / 2 + 61 + (self.height + 31) * (queue_position + 1)))
+        self.height = 250
+        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width, monitor_height / 2 - 330 + (self.height + 31) * (queue_position)))
 
     def focus(self):
         self.camera.move_to_body(self.body)
+
+    def update_canvas(self):
+        self.canvas.delete("all")
+        self.canvas.create_oval((2, 2, 102, 102))
+        self.canvas.create_line((52, 2, 52, 102), fill="Dark Gray", dash=(2, 2))
+        self.canvas.create_line((2, 52, 102, 52), fill="Dark Gray", dash=(2, 2))
+
+        x, y = self.body.velocity * 10
+        self.canvas.create_line((52, 52, 52 + x, 52 + y), fill="Blue", arrow="last")
+        self.canvas.grid(row=4, columnspan=4)
 
     def update(self):
         self.root.update()
         self.body.mass = self.original.mass * (self.mass_slider.get() / 100.0)
         self.body.density = self.original.density * (self.density_slider.get() / 100.0)
         self.body.update_radius()
+        self.update_canvas()
 
     def destroy(self):
         self.root.destroy()
