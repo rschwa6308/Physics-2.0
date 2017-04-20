@@ -118,13 +118,16 @@ class BodyProperties:
         self.canvas.create_line((52, 2, 52, 102), fill="Dark Gray", dash=(2, 2))
         self.canvas.create_line((2, 52, 102, 52), fill="Dark Gray", dash=(2, 2))
 
-        x_vel = (40 * (1 - 2**(-abs(self.body.velocity[0]))))           # TODO: include sgn of velocity
-        y_vel = (40 * (1 - 2**(-abs(self.body.velocity[1]))))
-        print(x_vel, y_vel)
+        mag_vel = abs(hypot(self.body.velocity[0], self.body.velocity[1]))
+        scale_factor = 40 * (1 - 2 ** -mag_vel) / mag_vel  if mag_vel != 0 else 0
+        x_vel, y_vel = [scale_factor * self.body.velocity[n] for n in (0, 1)]
         self.canvas.create_line((52, 52, 52 + x_vel, 52 + y_vel), fill="Blue", arrow="last")
-        x_acc = (40 * (1 - 2 ** (-self.body.acceleration[0])))
-        y_acc = (40 * (1 - 2 ** (-self.body.acceleration[1])))
+
+        mag_acc = abs(hypot(self.body.acceleration[0], self.body.acceleration[1]))
+        scale_factor = 40 * (1 - 2 ** -(mag_acc*1000000)) / mag_acc if mag_acc != 0 else 0
+        x_acc, y_acc = [scale_factor * self.body.acceleration[n] for n in (0, 1)]
         self.canvas.create_line((52, 52, 52 + x_acc, 52 + y_acc), fill="Red", arrow="last")
+
         self.canvas.grid(row=4, columnspan=4)
 
     def update(self):
@@ -294,20 +297,27 @@ def main():
         # Apply velocity to camera
         camera.apply_velocity()
 
-        # Calculate forces and apply acceleration
+        # Reset accelerations
+        for b in bodies:
+            b.acceleration = V2(0, 0)  # Reset to 0 (to ignore previous clock tick's calculations)
+
+        # Calculate forces and set acceleration
         for b in range(len(bodies)):
             for o in range(len(bodies)-1,b,-1):
                 if merge and bodies[b].test_collision(bodies[o]):           # Merge setting check must precede collision check for optimization purposes (https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not)
-                    bodies[b].merge(bodies[o])
+                    bodies[b].merge(bodies[o], properties_windows)
                     bodies.pop(o)
                     if settings_window.alive:
                         settings_window.set_bodies(len(bodies))
                 else:
                     force = bodies[b].force_of(bodies[o], G)
-                    bodies[b].acceleration = bodies[o].mass * force
-                    bodies[o].acceleration = -bodies[b].mass * force
-                    bodies[b].apply_acceleration(time_factor)
-                    bodies[o].apply_acceleration(time_factor)
+                    bodies[b].acceleration += bodies[o].mass * force
+                    bodies[o].acceleration += -bodies[b].mass * force
+
+        # Apply acceleration
+        for b in bodies:
+            b.apply_acceleration(time_factor)
+
 
         # Display current frame
         display(screen, bodies, camera)

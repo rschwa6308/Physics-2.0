@@ -45,7 +45,7 @@ class Body:
     def test_collision(self, other):
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
 
-    def merge(self, other):
+    def merge(self, other, prop_wins):
         total_mass = self.mass + other.mass
         self.position = (self.position*self.mass + other.position*other.mass) / total_mass
         self.velocity = (self.velocity*self.mass + other.velocity*other.mass) / total_mass
@@ -56,6 +56,12 @@ class Body:
         self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
 
         self.mass = total_mass
+
+        # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
+        for win in prop_wins:
+            if win.body is other:
+                win.body = self
+                win.original = self.copy()
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
