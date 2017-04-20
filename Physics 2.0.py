@@ -70,6 +70,7 @@ class Settings:
         self.destroy()
 
     def update(self):
+        self.set_bodies(len(self.bodies))
         self.root.update()
 
     def destroy(self):
@@ -220,10 +221,12 @@ def main():
     scroll_right, scroll_left, scroll_down, scroll_up = 0, 0, 0, 0
     scroll_constant = 2.5
 
-    # Initialize simulation sentinel
+    # Initialize simulation sentinel and frame counter
     done = False
+    frame_count = 0
     while not done:
         clock.tick(clock_speed)
+        frame_count += 1
 
         if settings_window.alive:
             settings_window.update()
@@ -307,8 +310,6 @@ def main():
                 if merge and bodies[b].test_collision(bodies[o]):           # Merge setting check must precede collision check for optimization purposes (https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not)
                     bodies[b].merge(bodies[o], properties_windows)
                     bodies.pop(o)
-                    if settings_window.alive:
-                        settings_window.set_bodies(len(bodies))
                 else:
                     force = bodies[b].force_of(bodies[o], G)
                     bodies[b].acceleration += bodies[o].mass * force
@@ -326,6 +327,15 @@ def main():
         for body in bodies:
             body.apply_velocity(time_factor)
             body.position += scroll
+
+        # Kill a body if too far from origin (only check every 100 ticks)
+        if frame_count % 100 == 0:
+            for b in bodies:
+                if max(b.position[0], b.position[1]) > 100000:           # TODO: find a good value from this boundary
+                    print("removing a body")
+                    bodies.remove(b)
+
+
 
         # Accelerate scrolling
         if scroll_right:
