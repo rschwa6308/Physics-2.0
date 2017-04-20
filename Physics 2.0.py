@@ -85,7 +85,7 @@ class BodyProperties:
         self.original = body.copy()
         self.body = body
 
-        self.root = tk.Tk()
+        self.root = tk.Toplevel()
         self.root.title(self.body.name if self.body.name is not None else "Unnamed Body")
 
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
@@ -101,10 +101,20 @@ class BodyProperties:
         self.density_slider.set(100)
         self.density_slider.grid(row=2, column=1)
 
-        tk.Button(self.root, text="Focus", command=self.focus).grid(row=3)          # TODO: change button text?
+        self.velocity = tk.BooleanVar()
+        self.velocity.set(True)
+        self.velocity_checkbutton = tk.Checkbutton(self.root, text="Velocity", variable=self.velocity)
+        self.velocity_checkbutton.grid(row=3, column=0, sticky=tk.W)
 
+        self.acceleration = tk.BooleanVar()
+        self.acceleration.set(True)
+        self.acceleration_checkbutton = tk.Checkbutton(self.root, text="Acceleration", variable=self.acceleration)
+        self.acceleration_checkbutton.grid(row=4, column=0, sticky=tk.W)
+        
         self.canvas = tk.Canvas(self.root, width=104, height=104)
         self.update_canvas()
+
+        tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)          # TODO: change button text?
 
         self.width = 220
         self.height = 250
@@ -113,23 +123,25 @@ class BodyProperties:
     def focus(self):
         self.camera.move_to_body(self.body)
 
-    def update_canvas(self):
+    def update_canvas(self):        
         self.canvas.delete("all")
         self.canvas.create_oval((2, 2, 102, 102))
         self.canvas.create_line((52, 2, 52, 102), fill="Dark Gray", dash=(2, 2))
         self.canvas.create_line((2, 52, 102, 52), fill="Dark Gray", dash=(2, 2))
+        
+        if self.velocity.get():
+            mag_vel = abs(hypot(self.body.velocity[0], self.body.velocity[1]))
+            scale_factor = 40 * (1 - 2 ** -mag_vel) / mag_vel  if mag_vel != 0 else 0
+            x_vel, y_vel = [scale_factor * self.body.velocity[n] for n in (0, 1)]
+            self.canvas.create_line((52, 52, 52 + x_vel, 52 + y_vel), fill="Blue", arrow="last")
+            
+        if self.acceleration.get():
+            mag_acc = abs(hypot(self.body.acceleration[0], self.body.acceleration[1]))
+            scale_factor = 40 * (1 - 2 ** -(mag_acc*1000000)) / mag_acc if mag_acc != 0 else 0
+            x_acc, y_acc = [scale_factor * self.body.acceleration[n] for n in (0, 1)]
+            self.canvas.create_line((52, 52, 52 + x_acc, 52 + y_acc), fill="Red", arrow="last")
 
-        mag_vel = abs(hypot(self.body.velocity[0], self.body.velocity[1]))
-        scale_factor = 40 * (1 - 2 ** -mag_vel) / mag_vel  if mag_vel != 0 else 0
-        x_vel, y_vel = [scale_factor * self.body.velocity[n] for n in (0, 1)]
-        self.canvas.create_line((52, 52, 52 + x_vel, 52 + y_vel), fill="Blue", arrow="last")
-
-        mag_acc = abs(hypot(self.body.acceleration[0], self.body.acceleration[1]))
-        scale_factor = 40 * (1 - 2 ** -(mag_acc*1000000)) / mag_acc if mag_acc != 0 else 0
-        x_acc, y_acc = [scale_factor * self.body.acceleration[n] for n in (0, 1)]
-        self.canvas.create_line((52, 52, 52 + x_acc, 52 + y_acc), fill="Red", arrow="last")
-
-        self.canvas.grid(row=4, columnspan=4)
+        self.canvas.grid(row=3, column=1, rowspan=2, columnspan=4)
 
     def update(self):
         self.root.update()
