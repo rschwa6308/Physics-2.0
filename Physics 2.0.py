@@ -332,7 +332,6 @@ def main():
         if frame_count % 100 == 0:
             for b in bodies:
                 if max(b.position[0], b.position[1]) > 100000:           # TODO: find a good value from this boundary
-                    print("removing a body")
                     bodies.remove(b)
 
 
