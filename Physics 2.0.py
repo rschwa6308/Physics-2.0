@@ -8,12 +8,27 @@ from Constants import *
 
 
 
+
+class Home:
+    def __init__(self):
+        self.root = tk.Tk
+        self.root.title("Physics Simulator Home")
+
+        tk.Button(self.root, text="Open Sim File", command=self.open_file).grid(row=0, column=1)
+
+    def open_file(self):
+        pass
+
+
+
+
+
 class Settings:
     def __init__(self, bodies, camera):
         self.bodies = bodies
         self.camera = camera
 
-        self.root = tk.Tk()
+        self.root = tk.Toplevel()
         self.root.title("Universe Settings")
 
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
@@ -40,7 +55,9 @@ class Settings:
 
         tk.Button(self.root, text="Move Cam to COM", command=self.center_cam).grid(row=3, column=0)
 
-        tk.Button(self.root, text="Quit", command=self.quit).grid(row=4, column=0, rowspan=2, columnspan=2, pady = 20)
+        tk.Button(self.root, text="Save", command=self.save).grid(row=4, column=0, rowspan=2, columnspan=1, pady=20)
+        
+        tk.Button(self.root, text="Quit", command=self.quit).grid(row=4, column=1, rowspan=2, columnspan=1, pady=20)
 
         self.root.geometry('%dx%d+%d+%d' % (320, 200, monitor_width/2 - width/2 - 330, monitor_height/2 - height/2 - 20))
 
@@ -64,6 +81,10 @@ class Settings:
 
     def center_cam(self):
         self.camera.move_to_com(self.bodies)
+
+    def save(self):
+        save_object = Save(self)
+        save_object.save_as("Save " + str(randint(1,1000)))
 
     def quit(self):
         pg.quit()
