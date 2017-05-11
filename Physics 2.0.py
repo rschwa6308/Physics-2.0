@@ -5,6 +5,7 @@ from operator import add
 
 from Presets import *
 from Constants import *
+from json_test import *
 
 
 
@@ -55,11 +56,13 @@ class Settings:
 
         tk.Button(self.root, text="Move Cam to COM", command=self.center_cam).grid(row=3, column=0)
 
-        tk.Button(self.root, text="Save", command=self.save).grid(row=4, column=0, rowspan=2, columnspan=1, pady=20)
+        tk.Button(self.root, text="Save As", command=self.save).grid(row=4, column=0)
+        self.filename_entry = tk.Entry(self.root)
+        self.filename_entry.grid(row=4, column=1, sticky="W")
         
-        tk.Button(self.root, text="Quit", command=self.quit).grid(row=4, column=1, rowspan=2, columnspan=1, pady=20)
+        tk.Button(self.root, text="Quit", command=self.quit).grid(row=5, column=0, rowspan=1, columnspan=1, pady=20)
 
-        self.root.geometry('%dx%d+%d+%d' % (320, 200, monitor_width/2 - width/2 - 330, monitor_height/2 - height/2 - 20))
+        self.root.geometry('%dx%d+%d+%d' % (320, 230, monitor_width/2 - width/2 - 330, monitor_height/2 - height/2 - 20))
 
     def get_gravity(self):
         try:
@@ -84,7 +87,11 @@ class Settings:
 
     def save(self):
         save_object = Save(self)
-        save_object.save_as("Save " + str(randint(1,1000)))
+        name = self.filename_entry.get()
+        if name != "":
+            print(name)
+            save_object.save_as(self.filename_entry.get())
+            self.filename_entry.delete(0, "end")
 
     def quit(self):
         pg.quit()
