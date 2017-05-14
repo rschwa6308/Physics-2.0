@@ -1,10 +1,29 @@
 import tkinter as tk
+from tkinter import filedialog
 import os
 from functools import reduce
 from operator import add
 
 from Presets import *
 from Constants import *
+from Json_Saving import *
+
+
+
+
+class Home:
+    def __init__(self):
+        self.root = tk.Tk
+        self.root.title("Physics Simulator Home")
+
+        tk.Button(self.root, text="Open Sim File", command=self.open_file).grid(row=0, column=1)
+
+    def open_file(self):
+        filename = filedialog.askopenfilename()
+        with open(filename) as file:
+            data = json.load(file)
+
+
 
 
 
@@ -14,35 +33,58 @@ class Settings:
         self.camera = camera
 
         self.root = tk.Tk()
-        self.root.title("Universe Settings")
+        self.root.title("Simulation Settings")
 
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.alive = True
 
-        tk.Label(self.root, text="Gravity: ").grid(row=0)
-        self.gravity_slider = tk.Scale(self.root, from_=0, to = 1000, orient=tk.HORIZONTAL, length=200)
+        self.physics_frame = tk.LabelFrame(self.root)
+
+        # Top Bar Menu
+        self.menu = tk.Menu(self.root)
+        self.menu.add_command(label="Open", command=self.open_file)
+        self.menu.add_command(label="Save", command=self.save)
+        self.menu.add_command(label="Save As", command=self.save_as)
+
+        self.root.config(menu=self.menu)
+
+        # File Frame Content
+        self.filename = ""
+        self.name = tk.StringVar()
+        self.name.set("Unnamed Simulation")
+        tk.Label(self.root, textvariable=self.name).grid(row=0, column=0, columnspan=5000)
+
+        # Physics Frame Content
+        tk.Label(self.physics_frame, text="Gravity: ").grid(row=0, column=0)
+        self.gravity_slider = tk.Scale(self.physics_frame, from_=0, to = 1000, orient=tk.HORIZONTAL, length=200)
         self.gravity_slider.set(G*100)
         self.gravity_slider.grid(row=0, column=1)
 
-        tk.Label(self.root, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
-        self.time_slider = tk.Scale(self.root, from_=-0, to=500, orient=tk.HORIZONTAL, length=200)      # from_ can be set negative for rewind
+        tk.Label(self.physics_frame, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
+        self.time_slider = tk.Scale(self.physics_frame, from_=-0, to=500, orient=tk.HORIZONTAL, length=200)      # from_ can be set negative for rewind
         self.time_slider.set(100)
         self.time_slider.grid(row=1, column=1)
 
         self.bodies_label_text = tk.StringVar()
-        self.bodies_label = tk.Label(self.root, textvariable=self.bodies_label_text)
+        self.bodies_label = tk.Label(self.physics_frame, textvariable=self.bodies_label_text)
         self.bodies_label.grid(row=2, column=0, pady=5)
 
         self.merge = tk.IntVar()
         self.merge.set(1)
-        self.merge_checkbutton = tk.Checkbutton(self.root, text="Merges", variable=self.merge)
+        self.merge_checkbutton = tk.Checkbutton(self.physics_frame, text="Merges", variable=self.merge)
         self.merge_checkbutton.grid(row=2, column=1, pady=5, sticky=tk.W)
 
-        tk.Button(self.root, text="Move Cam to COM", command=self.center_cam).grid(row=3, column=0)
+        # Grid Frames
+        # self.file_frame.grid(row=0, sticky=tk.W)
+        self.physics_frame.grid(row=1, sticky=tk.W)
 
-        tk.Button(self.root, text="Quit", command=self.quit).grid(row=4, column=0, rowspan=2, columnspan=2, pady = 20)
+        # Misc Buttons
+        tk.Button(self.root, text="Move Cam to COM", command=self.center_cam).grid(row=2, column=0)
 
-        self.root.geometry('%dx%d+%d+%d' % (320, 200, monitor_width/2 - width/2 - 330, monitor_height/2 - height/2 - 20))
+        tk.Button(self.root, text="Quit", command=self.quit).grid(row=3, column=0, rowspan=1, columnspan=1, pady=20)
+
+        # Set window size and screen position
+        self.root.geometry('%dx%d+%d+%d' % (305, 220, monitor_width/2 - width/2 - 315, monitor_height/2 - height/2 - 20))
 
     def get_gravity(self):
         try:
@@ -64,6 +106,38 @@ class Settings:
 
     def center_cam(self):
         self.camera.move_to_com(self.bodies)
+
+    def save(self):
+        name = self.name.get()
+        if self.filename == "":
+            self.save_as()
+        else:
+            save_object = Save(self)
+            save_object.save_as(self.filename)
+
+    def save_as(self):
+        save_object = Save(self)
+        filename = filedialog.asksaveasfilename(defaultextension=".sim", filetypes=(("simulation file", "*.sim"),("All Files", "*.*") ))
+        self.filename = filename
+        self.name.set(os.path.split(filename)[-1])
+        try:
+            save_object.save_as(filename)
+        except: pass
+
+    def open_file(self):
+        filename = filedialog.askopenfilename()
+        self.filename = filename
+        self.name.set(os.path.split(filename)[-1])
+        with open(filename) as file:
+            data = json.load(file)
+            # print(data)
+            self.gravity_slider.set(data["settings"]["G"] * 100.0)
+            self.time_slider.set(data["settings"]["time factor"] * 100.0)
+            cam_data = data["settings"]["camera"]
+            self.camera.position = cam_data["position"]
+            self.camera.scale = cam_data["scale"]
+            self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b in data["bodies"]]
+
 
     def quit(self):
         pg.quit()
@@ -171,7 +245,7 @@ def display(screen, bodies, cam):
 
 
 class Camera:
-    def __init__(self):
+    def __init__(self, position=None, scale=None):
         self.position = V2(0, 0)
         self.velocity = V2(0, 0)
         self.scale = 1
