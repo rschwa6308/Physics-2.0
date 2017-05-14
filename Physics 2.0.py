@@ -8,25 +8,6 @@ from Presets import *
 from Constants import *
 from JsonSaving import *
 
-
-
-
-class Home:
-    def __init__(self):
-        self.root = tk.Tk
-        self.root.title("Physics Simulator Home")
-
-        tk.Button(self.root, text="Open Sim File", command=self.open_file).grid(row=0, column=1)
-
-    def open_file(self):
-        filename = filedialog.askopenfilename()
-        with open(filename) as file:
-            data = json.load(file)
-
-
-
-
-
 class Settings:
     def __init__(self, bodies, camera):
         self.bodies = bodies
@@ -75,7 +56,6 @@ class Settings:
         self.merge_checkbutton.grid(row=2, column=1, pady=5, sticky=tk.W)
 
         # Grid Frames
-        # self.file_frame.grid(row=0, sticky=tk.W)
         self.physics_frame.grid(row=1, sticky=tk.W)
 
         # Misc Buttons
@@ -117,7 +97,7 @@ class Settings:
 
     def save_as(self):
         save_object = Save(self)
-        filename = filedialog.asksaveasfilename(defaultextension=".sim", filetypes=(("simulation file", "*.sim"),("All Files", "*.*") ))
+        filename = filedialog.asksaveasfilename(defaultextension=".sim", filetypes=(("Simulation file", "*.sim"),("All files", "*.*") ))
         self.filename = filename
         self.name.set(os.path.split(filename)[-1])
         try:
@@ -130,7 +110,6 @@ class Settings:
         self.name.set(os.path.split(filename)[-1])
         with open(filename) as file:
             data = json.load(file)
-            # print(data)
             self.gravity_slider.set(data["settings"]["G"] * 100.0)
             self.time_slider.set(data["settings"]["time factor"] * 100.0)
             cam_data = data["settings"]["camera"]
