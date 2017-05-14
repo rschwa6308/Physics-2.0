@@ -25,7 +25,7 @@ class Settings:
         self.gravity_slider.grid(row=0, column=1)
 
         tk.Label(self.root, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
-        self.time_slider = tk.Scale(self.root, from_=-200, to=500, orient=tk.HORIZONTAL, length=200)
+        self.time_slider = tk.Scale(self.root, from_=-0, to=500, orient=tk.HORIZONTAL, length=200)      # from_ can be set negative for rewind
         self.time_slider.set(100)
         self.time_slider.grid(row=1, column=1)
 
@@ -76,14 +76,47 @@ class Settings:
         self.alive = False
         self.root.destroy()
 
+class Body_Properties:
+    def __init__(self, body, queue_position):
+        self.original = body.copy()
+        self.body = body
+
+        self.root = tk.Tk()
+        self.root.title(self.body.name if self.body.name is not None else "Unnamed Body")
+
+        self.root.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.alive = True
+
+        tk.Label(self.root, text="Mass (%): ").grid(row=1)
+        self.mass_slider = tk.Scale(self.root, from_=1, to=1000, orient=tk.HORIZONTAL, length=100)
+        self.mass_slider.set(100)
+        self.mass_slider.grid(row=1, column=1)
+
+        tk.Label(self.root, text="Density (%): ").grid(row=2)
+        self.density_slider = tk.Scale(self.root, from_=10, to=1000, orient=tk.HORIZONTAL, length=100)
+        self.density_slider.set(100)
+        self.density_slider.grid(row=2, column=1)
+
+        self.width = 250
+        self.height = 120
+        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width, monitor_height / 2 - height / 2 + 61 + (self.height + 31) * (queue_position + 1)))
+
+    def update(self):
+        self.root.update()
+        self.body.mass = self.original.mass * (self.mass_slider.get() / 100.0)
+        self.body.density = self.original.density * (self.density_slider.get() / 100.0)
+        self.body.update_radius()
+
+    def destroy(self):
+        self.root.destroy()
+        self.alive = False
+
 
 def display(screen, bodies, cam):
     # Clear last frame
     screen.fill(bg_color)           # comment out this line for a fun time ;)
     # Display all bodies
     for b in bodies:
-        #screen.blit(b.image, b.position)
-        # b.draw_on(screen)
         # calculate coordinates and radius adjusted for camera
         x = b.position[0] - cam.position[0]
         x = (x - width / 2) * cam.scale + width / 2
@@ -118,18 +151,15 @@ def main():
     camera = Camera()
 
     # Construct bodies list
-
-##    bodies = [
-##         Body(1000, [1000, 500], [1, 0]),
-##         Body(1000, [60, 800], [0, -1]),
-##         Body(1000, [500, 150], [0, 0])
-##    ]
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
 
-    # Initialize tkinter window
+    # Initialize settings window
     settings_window = Settings(bodies, camera)
+
+    # Initialize body properties window list
+    properties_windows = []
 
     # Initialize merge setting to True
     merge = 1
@@ -164,6 +194,12 @@ def main():
             G = settings_window.get_gravity()
             time_factor = settings_window.get_time()
             merge = settings_window.get_merge()
+
+        for window in properties_windows:
+            if window.alive:
+                window.update()
+            else:
+                properties_windows.remove(window)
 
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -206,7 +242,16 @@ def main():
             elif event.type == pg.QUIT:
                 done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
-                if event.button == 4:
+                if event.button == 1:
+                    x, y = pg.mouse.get_pos()
+                    x = camera.position[0] + (x - width / 2) / camera.scale + width / 2
+                    y = camera.position[1] + (y - height / 2) / camera.scale + height / 2
+                    for b in bodies:
+                        if b.click_collision((x, y)):
+                            if b not in [win.body for win in properties_windows]:
+                                properties_windows.append(Body_Properties(b, len(properties_windows)))
+
+                elif event.button == 4:
                     camera.scale *= 1.1
                     camera.scale = min(camera.scale, 100)
                 elif event.button == 5:
