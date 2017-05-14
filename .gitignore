@@ -54,3 +54,6 @@ Temporary Items
 
 # Simulation Save Files
 *.sim
+
+# Python 3 Cache
+__pycache__/
