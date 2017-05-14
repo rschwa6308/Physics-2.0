@@ -51,3 +51,6 @@ Temporary Items
 
 # Pycharm documentation
 *.idea
+
+# Simulation Save Files
+*.sim
