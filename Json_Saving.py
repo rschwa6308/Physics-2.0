@@ -24,38 +24,6 @@ import json
 # ]
 
 
-def save(settings_window, filename):
-    grav = settings_window.get_gravity()
-    time = settings_window.get_time()
-    cam = settings_window.camera
-    bods = settings_window.bodies
-
-    data = {}
-    data["settings"] = {
-        "G": grav,
-        "time factor": time,
-        "camera": {
-            "position": cam.position,
-            "scale": cam.scale
-        }
-    }
-
-    data["bodies"] = []
-    for b in bods:
-        data["bodies"].append(
-            {
-                "mass": b.mass,
-                "radius": b.radius,
-                "position": b.position,
-                "velocity": b.velocity,
-                "density": b.density,
-                "color": b.color,
-                "name": b.name
-            }
-        )
-
-    with open(filename + ".sim", "w") as outfile:
-        json.dump(data, outfile)
 
 
 class Save:
@@ -90,5 +58,5 @@ class Save:
             )
 
     def save_as(self, filename):
-        with open("Saves/" + filename + ".sim", "w") as outfile:
+        with open(filename, "w") as outfile:
             json.dump(self.data, outfile)
