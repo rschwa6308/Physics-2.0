@@ -10,6 +10,9 @@ Physics-2.0 is a remake of simple 2D n-body gravity simulator made in Python wit
   - Adjust time factor
 - Fully featured camera movement and zoom
 - Window resizing
+- Live body telemetry
+   - Adjust mass and density
+   - Visualize velocity and acceleration vectors on a logistic plot
 
 
 ## Controls

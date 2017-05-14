@@ -13,6 +13,7 @@ class Body:
 
         self.position = V2(position)
         self.velocity = V2(velocity)
+        self.acceleration = V2(0, 0)
 
         self.density = density
 
@@ -44,7 +45,7 @@ class Body:
     def test_collision(self, other):
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
 
-    def merge(self, other):
+    def merge(self, other, prop_wins):
         total_mass = self.mass + other.mass
         self.position = (self.position*self.mass + other.position*other.mass) / total_mass
         self.velocity = (self.velocity*self.mass + other.velocity*other.mass) / total_mass
@@ -56,11 +57,17 @@ class Body:
 
         self.mass = total_mass
 
+        # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
+        for win in prop_wins:
+            if win.body is other:
+                win.body = self
+                win.original = self.copy()
+
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
 
-    def apply_acceleration(self, acceleration):
-        self.velocity += acceleration
+    def apply_acceleration(self, time_factor):
+        self.velocity += self.acceleration * time_factor
 
     def apply_velocity(self, time_factor):
         self.position += self.velocity * time_factor
