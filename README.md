@@ -13,6 +13,8 @@ Physics-2.0 is a remake of simple 2D n-body gravity simulator made in Python wit
 - Live body telemetry
    - Adjust mass and density
    - Visualize velocity and acceleration vectors on a logistic plot
+- Save simulations to files
+- Open simulations from files
 
 
 ## Controls
@@ -21,4 +23,5 @@ Action | Control
 Basic camera translation | Arrow keys
 Cinematic camera translation | WASD
 Camera zoom | Scroll wheel
-Open properties dialogue | Left click on body
+Open properties dialogue | Left click
+Spawn body | Right click

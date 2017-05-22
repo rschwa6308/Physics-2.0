@@ -150,7 +150,7 @@ def main():
                     for b in bodies:
                         if b.click_collision((x, y)):
                             if b not in [win.body for win in properties_windows]:
-                                properties_windows.append(BodyProperties(b, len(properties_windows), camera))
+                                properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
 
                 elif event.button == 4:
                     camera.scale *= 1.1

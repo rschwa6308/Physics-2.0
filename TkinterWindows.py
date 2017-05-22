@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import messagebox
 import os
 
 from Constants import *
@@ -135,26 +136,28 @@ class Settings:
 
 
 class BodyProperties:
-    def __init__(self, body, queue_position, camera):
+    def __init__(self, body, bodies, queue_position, camera):
         self.camera = camera
 
         self.original = body.copy()
         self.body = body
 
+        self.bodies = bodies
+
         self.root = tk.Toplevel()
-        self.root.title(self.body.name if self.body.name is not None else "Unnamed Body")
+        self.root.title(self.body.name.title() if self.body.name is not None else "Unnamed Body")
 
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.alive = True
 
-        tk.Label(self.root, text="Mass (%): ").grid(row=1)
-        self.mass_slider = tk.Scale(self.root, from_=1, to=1000, orient=tk.HORIZONTAL, length=100)
-        self.mass_slider.set(100)
+        tk.Label(self.root, text="Mass: ").grid(row=1)
+        self.mass_slider = tk.Scale(self.root, from_=1, to=self.body.mass * 10, orient=tk.HORIZONTAL, length=100)
+        self.mass_slider.set(self.body.mass)
         self.mass_slider.grid(row=1, column=1)
 
-        tk.Label(self.root, text="Density (%): ").grid(row=2)
-        self.density_slider = tk.Scale(self.root, from_=10, to=1000, orient=tk.HORIZONTAL, length=100)
-        self.density_slider.set(100)
+        tk.Label(self.root, text="Density: ").grid(row=2)
+        self.density_slider = tk.Scale(self.root, from_=.01, to=self.body.density * 10, resolution=0.01, orient=tk.HORIZONTAL, length=100)
+        self.density_slider.set(self.body.density)
         self.density_slider.grid(row=2, column=1)
 
         self.velocity = tk.BooleanVar()
@@ -172,13 +175,19 @@ class BodyProperties:
 
         tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)  # TODO: change button text?
 
+        tk.Button(self.root, text="Delete", command=self.delete_body).grid(row=6, columnspan=3)
+
         self.width = 220
         self.height = 250
         self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width,
-                                            monitor_height / 2 - 330 + (self.height + 31) * (queue_position)))
+                                            monitor_height / 2 - 290 + (self.height + 31) * queue_position))
 
     def focus(self):
         self.camera.move_to_body(self.body)
+
+    def delete_body(self):
+        if messagebox.askokcancel("Delete Body", "Are you sure you want to delete \"{0}\"".format(self.body.name)):
+            self.bodies.remove(self.body)
 
     def update_canvas(self):
         self.canvas.delete("all")
@@ -202,8 +211,8 @@ class BodyProperties:
 
     def update(self):
         self.root.update()
-        self.body.mass = self.original.mass * (self.mass_slider.get() / 100.0)
-        self.body.density = self.original.density * (self.density_slider.get() / 100.0)
+        self.body.mass = self.mass_slider.get()
+        self.body.density = self.density_slider.get()
         self.body.update_radius()
         self.update_canvas()
 
