@@ -28,4 +28,4 @@ Spawn body | Right click
 
 
 ## Screenshots
-![unavailable](https://github.com/rschwa6308/Physics-2.0/Screenshots/screenshot_0.png "Screenshot 0")
+![unavailable](https://github.com/rschwa6308/Physics-2.0/blob/master/Screenshots/screenshot_0.PNG "Screenshot 0")
