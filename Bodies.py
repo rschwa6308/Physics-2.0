@@ -2,6 +2,7 @@ from random import randint
 import pygame as pg
 from pygame.math import Vector2 as V2
 from math import hypot
+from copy import copy
 
 from Constants import *
 
@@ -45,23 +46,31 @@ class Body:
     def test_collision(self, other):
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
 
-    def merge(self, other, prop_wins):
-        total_mass = self.mass + other.mass
-        self.position = (self.position*self.mass + other.position*other.mass) / total_mass
-        self.velocity = (self.velocity*self.mass + other.velocity*other.mass) / total_mass
+    def collide(self, other, COR, prop_wins):
+        print("COR: ", COR)
+        # Special case: perfectly inelastic collision results in merging of the two bodies
+        if COR == 0:
+            total_mass = self.mass + other.mass
+            self.position = (self.position*self.mass + other.position*other.mass) / total_mass
+            self.velocity = (self.velocity*self.mass + other.velocity*other.mass) / total_mass
 
-        avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
-        self.radius = int((total_mass/avg_density)**(1/3))
+            avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
+            self.radius = int((total_mass/avg_density)**(1/3))
 
-        self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
+            self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
 
-        self.mass = total_mass
+            self.mass = total_mass
 
-        # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
-        for win in prop_wins:
-            if win.body is other:
-                win.body = self
-                win.original = self.copy()
+            # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
+            for win in prop_wins:
+                if win.body is other:
+                    win.body = self
+                    win.original = self.copy()
+        else:
+            self_vel_copy = V2(self.velocity)
+            self.velocity = (self.mass*self.velocity + other.mass*other.velocity + other.mass*COR*(other.velocity - self.velocity)) / (self.mass + other.mass)
+            print("original: ", self_vel_copy, ", new: ", self.velocity)
+            other.velocity = (self.mass*self_vel_copy + other.mass*other.velocity + self.mass*COR*(self_vel_copy - other.velocity)) / (self.mass + other.mass)
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))

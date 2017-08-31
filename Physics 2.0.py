@@ -7,7 +7,7 @@ from TkinterWindows import *
 
 def display(screen, bodies, cam):
     # Clear last frame
-    screen.fill(bg_color)           # comment out this line for a fun time ;)
+    screen.fill(bg_color)  # comment out this line for a fun time ;)
     # Display all bodies
     for b in bodies:
         # calculate coordinates and radius adjusted for camera
@@ -28,7 +28,7 @@ class Camera:
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
-        self.position = reduce(add,(b.position * b.mass for b in bodies)) / total_mass - V2(width,height) / 2
+        self.position = reduce(add, (b.position * b.mass for b in bodies)) / total_mass - V2(width, height) / 2
 
     def move_to_body(self, body):
         x, y = body.position
@@ -60,15 +60,15 @@ def main():
     # Initialize body properties window list
     properties_windows = []
 
-    # Initialize merge setting to True
-    merge = 1
+    # Initialize collision setting to True
+    collision = 1
 
     # Initialize body count
     settings_window.set_bodies(len(bodies))
 
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
-    
+
     # Initialize screen
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
@@ -79,7 +79,7 @@ def main():
     clock = pg.time.Clock()
     time_factor = 1
 
-    scroll = V2(0,0)
+    scroll = V2(0, 0)
     scroll_right, scroll_left, scroll_down, scroll_up = 0, 0, 0, 0
     scroll_constant = 2.5
 
@@ -94,7 +94,9 @@ def main():
             settings_window.update()
             G = settings_window.get_gravity()
             time_factor = settings_window.get_time()
-            merge = settings_window.get_merge()
+            COR = settings_window.get_COR()
+            print(COR)
+            collision = settings_window.get_collision()
 
         for window in properties_windows:
             if window.alive:
@@ -108,7 +110,7 @@ def main():
                 screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_d:
-                    scroll_right = 1 
+                    scroll_right = 1
                 elif event.key == pg.K_a:
                     scroll_left = 1
                 elif event.key == pg.K_w:
@@ -118,7 +120,7 @@ def main():
                 elif event.key == pg.K_LEFT:
                     camera.velocity[0] = -3 / camera.scale
                 elif event.key == pg.K_RIGHT:
-                    camera.velocity[0] = 3  / camera.scale
+                    camera.velocity[0] = 3 / camera.scale
                 elif event.key == pg.K_UP:
                     camera.velocity[1] = -3 / camera.scale
                 elif event.key == pg.K_DOWN:
@@ -168,10 +170,11 @@ def main():
 
         # Calculate forces and set acceleration
         for b in range(len(bodies)):
-            for o in range(len(bodies)-1,b,-1):
-                if merge and bodies[b].test_collision(bodies[o]):           # Merge setting check must precede collision check for optimization purposes (https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not)
-                    bodies[b].merge(bodies[o], properties_windows)
-                    bodies.pop(o)
+            for o in range(len(bodies) - 1, b, -1):
+                if collision and bodies[b].test_collision(bodies[o]):  # Collision setting check must precede collision check for optimization purposes (https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not)
+                    bodies[b].collide(bodies[o], COR, properties_windows)
+                    if COR == 0:            # Only remove second body if collision is perfectly inelastic
+                        bodies.pop(o)
                 else:
                     force = bodies[b].force_of(bodies[o], G)
                     bodies[b].acceleration += bodies[o].mass * force
@@ -181,10 +184,9 @@ def main():
         for b in bodies:
             b.apply_acceleration(time_factor)
 
-
         # Display current frame
         display(screen, bodies, camera)
-        
+
         # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity(time_factor)
@@ -193,10 +195,8 @@ def main():
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
             for b in bodies:
-                if max(b.position[0], b.position[1]) > 100000:           # TODO: find a good value from this boundary
+                if max(b.position[0], b.position[1]) > 100000:  # TODO: find a good value from this boundary
                     bodies.remove(b)
-
-
 
         # Accelerate scrolling
         if scroll_right:
@@ -204,18 +204,17 @@ def main():
         if scroll_left:
             scroll[0] += scroll_constant
         if scroll_up:
-            scroll[1] += scroll_constant    
+            scroll[1] += scroll_constant
         if scroll_down:
             scroll[1] -= scroll_constant
         # Decelerate scrolling
         if scroll[0]:
-            scroll[0] -= abs(scroll[0])/scroll[0]
+            scroll[0] -= abs(scroll[0]) / scroll[0]
         if scroll[1]:
-            scroll[1] -= abs(scroll[1])/scroll[1]
+            scroll[1] -= abs(scroll[1]) / scroll[1]
 
     pg.quit()
     if settings_window.alive: settings_window.destroy()
-
 
 
 if __name__ == "__main__":

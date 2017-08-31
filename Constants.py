@@ -4,6 +4,8 @@ G = 0.5
 
 Density = 0.1
 
+COR = 0.5         # Coefficient of Restitution (https://en.wikipedia.org/wiki/Coefficient_of_restitution)
+
 # define starting window width and height
 try:
     # Windows

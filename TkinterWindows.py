@@ -47,14 +47,21 @@ class Settings:
         self.time_slider.set(100)
         self.time_slider.grid(row=1, column=1)
 
+        tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
+        self.COR_slider = tk.Scale(self.physics_frame, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, length=200)
+        self.COR_slider.set(COR)
+        self.COR_slider.grid(row=2, column=1)
+
+        self.collision = tk.IntVar()
+        self.collision.set(1)
+        self.collision_checkbutton = tk.Checkbutton(self.physics_frame, text="Collisions", variable=self.collision)
+        self.collision_checkbutton.grid(row=3, column=1, pady=5, sticky=tk.W)
+
         self.bodies_label_text = tk.StringVar()
         self.bodies_label = tk.Label(self.physics_frame, textvariable=self.bodies_label_text)
-        self.bodies_label.grid(row=2, column=0, pady=5)
+        self.bodies_label.grid(row=3, column=0, pady=5)
 
-        self.merge = tk.IntVar()
-        self.merge.set(1)
-        self.merge_checkbutton = tk.Checkbutton(self.physics_frame, text="Merges", variable=self.merge)
-        self.merge_checkbutton.grid(row=2, column=1, pady=5, sticky=tk.W)
+
 
         # Grid Frames
         self.physics_frame.grid(row=1, sticky=tk.W)
@@ -80,8 +87,14 @@ class Settings:
         except:
             return 1
 
-    def get_merge(self):
-        return self.merge.get()
+    def get_COR(self):
+        try:
+            return self.COR_slider.get()
+        except:
+            return COR
+
+    def get_collision(self):
+        return self.collision.get()
 
     def set_bodies(self, n):
         self.bodies_label_text.set("Bodies: " + str(n))
