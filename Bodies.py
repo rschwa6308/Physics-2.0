@@ -67,9 +67,9 @@ class Body:
                     win.body = self
                     win.original = self.copy()
         else:
+            # TODO: fix this! this is the equation for one dimension (from COR wikipedia page), which i thought would work but it doesnt seem to lol
             self_vel_copy = V2(self.velocity)
             self.velocity = (self.mass*self.velocity + other.mass*other.velocity + other.mass*COR*(other.velocity - self.velocity)) / (self.mass + other.mass)
-            print("original: ", self_vel_copy, ", new: ", self.velocity)
             other.velocity = (self.mass*self_vel_copy + other.mass*other.velocity + self.mass*COR*(self_vel_copy - other.velocity)) / (self.mass + other.mass)
 
     def update_radius(self):
