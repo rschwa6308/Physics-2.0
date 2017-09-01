@@ -50,7 +50,7 @@ class Body:
 
             avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
             self.radius = int((total_mass/avg_density)**(1/3))
-            self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for _ in '111')
+            self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
             self.mass = total_mass
 
             # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body

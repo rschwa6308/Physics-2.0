@@ -2,7 +2,6 @@ from random import uniform
 from math import pi, sin, cos, sqrt
 
 from Bodies import *
-from Colors import *
 
 def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
