@@ -115,11 +115,9 @@ class Settings:
         filename = filedialog.asksaveasfilename(defaultextension=".sim",
                                                 filetypes=(("Simulation file", "*.sim"), ("All files", "*.*")))
         self.filename = filename
-        self.name.set(os.path.split(filename)[-1])
-        try:
+        if filename:
+            self.name.set(os.path.split(filename)[-1])
             save_object.save_as(filename)
-        except:
-            pass
 
     def open_file(self):
         filename = filedialog.askopenfilename()

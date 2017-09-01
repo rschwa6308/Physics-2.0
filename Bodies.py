@@ -50,9 +50,7 @@ class Body:
 
             avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
             self.radius = int((total_mass/avg_density)**(1/3))
-
             self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for _ in '111')
-
             self.mass = total_mass
 
             # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
@@ -61,10 +59,6 @@ class Body:
                     win.body = self
                     win.original = self.copy()
         else:
-            # TODO: fix this! this is the equation for one dimension (from COR wikipedia page), which i thought would work but it doesnt seem to lol
-            m, m2, v, v2 = self.mass, other.mass, self.velocity, other.velocity
-            self.velocity = (m*v + m2*v2 + m2*COR*(v2-v)) / (m+m2)
-            other.velocity = (m*v + m2*v2 + m*COR*(v-v2)) / (m+m2)
             d = self.position.distance_to(other.position)
             n = (other.position - self.position) / d
             p = 2 * (self.velocity.dot(n) - other.velocity.dot(n)) / (self.mass + other.mass)

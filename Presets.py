@@ -34,7 +34,7 @@ def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=Tr
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
-    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, yellow, "Star")
+    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, (255, 255, 0), "Star")
     bodies.append(star)
 
     for x in range(planets):
