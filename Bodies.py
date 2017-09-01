@@ -65,6 +65,12 @@ class Body:
             m, m2, v, v2 = self.mass, other.mass, self.velocity, other.velocity
             self.velocity = (m*v + m2*v2 + m2*COR*(v2-v)) / (m+m2)
             other.velocity = (m*v + m2*v2 + m*COR*(v-v2)) / (m+m2)
+            d = self.position.distance_to(other.position)
+            n = (other.position - self.position) / d
+            p = 2 * (self.velocity.dot(n) - other.velocity.dot(n)) / (self.mass + other.mass)
+            # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept
+            self.velocity = (self.velocity - p * self.mass * n) * COR
+            other.velocity = (other.velocity + p * other.mass * n) * COR
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
