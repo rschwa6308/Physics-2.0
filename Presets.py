@@ -6,12 +6,6 @@ from Bodies import *
 def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
-    for x in range(planets):
-        mass = uniform(min_mass, max_mass)
-
-def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
-    bodies = []
-
     total_mass = 0
     for x in range(planets):
         mass = uniform(min_mass, max_mass)
