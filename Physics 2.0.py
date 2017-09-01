@@ -51,10 +51,10 @@ def main():
 
     # Construct bodies list
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
+    bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
     # bodies = cluster(100, 10, 20, 5, 500, False)
-    bodies = [Body(100, (200, 200), (1, 0), 0.01, black, "A"), Body(100, (500, 230), (-1, 0), 0.01, yellow, "B")]
+    # bodies = [Body(100, (200, 200), (1, 0), 0.01, black, "A"), Body(100, (500, 230), (-1, 0), 0.01, yellow, "B")]
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
