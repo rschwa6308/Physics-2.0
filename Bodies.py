@@ -47,7 +47,6 @@ class Body:
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
 
     def collide(self, other, COR, prop_wins):
-        print("COR: ", COR)
         # Special case: perfectly inelastic collision results in merging of the two bodies
         if COR == 0:
             total_mass = self.mass + other.mass
@@ -67,10 +66,16 @@ class Body:
                     win.body = self
                     win.original = self.copy()
         else:
-            # TODO: fix this! this is the equation for one dimension (from COR wikipedia page), which i thought would work but it doesnt seem to lol
-            self_vel_copy = V2(self.velocity)
-            self.velocity = (self.mass*self.velocity + other.mass*other.velocity + other.mass*COR*(other.velocity - self.velocity)) / (self.mass + other.mass)
-            other.velocity = (self.mass*self_vel_copy + other.mass*other.velocity + self.mass*COR*(self_vel_copy - other.velocity)) / (self.mass + other.mass)
+            # self_vel_copy = V2(self.velocity)
+            # self.velocity = (self.mass*self.velocity + other.mass*other.velocity + other.mass*COR*(other.velocity - self.velocity)) / (self.mass + other.mass)
+            # other.velocity = (self.mass*self_vel_copy + other.mass*other.velocity + self.mass*COR*(self_vel_copy - other.velocity)) / (self.mass + other.mass)
+            d = self.position.distance_to(other.position)
+            n = (other.position - self.position) / d
+            p = 2 * (self.velocity.dot(n) - other.velocity.dot(n)) / (self.mass + other.mass)
+            # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept
+            self.velocity = (self.velocity - p * self.mass * n) * COR
+            other.velocity = (other.velocity + p * self.mass * n) * COR
+
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
