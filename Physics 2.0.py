@@ -51,8 +51,9 @@ def main():
 
     # Construct bodies list
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
+    # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
+    bodies = cluster(50, 10, 10, 10, 100, False)
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
@@ -95,7 +96,6 @@ def main():
             G = settings_window.get_gravity()
             time_factor = settings_window.get_time()
             COR = settings_window.get_COR()
-            print(COR)
             collision = settings_window.get_collision()
 
         for window in properties_windows:

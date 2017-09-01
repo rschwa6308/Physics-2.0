@@ -18,14 +18,9 @@ class Body:
 
         self.density = density
 
-        self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
+        self.color = tuple(randint(0, 255) for _ in '111') if color is None else color
 
         self.name = name
-
-        # self.image = pg.Surface((radius*2, radius*2))
-        # self.image.fill(bg_color)
-        # self.image.set_alpha(255)
-        # pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def copy(self):
         return Body(self.mass, self.position, self.velocity, self.density, self.color, None if self.name is None else self.name + " copy")     # inheritance of 'name' for debugging purposes only
@@ -47,7 +42,6 @@ class Body:
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
 
     def collide(self, other, COR, prop_wins):
-        print("COR: ", COR)
         # Special case: perfectly inelastic collision results in merging of the two bodies
         if COR == 0:
             total_mass = self.mass + other.mass
@@ -57,7 +51,7 @@ class Body:
             avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
             self.radius = int((total_mass/avg_density)**(1/3))
 
-            self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
+            self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for _ in '111')
 
             self.mass = total_mass
 
@@ -68,9 +62,9 @@ class Body:
                     win.original = self.copy()
         else:
             # TODO: fix this! this is the equation for one dimension (from COR wikipedia page), which i thought would work but it doesnt seem to lol
-            self_vel_copy = V2(self.velocity)
-            self.velocity = (self.mass*self.velocity + other.mass*other.velocity + other.mass*COR*(other.velocity - self.velocity)) / (self.mass + other.mass)
-            other.velocity = (self.mass*self_vel_copy + other.mass*other.velocity + self.mass*COR*(self_vel_copy - other.velocity)) / (self.mass + other.mass)
+            m, m2, v, v2 = self.mass, other.mass, self.velocity, other.velocity
+            self.velocity = (m*v + m2*v2 + m2*COR*(v2-v)) / (m+m2)
+            other.velocity = (m*v + m2*v2 + m*COR*(v-v2)) / (m+m2)
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
