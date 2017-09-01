@@ -51,10 +51,11 @@ def main():
 
     # Construct bodies list
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
+    # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
+    # bodies = cluster(50, 10, 10, 10, 100, False)
     # bodies = cluster(100, 10, 20, 5, 500, False)
-    # bodies = [Body(100, (200, 200), (1, 0), 0.01, black, "A"), Body(100, (500, 230), (-1, 0), 0.01, yellow, "B")]
+    bodies = [Body(100, (200, 200), (1, 0), 0.01, (0,0,0), "A"), Body(100, (500, 230), (-1, 0), 0.01, (255,255,0), "B")]
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
@@ -97,7 +98,6 @@ def main():
             G = settings_window.get_gravity()
             time_factor = settings_window.get_time()
             COR = settings_window.get_COR()
-            print(COR)
             collision = settings_window.get_collision()
 
         for window in properties_windows:
@@ -173,7 +173,7 @@ def main():
         # Calculate forces and set acceleration
         for b in range(len(bodies)):
             for o in range(len(bodies) - 1, b, -1):
-                if collision and bodies[b].test_collision(bodies[o]):  # Collision setting check must precede collision check for optimization purposes (https://docs.python.org/3/library/stdtypes.html#boolean-operations-and-or-not)
+                if collision and bodies[b].test_collision(bodies[o]):
                     bodies[b].collide(bodies[o], COR, properties_windows)
                     if COR == 0:            # Only remove second body if collision is perfectly inelastic
                         bodies.pop(o)

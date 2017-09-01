@@ -18,14 +18,9 @@ class Body:
 
         self.density = density
 
-        self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
+        self.color = tuple(randint(0, 255) for _ in '111') if color is None else color
 
         self.name = name
-
-        # self.image = pg.Surface((radius*2, radius*2))
-        # self.image.fill(bg_color)
-        # self.image.set_alpha(255)
-        # pg.draw.circle(self.image, self.color, (self.radius, self.radius), self.radius, 0)
 
     def copy(self):
         return Body(self.mass, self.position, self.velocity, self.density, self.color, None if self.name is None else self.name + " copy")     # inheritance of 'name' for debugging purposes only
@@ -48,17 +43,16 @@ class Body:
 
     def collide(self, other, COR, prop_wins):
         # Special case: perfectly inelastic collision results in merging of the two bodies
+        m, m2, v, v2, x, x2 = self.mass, other.mass, self.velocity, other.velocity, self.position, other.position
+        M = m + m2
         if COR == 0:
-            total_mass = self.mass + other.mass
-            self.position = (self.position*self.mass + other.position*other.mass) / total_mass
-            self.velocity = (self.velocity*self.mass + other.velocity*other.mass) / total_mass
+            self.position = (x*m + x2*m2) / M
+            self.velocity = (v*m + v2*m2) / M
 
-            avg_density = (self.density * self.mass + other.density * other.mass) / total_mass
-            self.radius = int((total_mass/avg_density)**(1/3))
-
-            self.color = tuple(((self.color[x]*self.mass + other.color[x]*other.mass)/total_mass) for x in (0,1,2))
-
-            self.mass = total_mass
+            avg_density = (self.density * m + other.density * m2) / M
+            self.radius = int((M/avg_density)**(1/3))
+            self.color = tuple(((self.color[x]*m + other.color[x]*m2)/M) for x in (0,1,2))
+            self.mass = M
 
             # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
             for win in prop_wins:
@@ -66,16 +60,12 @@ class Body:
                     win.body = self
                     win.original = self.copy()
         else:
-            # self_vel_copy = V2(self.velocity)
-            # self.velocity = (self.mass*self.velocity + other.mass*other.velocity + other.mass*COR*(other.velocity - self.velocity)) / (self.mass + other.mass)
-            # other.velocity = (self.mass*self_vel_copy + other.mass*other.velocity + self.mass*COR*(self_vel_copy - other.velocity)) / (self.mass + other.mass)
-            d = self.position.distance_to(other.position)
-            n = (other.position - self.position) / d
-            p = 2 * (self.velocity.dot(n) - other.velocity.dot(n)) / (self.mass + other.mass)
+            d = x.distance_to(x2)
+            n = (x2 - x) / d
+            p = 2 * (v.dot(n) - v2.dot(n)) / M
             # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept
-            self.velocity = (self.velocity - p * self.mass * n) * COR
-            other.velocity = (other.velocity + p * other.mass * n) * COR
-
+            self.velocity = (v - p * m * n) * COR
+            other.velocity = (v2 + p * m2 * n) * COR
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))

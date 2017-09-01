@@ -2,8 +2,6 @@ from random import uniform
 from math import pi, sin, cos, sqrt
 
 from Bodies import *
-from Colors import *
-
 
 def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
@@ -25,11 +23,10 @@ def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=Tr
 
     return bodies
 
-
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
-    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, yellow, "Star")
+    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, (255, 255, 0), "Star")
     bodies.append(star)
 
     for x in range(planets):
@@ -46,6 +43,7 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
         bodies.append(planet)
 
     return bodies
+
 
 
 def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):
