@@ -14,7 +14,6 @@ def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=Tr
         angle = uniform(-1*pi, pi)
         position = V2(width/2 + distance * cos(angle), height/2 - distance * sin(angle))
         if circular:
-            speed = sqrt(star_mass * G / distance)
             speed = sqrt(total_mass * G / distance)
             velocity = V2(speed * sin(angle), speed * cos(angle))
         else:
