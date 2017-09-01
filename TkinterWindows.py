@@ -112,15 +112,16 @@ class Settings:
         filename = filedialog.askopenfilename()
         self.filename = filename
         self.name.set(os.path.split(filename)[-1])
-        with open(filename) as file:
-            data = json.load(file)
-            self.gravity_slider.set(data["settings"]["G"] * 100.0)
-            self.time_slider.set(data["settings"]["time factor"] * 100.0)
-            cam_data = data["settings"]["camera"]
-            self.camera.position = cam_data["position"]
-            self.camera.scale = cam_data["scale"]
-            self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
-                              in data["bodies"]]
+        if filename:
+            with open(filename) as file:
+                data = json.load(file)
+                self.gravity_slider.set(data["settings"]["G"] * 100.0)
+                self.time_slider.set(data["settings"]["time factor"] * 100.0)
+                cam_data = data["settings"]["camera"]
+                self.camera.position = cam_data["position"]
+                self.camera.scale = cam_data["scale"]
+                self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
+                                  in data["bodies"]]
 
     def quit(self):
         pg.quit()
