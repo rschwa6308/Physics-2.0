@@ -48,7 +48,7 @@ class Settings:
         self.time_slider.grid(row=1, column=1)
 
         tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
-        self.COR_slider = tk.Scale(self.physics_frame, from_=0, to=1, resolution=0.01, orient=tk.HORIZONTAL, length=200)
+        self.COR_slider = tk.Scale(self.physics_frame, from_=0, to=2, resolution=0.01, orient=tk.HORIZONTAL, length=200)
         self.COR_slider.set(COR)
         self.COR_slider.grid(row=2, column=1)
 
@@ -73,7 +73,7 @@ class Settings:
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 220, monitor_width / 2 - width / 2 - 315, monitor_height / 2 - height / 2 - 20))
+            '%dx%d+%d+%d' % (305, 260, monitor_width / 2 - width / 2 - 315, monitor_height / 2 - height / 2 - 20))
 
     def get_gravity(self):
         try:

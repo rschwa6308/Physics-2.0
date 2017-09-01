@@ -9,11 +9,20 @@ def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=Tr
 
     for x in range(planets):
         mass = uniform(min_mass, max_mass)
+
+def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
+    bodies = []
+
+    total_mass = 0
+    for x in range(planets):
+        mass = uniform(min_mass, max_mass)
+        total_mass += mass
         distance = uniform(min_distance, max_distance)
         angle = uniform(-1*pi, pi)
         position = V2(width/2 + distance * cos(angle), height/2 - distance * sin(angle))
         if circular:
             speed = sqrt(star_mass * G / distance)
+            speed = sqrt(total_mass * G / distance)
             velocity = V2(speed * sin(angle), speed * cos(angle))
         else:
             velocity = V2(uniform(-2, 2), uniform(-2, 2))
