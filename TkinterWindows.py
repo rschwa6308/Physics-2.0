@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import colorchooser
 import os
 
 from Constants import *
@@ -21,13 +22,21 @@ class Settings:
 
         self.physics_frame = tk.LabelFrame(self.root)
 
+        self.bg_color = bg_color
+        self.walls = tk.BooleanVar(False)
+
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
+        self.root.config(menu=self.menu)
         self.menu.add_command(label="Open", command=self.open_file)
         self.menu.add_command(label="Save", command=self.save)
         self.menu.add_command(label="Save As", command=self.save_as)
 
-        self.root.config(menu=self.menu)
+        self.submenu = tk.Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Options", menu=self.submenu)
+        self.submenu.add_command(label="Set Background Color", command=self.set_bg_color)
+        # self.submenu.add_command(label="Toggle Walls", command=self.toggle_walls)
+        self.submenu.add_checkbutton(label="Walls", variable=self.walls)
 
         # File Frame Content
         self.filename = ""
@@ -60,8 +69,6 @@ class Settings:
         self.bodies_label_text = tk.StringVar()
         self.bodies_label = tk.Label(self.physics_frame, textvariable=self.bodies_label_text)
         self.bodies_label.grid(row=3, column=0, pady=5)
-
-
 
         # Grid Frames
         self.physics_frame.grid(row=1, sticky=tk.W)
@@ -133,6 +140,12 @@ class Settings:
                 self.camera.scale = cam_data["scale"]
                 self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
                                   in data["bodies"]]
+
+    def set_bg_color(self):
+        self.bg_color = colorchooser.askcolor()[0]
+
+    def toggle_walls(self):
+        self.walls = not self.walls
 
     def quit(self):
         pg.quit()

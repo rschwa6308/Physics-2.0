@@ -5,9 +5,12 @@ from Presets import *
 from TkinterWindows import *
 
 
-def display(screen, bodies, cam):
+def display(settings_window, screen, bodies, cam):
     # Clear last frame
-    screen.fill(bg_color)  # comment out this line for a fun time ;)
+    screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
+    # Draw walls if on
+    if settings_window.walls.get():
+        pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
     # Display all bodies
     for b in bodies:
         # calculate coordinates and radius adjusted for camera
@@ -76,7 +79,7 @@ def main():
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
-    pg.display.set_caption("Physics Simulator 2")
+    pg.display.set_caption("Physics Simulator 2.0")
 
     # Initialize simulation clock and time factor
     clock = pg.time.Clock()
@@ -84,9 +87,8 @@ def main():
 
     scroll = V2(0, 0)
     scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
-    scrolling = [0,0,0,0]
+    scrolling = [0, 0, 0, 0]
     scroll_constant = 1
-    
 
     # Initialize simulation sentinel and frame counter
     done = False
@@ -179,12 +181,33 @@ def main():
             b.apply_acceleration(time_factor)
 
         # Display current frame
-        display(screen, bodies, camera)
+        display(settings_window, screen, bodies, camera)
 
         # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity(time_factor)
             body.position += scroll
+
+        # TEMPORARY wall collision (for the lols)
+        if settings_window.walls:
+            for b in bodies:
+                x = b.position[0] - camera.position[0]
+                x = (x - width / 2) * camera.scale + width / 2
+                y = b.position[1] - camera.position[1]
+                y = (y - height / 2) * camera.scale + height / 2
+                radius = b.radius * camera.scale
+                if x - radius < 0:
+                    b.position.x = ((radius) - width / 2) / camera.scale + width / 2
+                    b.velocity.x *= -1
+                elif x + radius > width:
+                    b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2
+                    b.velocity.x *= -1
+                if y - radius < 0:
+                    b.position.y = ((radius) - height / 2) / camera.scale + height / 2
+                    b.velocity.y *= -1
+                elif y + radius > height:
+                    b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2
+                    b.velocity.y *= -1
 
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
