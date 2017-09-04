@@ -189,7 +189,7 @@ def main():
             body.position += scroll
 
         # TEMPORARY wall collision (for the lols)
-        if settings_window.walls:
+        if settings_window.walls.get():
             for b in bodies:
                 x = b.position[0] - camera.position[0]
                 x = (x - width / 2) * camera.scale + width / 2
