@@ -57,8 +57,8 @@ def main():
     # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
     # bodies = binary_system(1000, 800, 150, 2, 10)
     # bodies = cluster(50, 10, 10, 10, 100, False)
-    # bodies = cluster(100, 10, 20, 5, 500, False)
-    bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255,255,0), "B")]
+    bodies = cluster(100, 10, 20, 5, 500, False)
+    # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)

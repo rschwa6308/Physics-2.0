@@ -65,17 +65,15 @@ class Body:
                 return          # TODO: find better solution
             n = (x2 - x).normalize()
             p = 2 * (v.dot(n) - v2.dot(n)) / M
-            # TODO: properly incorporate COR.  This is currently incorrect, and is only a proof of concept,
+            # TODO: properly incorporate COR.  This is currently incorrect, and is only a proof of concept
             offset = (self.radius + other.radius) - (x2 - x).length()
             offset_vector = n * offset
-            total_v = v + v2
-            # Set position of bodies to outer boundary to prevent bodies from getting stuck together
-            self.position.x -= offset_vector.x * (v.x / total_v.x)
-            self.position.y -= offset_vector.y * (v.y / total_v.y)
-            other.position.x += offset_vector.x * (v2.x / total_v.x)
-            other.position.y += offset_vector.y * (v2.y / total_v.y)
             self.velocity = (v - p * m2 * n) * COR
             other.velocity = (v2 + p * m * n) * COR
+            # Set position of bodies to outer boundary to prevent bodies from getting stuck together
+            # this method of splitting the offset evenly works, but is imprecise.  It should be based off of velocity.
+            self.position -= offset_vector / 2
+            other.position += offset_vector / 2
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
