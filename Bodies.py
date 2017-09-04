@@ -61,13 +61,10 @@ class Body:
                     win.original = self.copy()
         else:
             # Explanation can be found here --->        http://ericleong.me/research/circle-circle/
-            d = x.distance_to(x2)
-            d = max(d, 0.0000000001)
-            n = (x2 - x) / d
+            n = (x2 - x).normalize()
             p = 2 * (v.dot(n) - v2.dot(n)) / M
             # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept,
             # TODO: set position of bodies to outer boundary to prevent bodies from getting stuck together
-
             self.velocity = (v - p * m2 * n) * COR
             other.velocity = (v2 + p * m * n) * COR
 
