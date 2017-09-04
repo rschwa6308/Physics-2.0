@@ -55,7 +55,7 @@ def main():
     # bodies = binary_system(1000, 800, 150, 2, 10)
     # bodies = cluster(50, 10, 10, 10, 100, False)
     # bodies = cluster(100, 10, 20, 5, 500, False)
-    bodies = [Body(100, (200, 200), (1, 0), 0.01, (0,0,0), "A"), Body(100, (500, 230), (-1, 0), 0.01, (255,255,0), "B")]
+    bodies = [Body(200, (200, 200), (1, 0), 0.01, (0,0,0), "A"), Body(100, (500, 230), (-1, 0), 0.01, (255,255,0), "B")]
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)

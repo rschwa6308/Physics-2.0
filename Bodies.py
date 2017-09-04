@@ -42,9 +42,9 @@ class Body:
         return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
 
     def collide(self, other, COR, prop_wins):
-        # Special case: perfectly inelastic collision results in merging of the two bodies
         m, m2, v, v2, x, x2 = self.mass, other.mass, self.velocity, other.velocity, self.position, other.position
         M = m + m2
+        # Special case: perfectly inelastic collision results in merging of the two bodies
         if COR == 0:
             self.position = (x*m + x2*m2) / M
             self.velocity = (v*m + v2*m2) / M
@@ -60,12 +60,16 @@ class Body:
                     win.body = self
                     win.original = self.copy()
         else:
+            # Explanation can be found here --->        http://ericleong.me/research/circle-circle/
             d = x.distance_to(x2)
+            d = max(d, 0.0000000001)
             n = (x2 - x) / d
             p = 2 * (v.dot(n) - v2.dot(n)) / M
-            # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept
-            self.velocity = (v - p * m * n) * COR
-            other.velocity = (v2 + p * m2 * n) * COR
+            # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept,
+            # TODO: set position of bodies to outer boundary to prevent bodies from getting stuck together
+
+            self.velocity = (v - p * m2 * n) * COR
+            other.velocity = (v2 + p * m * n) * COR
 
     def update_radius(self):
         self.radius = int((self.mass / self.density) ** (1 / 3))
