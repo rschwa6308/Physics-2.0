@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import colorchooser
 import os
 
 from Constants import *
@@ -21,13 +22,21 @@ class Settings:
 
         self.physics_frame = tk.LabelFrame(self.root)
 
+        self.bg_color = bg_color
+        self.walls = tk.BooleanVar(False)
+
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
+        self.root.config(menu=self.menu)
         self.menu.add_command(label="Open", command=self.open_file)
         self.menu.add_command(label="Save", command=self.save)
         self.menu.add_command(label="Save As", command=self.save_as)
 
-        self.root.config(menu=self.menu)
+        self.submenu = tk.Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Options", menu=self.submenu)
+        self.submenu.add_command(label="Set Background Color", command=self.set_bg_color)
+        # self.submenu.add_command(label="Toggle Walls", command=self.toggle_walls)
+        self.submenu.add_checkbutton(label="Walls", variable=self.walls)
 
         # File Frame Content
         self.filename = ""
@@ -47,14 +56,19 @@ class Settings:
         self.time_slider.set(100)
         self.time_slider.grid(row=1, column=1)
 
+        tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
+        self.COR_slider = tk.Scale(self.physics_frame, from_=0, to=2, resolution=0.01, orient=tk.HORIZONTAL, length=200)
+        self.COR_slider.set(COR)
+        self.COR_slider.grid(row=2, column=1)
+
+        self.collision = tk.IntVar()
+        self.collision.set(1)
+        self.collision_checkbutton = tk.Checkbutton(self.physics_frame, text="Collisions", variable=self.collision)
+        self.collision_checkbutton.grid(row=3, column=1, pady=5, sticky=tk.W)
+
         self.bodies_label_text = tk.StringVar()
         self.bodies_label = tk.Label(self.physics_frame, textvariable=self.bodies_label_text)
-        self.bodies_label.grid(row=2, column=0, pady=5)
-
-        self.merge = tk.IntVar()
-        self.merge.set(1)
-        self.merge_checkbutton = tk.Checkbutton(self.physics_frame, text="Merges", variable=self.merge)
-        self.merge_checkbutton.grid(row=2, column=1, pady=5, sticky=tk.W)
+        self.bodies_label.grid(row=3, column=0, pady=5)
 
         # Grid Frames
         self.physics_frame.grid(row=1, sticky=tk.W)
@@ -66,7 +80,7 @@ class Settings:
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 220, monitor_width / 2 - width / 2 - 315, monitor_height / 2 - height / 2 - 20))
+            '%dx%d+%d+%d' % (305, 260, monitor_width / 2 - width / 2 - 315, monitor_height / 2 - height / 2 - 20))
 
     def get_gravity(self):
         try:
@@ -80,8 +94,14 @@ class Settings:
         except:
             return 1
 
-    def get_merge(self):
-        return self.merge.get()
+    def get_COR(self):
+        try:
+            return self.COR_slider.get()
+        except:
+            return COR
+
+    def get_collision(self):
+        return self.collision.get()
 
     def set_bodies(self, n):
         self.bodies_label_text.set("Bodies: " + str(n))
@@ -102,25 +122,30 @@ class Settings:
         filename = filedialog.asksaveasfilename(defaultextension=".sim",
                                                 filetypes=(("Simulation file", "*.sim"), ("All files", "*.*")))
         self.filename = filename
-        self.name.set(os.path.split(filename)[-1])
-        try:
+        if filename:
+            self.name.set(os.path.split(filename)[-1])
             save_object.save_as(filename)
-        except:
-            pass
 
     def open_file(self):
         filename = filedialog.askopenfilename()
         self.filename = filename
         self.name.set(os.path.split(filename)[-1])
-        with open(filename) as file:
-            data = json.load(file)
-            self.gravity_slider.set(data["settings"]["G"] * 100.0)
-            self.time_slider.set(data["settings"]["time factor"] * 100.0)
-            cam_data = data["settings"]["camera"]
-            self.camera.position = cam_data["position"]
-            self.camera.scale = cam_data["scale"]
-            self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
-                              in data["bodies"]]
+        if filename:
+            with open(filename) as file:
+                data = json.load(file)
+                self.gravity_slider.set(data["settings"]["G"] * 100.0)
+                self.time_slider.set(data["settings"]["time factor"] * 100.0)
+                cam_data = data["settings"]["camera"]
+                self.camera.position = cam_data["position"]
+                self.camera.scale = cam_data["scale"]
+                self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
+                                  in data["bodies"]]
+
+    def set_bg_color(self):
+        self.bg_color = colorchooser.askcolor()[0]
+
+    def toggle_walls(self):
+        self.walls = not self.walls
 
     def quit(self):
         pg.quit()
