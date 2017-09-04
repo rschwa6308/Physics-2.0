@@ -58,7 +58,7 @@ def main():
     # bodies = binary_system(1000, 800, 150, 2, 10)
     # bodies = cluster(50, 10, 10, 10, 100, False)
     # bodies = cluster(100, 10, 20, 5, 500, False)
-    bodies = [Body(200, (200, 200), (1, 0), 0.01, (0,0,0), "A"), Body(100, (500, 230), (-1, 0), 0.01, (255,255,0), "B")]
+    bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255,255,0), "B")]
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
@@ -188,7 +188,7 @@ def main():
             body.apply_velocity(time_factor)
             body.position += scroll
 
-        # TEMPORARY wall collision (for the lols)
+        # Wall collision
         if settings_window.walls.get():
             for b in bodies:
                 x = b.position[0] - camera.position[0]
@@ -197,16 +197,16 @@ def main():
                 y = (y - height / 2) * camera.scale + height / 2
                 radius = b.radius * camera.scale
                 if x - radius < 0:
-                    b.position.x = ((radius) - width / 2) / camera.scale + width / 2
+                    b.position.x = ((radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
                     b.velocity.x *= -1
                 elif x + radius > width:
-                    b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2
+                    b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
                     b.velocity.x *= -1
                 if y - radius < 0:
-                    b.position.y = ((radius) - height / 2) / camera.scale + height / 2
+                    b.position.y = ((radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
                     b.velocity.y *= -1
                 elif y + radius > height:
-                    b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2
+                    b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
                     b.velocity.y *= -1
 
         # Kill a body if too far from origin (only check every 100 ticks)

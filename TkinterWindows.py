@@ -142,7 +142,9 @@ class Settings:
                                   in data["bodies"]]
 
     def set_bg_color(self):
-        self.bg_color = colorchooser.askcolor()[0]
+        new = colorchooser.askcolor()[0]
+        if new is not None:
+            self.bg_color = colorchooser.askcolor()[0]
 
     def toggle_walls(self):
         self.walls = not self.walls

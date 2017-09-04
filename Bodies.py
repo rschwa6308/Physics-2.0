@@ -61,13 +61,15 @@ class Body:
                     win.original = self.copy()
         else:
             # Explanation can be found here --->        http://ericleong.me/research/circle-circle/
+            if (x2 - x).length() == 0:
+                return          # TODO: find better solution
             n = (x2 - x).normalize()
             p = 2 * (v.dot(n) - v2.dot(n)) / M
-            # TODO: properly incorperate COR.  This is currently incorrect, and is only a proof of concept,
+            # TODO: properly incorporate COR.  This is currently incorrect, and is only a proof of concept,
             offset = (self.radius + other.radius) - (x2 - x).length()
             offset_vector = n * offset
             total_v = v + v2
-            # set position of bodies to outer boundary to prevent bodies from getting stuck together
+            # Set position of bodies to outer boundary to prevent bodies from getting stuck together
             self.position.x -= offset_vector.x * (v.x / total_v.x)
             self.position.y -= offset_vector.y * (v.y / total_v.y)
             other.position.x += offset_vector.x * (v2.x / total_v.x)
