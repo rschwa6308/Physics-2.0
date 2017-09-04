@@ -83,8 +83,10 @@ def main():
     time_factor = 1
 
     scroll = V2(0, 0)
-    scroll_right, scroll_left, scroll_down, scroll_up = 0, 0, 0, 0
-    scroll_constant = 2.5
+    scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
+    scrolling = [0,0,0,0]
+    scroll_constant = 1
+    
 
     # Initialize simulation sentinel and frame counter
     done = False
@@ -111,14 +113,8 @@ def main():
                 width, height = event.w, event.h
                 screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
-                if event.key == pg.K_d:
-                    scroll_right = 1
-                elif event.key == pg.K_a:
-                    scroll_left = 1
-                elif event.key == pg.K_w:
-                    scroll_up = 1
-                elif event.key == pg.K_s:
-                    scroll_down = 1
+                if event.key in scroll_keys:
+                    scrolling[scroll_keys.index(event.key)] = 1
                 elif event.key == pg.K_LEFT:
                     camera.velocity[0] = -3 / camera.scale
                 elif event.key == pg.K_RIGHT:
@@ -128,14 +124,8 @@ def main():
                 elif event.key == pg.K_DOWN:
                     camera.velocity[1] = 3 / camera.scale
             elif event.type == pg.KEYUP:
-                if event.key == pg.K_d:
-                    scroll_right = 0
-                elif event.key == pg.K_a:
-                    scroll_left = 0
-                elif event.key == pg.K_w:
-                    scroll_up = 0
-                elif event.key == pg.K_s:
-                    scroll_down = 0
+                if event.key in scroll_keys:
+                    scrolling[scroll_keys.index(event.key)] = 0
                 elif event.key == pg.K_LEFT:
                     camera.velocity[0] = 0
                 elif event.key == pg.K_RIGHT:
@@ -159,9 +149,11 @@ def main():
                 elif event.button == 4:
                     camera.scale *= 1.1
                     camera.scale = min(camera.scale, 100)
+                    scroll_constant /= 1.1
                 elif event.button == 5:
                     camera.scale /= 1.1
                     camera.scale = max(float(camera.scale), 0.01)
+                    scroll_constant *= 1.1
 
         # Apply velocity to camera
         camera.apply_velocity()
@@ -201,19 +193,17 @@ def main():
                     bodies.remove(b)
 
         # Accelerate scrolling
-        if scroll_right:
+        if scrolling[0]:
             scroll[0] -= scroll_constant
-        if scroll_left:
+        if scrolling[1]:
             scroll[0] += scroll_constant
-        if scroll_up:
+        if scrolling[2]:
             scroll[1] += scroll_constant
-        if scroll_down:
+        if scrolling[3]:
             scroll[1] -= scroll_constant
+
         # Decelerate scrolling
-        if scroll[0]:
-            scroll[0] -= abs(scroll[0]) / scroll[0]
-        if scroll[1]:
-            scroll[1] -= abs(scroll[1]) / scroll[1]
+        scroll *= .95
 
     pg.quit()
     if settings_window.alive: settings_window.destroy()
