@@ -3,6 +3,7 @@ import pygame as pg
 from pygame.math import Vector2 as V2
 from math import hypot
 from copy import copy
+from time import time
 
 from Constants import *
 
@@ -33,13 +34,14 @@ class Body:
         return self.position.distance_to(mouse_pos) < self.radius
 
     def force_of(self, other, G):
-        x,y = (other.position[a]-self.position[a] for a in (0,1))
+        x, y = (other.position[a] - self.position[a] for a in (0,1))
         r = hypot(x,y)
+        if r == 0: return V2(0, 0)
         acc = G/r**3
         return V2(acc * x, acc * y)
 
     def test_collision(self, other):
-        return other.position.distance_to(self.position) < self.radius + other.radius # Zero-tolerance collision
+        return self.position.distance_to(other.position) < self.radius + other.radius # Zero-tolerance collision
 
     def collide(self, other, COR, prop_wins):
         m, m2, v, v2, x, x2 = self.mass, other.mass, self.velocity, other.velocity, self.position, other.position
@@ -66,12 +68,12 @@ class Body:
             n = (x2 - x).normalize()
             p = 2 * (v.dot(n) - v2.dot(n)) / M
             # TODO: properly incorporate COR.  This is currently incorrect, and is only a proof of concept
-            offset = (self.radius + other.radius) - (x2 - x).length()
-            offset_vector = n * offset
-            self.velocity = (v - p * m2 * n) * COR
-            other.velocity = (v2 + p * m * n) * COR
+            self.velocity = v - (p * m2 * n) * COR
+            other.velocity = v2 + (p * m * n) * COR
             # Set position of bodies to outer boundary to prevent bodies from getting stuck together
             # this method of splitting the offset evenly works, but is imprecise.  It should be based off of velocity.
+            offset = (self.radius + other.radius) - (x2 - x).length()
+            offset_vector = n * offset
             self.position -= offset_vector / 2
             other.position += offset_vector / 2
 

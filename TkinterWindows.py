@@ -24,6 +24,9 @@ class Settings:
 
         self.bg_color = bg_color
         self.walls = tk.BooleanVar(False)
+        self.gravity_on = tk.BooleanVar()
+        self.gravity_on.set(True)
+        self.g_field = tk.BooleanVar(False)
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -37,6 +40,8 @@ class Settings:
         self.submenu.add_command(label="Set Background Color", command=self.set_bg_color)
         # self.submenu.add_command(label="Toggle Walls", command=self.toggle_walls)
         self.submenu.add_checkbutton(label="Walls", variable=self.walls)
+        self.submenu.add_checkbutton(label="Mutual Gravitation", variable=self.gravity_on)
+        self.submenu.add_checkbutton(label="Gravitational Field", variable=self.g_field)
 
         # File Frame Content
         self.filename = ""
@@ -46,14 +51,14 @@ class Settings:
 
         # Physics Frame Content
         tk.Label(self.physics_frame, text="Gravity: ").grid(row=0, column=0)
-        self.gravity_slider = tk.Scale(self.physics_frame, from_=0, to=1000, orient=tk.HORIZONTAL, length=200)
+        self.gravity_slider = tk.Scale(self.physics_frame, from_=-1000, to=1000, orient=tk.HORIZONTAL, length=200)
         self.gravity_slider.set(G * 100)
         self.gravity_slider.grid(row=0, column=1)
 
         tk.Label(self.physics_frame, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
         self.time_slider = tk.Scale(self.physics_frame, from_=-0, to=500, orient=tk.HORIZONTAL,
                                     length=200)  # from_ can be set negative for rewind
-        self.time_slider.set(100)
+        self.time_slider.set(0)
         self.time_slider.grid(row=1, column=1)
 
         tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
@@ -145,9 +150,6 @@ class Settings:
         new = colorchooser.askcolor()[0]
         if new is not None:
             self.bg_color = colorchooser.askcolor()[0]
-
-    def toggle_walls(self):
-        self.walls = not self.walls
 
     def quit(self):
         pg.quit()

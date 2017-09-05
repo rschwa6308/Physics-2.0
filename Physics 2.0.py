@@ -55,10 +55,10 @@ def main():
     # Construct bodies list
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
-    # bodies = binary_system(1000, 800, 150, 2, 10)
-    # bodies = cluster(50, 10, 10, 10, 100, False)
-    bodies = cluster(100, 10, 20, 5, 500, False)
+    # bodies = cluster(100, 10, 20, 5, 500, False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
+    # bodies = diffusion_gradient(120, 1000, (255, 0, 0), (0, 0, 255))
+    bodies = density_gradient(120, 500, 1000, 0.1, 0.3, (255, 0, 0), (0, 0, 255))
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
@@ -164,17 +164,23 @@ def main():
         for b in bodies:
             b.acceleration = V2(0, 0)  # Reset to 0 (to ignore previous clock tick's calculations)
 
-        # Calculate forces and set acceleration
+        # Calculate forces and set acceleration, if mutual gravitation is enabled
         for b in range(len(bodies)):
             for o in range(len(bodies) - 1, b, -1):
-                if collision and bodies[b].test_collision(bodies[o]):
-                    bodies[b].collide(bodies[o], COR, properties_windows)
+                if collision and bodies[o].test_collision(bodies[b]):
+                    bodies[o].collide(bodies[b], COR, properties_windows)
                     if COR == 0:            # Only remove second body if collision is perfectly inelastic
-                        bodies.pop(o)
-                else:
-                    force = bodies[b].force_of(bodies[o], G)
-                    bodies[b].acceleration += bodies[o].mass * force
-                    bodies[o].acceleration += -bodies[b].mass * force
+                        bodies.pop(b)
+                        break
+                if settings_window.gravity_on.get():
+                        force = bodies[b].force_of(bodies[o], G)
+                        bodies[b].acceleration += bodies[o].mass * force
+                        bodies[o].acceleration += -bodies[b].mass * force
+
+        # Uniform Gravitational field if option is enabled
+        if settings_window.g_field.get():
+            for b in bodies:
+                b.acceleration.y += G / 50.0
 
         # Apply acceleration
         for b in bodies:
@@ -198,16 +204,16 @@ def main():
                 radius = b.radius * camera.scale
                 if x - radius < 0:
                     b.position.x = ((radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
-                    b.velocity.x *= -1
+                    b.velocity.x *= -1 * COR
                 elif x + radius > width:
                     b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
-                    b.velocity.x *= -1
+                    b.velocity.x *= -1 * COR
                 if y - radius < 0:
                     b.position.y = ((radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
-                    b.velocity.y *= -1
+                    b.velocity.y *= -1 * COR
                 elif y + radius > height:
                     b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
-                    b.velocity.y *= -1
+                    b.velocity.y *= -1 * COR
 
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
