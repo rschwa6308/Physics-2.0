@@ -1,5 +1,6 @@
 from functools import reduce
 from operator import add
+from random import shuffle
 
 from Presets import *
 from TkinterWindows import *
@@ -59,6 +60,9 @@ def main():
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
     # bodies = diffusion_gradient(120, 1000, (255, 0, 0), (0, 0, 255))
     bodies = density_gradient(120, 500, 1000, 0.1, 0.3, (255, 0, 0), (0, 0, 255))
+    
+    # Eliminates patterns that come from constant computation order
+    shuffle(bodies)
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
