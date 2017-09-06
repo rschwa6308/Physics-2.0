@@ -2,12 +2,51 @@ from random import uniform
 from math import pi, sin, cos, sqrt
 
 from Bodies import *
-from Colors import *
+
+
+def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
+    bodies = []
+
+    total_mass = 0
+    for x in range(planets):
+        mass = uniform(min_mass, max_mass)
+        total_mass += mass
+        distance = uniform(min_distance, max_distance)
+        angle = uniform(-1*pi, pi)
+        position = V2(width/2 + distance * cos(angle), height/2 - distance * sin(angle))
+        if circular:
+            speed = sqrt(total_mass * G / distance)
+            velocity = V2(speed * sin(angle), speed * cos(angle))
+        else:
+            velocity = V2(uniform(-2, 2), uniform(-2, 2))
+        planet = Body(mass, position, velocity, density=planet_density, name="planet " + str(x))
+        bodies.append(planet)
+
+    return bodies
+
+
+def diffusion_gradient(num, mass, color_a, color_b):
+    bodies = []
+    for x in range(num // 2):
+        bodies.append(Body(mass, (uniform(0, width / 2 - 1), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=color_a))
+    for x in range(num // 2):
+        bodies.append(Body(mass, (uniform(width / 2 + 1, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=color_b))
+    return bodies
+
+
+def density_gradient(num, min_mass, max_mass, density_a, density_b, color_a, color_b):
+    bodies = []
+    for x in range(num // 2):
+        bodies.append(Body(uniform(min_mass, max_mass), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=density_a, color=color_a))
+    for x in range(num // 2):
+        bodies.append(Body(uniform(min_mass, max_mass), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=density_b, color=color_b))
+    return bodies
+
 
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
-    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, yellow, "Star")
+    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, (255, 255, 0), "Star")
     bodies.append(star)
 
     for x in range(planets):
@@ -24,7 +63,6 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
         bodies.append(planet)
 
     return bodies
-
 
 
 def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):

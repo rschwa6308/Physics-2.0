@@ -4,6 +4,8 @@ G = 0.5
 
 Density = 0.1
 
+COR = 1.0         # Coefficient of Restitution (https://en.wikipedia.org/wiki/Coefficient_of_restitution)
+
 # define starting window width and height
 try:
     # Windows
@@ -17,6 +19,8 @@ except:
     monitor_width, monitor_height = re.findall(r'[0-9]+',str(output))
 
 width, height = int(monitor_width * 0.6), int(monitor_height * 0.75)
+
+bg_color = (255, 255, 255)
 
 # Set simulation hard clock speed (fps)
 clock_speed = 144
