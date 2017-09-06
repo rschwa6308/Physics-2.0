@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import colorchooser
 import os
 
 from Constants import *
@@ -21,13 +22,26 @@ class Settings:
 
         self.physics_frame = tk.LabelFrame(self.root)
 
+        self.bg_color = bg_color
+        self.walls = tk.BooleanVar(False)
+        self.gravity_on = tk.BooleanVar()
+        self.gravity_on.set(True)
+        self.g_field = tk.BooleanVar(False)
+
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
+        self.root.config(menu=self.menu)
         self.menu.add_command(label="Open", command=self.open_file)
         self.menu.add_command(label="Save", command=self.save)
         self.menu.add_command(label="Save As", command=self.save_as)
 
-        self.root.config(menu=self.menu)
+        self.submenu = tk.Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Options", menu=self.submenu)
+        self.submenu.add_command(label="Set Background Color", command=self.set_bg_color)
+        # self.submenu.add_command(label="Toggle Walls", command=self.toggle_walls)
+        self.submenu.add_checkbutton(label="Walls", variable=self.walls)
+        self.submenu.add_checkbutton(label="Mutual Gravitation", variable=self.gravity_on)
+        self.submenu.add_checkbutton(label="Gravitational Field", variable=self.g_field)
 
         # File Frame Content
         self.filename = ""
@@ -37,14 +51,14 @@ class Settings:
 
         # Physics Frame Content
         tk.Label(self.physics_frame, text="Gravity: ").grid(row=0, column=0)
-        self.gravity_slider = tk.Scale(self.physics_frame, from_=0, to=1000, orient=tk.HORIZONTAL, length=200)
+        self.gravity_slider = tk.Scale(self.physics_frame, from_=-1000, to=1000, orient=tk.HORIZONTAL, length=200)
         self.gravity_slider.set(G * 100)
         self.gravity_slider.grid(row=0, column=1)
 
         tk.Label(self.physics_frame, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
         self.time_slider = tk.Scale(self.physics_frame, from_=-0, to=500, orient=tk.HORIZONTAL,
                                     length=200)  # from_ can be set negative for rewind
-        self.time_slider.set(100)
+        self.time_slider.set(0)
         self.time_slider.grid(row=1, column=1)
 
         tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
@@ -60,8 +74,6 @@ class Settings:
         self.bodies_label_text = tk.StringVar()
         self.bodies_label = tk.Label(self.physics_frame, textvariable=self.bodies_label_text)
         self.bodies_label.grid(row=3, column=0, pady=5)
-
-
 
         # Grid Frames
         self.physics_frame.grid(row=1, sticky=tk.W)
@@ -133,6 +145,11 @@ class Settings:
                 self.camera.scale = cam_data["scale"]
                 self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
                                   in data["bodies"]]
+
+    def set_bg_color(self):
+        new = colorchooser.askcolor()[0]
+        if new is not None:
+            self.bg_color = colorchooser.askcolor()[0]
 
     def quit(self):
         pg.quit()

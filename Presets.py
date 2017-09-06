@@ -3,6 +3,7 @@ from math import pi, sin, cos, sqrt
 
 from Bodies import *
 
+
 def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
 
@@ -22,6 +23,25 @@ def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=Tr
         bodies.append(planet)
 
     return bodies
+
+
+def diffusion_gradient(num, mass, color_a, color_b):
+    bodies = []
+    for x in range(num // 2):
+        bodies.append(Body(mass, (uniform(0, width / 2 - 1), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=color_a))
+    for x in range(num // 2):
+        bodies.append(Body(mass, (uniform(width / 2 + 1, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=color_b))
+    return bodies
+
+
+def density_gradient(num, min_mass, max_mass, density_a, density_b, color_a, color_b):
+    bodies = []
+    for x in range(num // 2):
+        bodies.append(Body(uniform(min_mass, max_mass), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=density_a, color=color_a))
+    for x in range(num // 2):
+        bodies.append(Body(uniform(min_mass, max_mass), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=density_b, color=color_b))
+    return bodies
+
 
 def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
     bodies = []
@@ -43,7 +63,6 @@ def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distan
         bodies.append(planet)
 
     return bodies
-
 
 
 def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):

@@ -1,13 +1,17 @@
 from functools import reduce
 from operator import add
+from random import shuffle
 
 from Presets import *
 from TkinterWindows import *
 
 
-def display(screen, bodies, cam):
+def display(settings_window, screen, bodies, cam):
     # Clear last frame
-    screen.fill(bg_color)  # comment out this line for a fun time ;)
+    screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
+    # Draw walls if on
+    if settings_window.walls.get():
+        pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
     # Display all bodies
     for b in bodies:
         # calculate coordinates and radius adjusted for camera
@@ -52,10 +56,13 @@ def main():
     # Construct bodies list
     #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
-    # bodies = binary_system(1000, 800, 150, 2, 10)
-    # bodies = cluster(50, 10, 10, 10, 100, False)
     # bodies = cluster(100, 10, 20, 5, 500, False)
-    bodies = [Body(200, (200, 200), (1, 0), 0.01, (0,0,0), "A"), Body(100, (500, 230), (-1, 0), 0.01, (255,255,0), "B")]
+    # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
+    # bodies = diffusion_gradient(120, 1000, (255, 0, 0), (0, 0, 255))
+    bodies = density_gradient(120, 500, 1000, 0.1, 0.3, (255, 0, 0), (0, 0, 255))
+    
+    # Eliminates patterns that come from constant computation order
+    shuffle(bodies)
 
     # Initialize settings window
     settings_window = Settings(bodies, camera)
@@ -76,7 +83,7 @@ def main():
     icon = pg.image.load('AtomIcon.png')
     pg.display.set_icon(icon)
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
-    pg.display.set_caption("Physics Simulator 2")
+    pg.display.set_caption("Physics Simulator 2.0")
 
     # Initialize simulation clock and time factor
     clock = pg.time.Clock()
@@ -84,9 +91,8 @@ def main():
 
     scroll = V2(0, 0)
     scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
-    scrolling = [0,0,0,0]
+    scrolling = [0, 0, 0, 0]
     scroll_constant = 1
-    
 
     # Initialize simulation sentinel and frame counter
     done = False
@@ -162,29 +168,56 @@ def main():
         for b in bodies:
             b.acceleration = V2(0, 0)  # Reset to 0 (to ignore previous clock tick's calculations)
 
-        # Calculate forces and set acceleration
+        # Calculate forces and set acceleration, if mutual gravitation is enabled
         for b in range(len(bodies)):
             for o in range(len(bodies) - 1, b, -1):
-                if collision and bodies[b].test_collision(bodies[o]):
-                    bodies[b].collide(bodies[o], COR, properties_windows)
+                if collision and bodies[o].test_collision(bodies[b]):
+                    bodies[o].collide(bodies[b], COR, properties_windows)
                     if COR == 0:            # Only remove second body if collision is perfectly inelastic
-                        bodies.pop(o)
-                else:
-                    force = bodies[b].force_of(bodies[o], G)
-                    bodies[b].acceleration += bodies[o].mass * force
-                    bodies[o].acceleration += -bodies[b].mass * force
+                        bodies.pop(b)
+                        break
+                if settings_window.gravity_on.get():
+                        force = bodies[b].force_of(bodies[o], G)
+                        bodies[b].acceleration += bodies[o].mass * force
+                        bodies[o].acceleration += -bodies[b].mass * force
+
+        # Uniform Gravitational field if option is enabled
+        if settings_window.g_field.get():
+            for b in bodies:
+                b.acceleration.y += G / 50.0
 
         # Apply acceleration
         for b in bodies:
             b.apply_acceleration(time_factor)
 
         # Display current frame
-        display(screen, bodies, camera)
+        display(settings_window, screen, bodies, camera)
 
         # Apply velocity (update position)
         for body in bodies:
             body.apply_velocity(time_factor)
             body.position += scroll
+
+        # Wall collision
+        if settings_window.walls.get():
+            for b in bodies:
+                x = b.position[0] - camera.position[0]
+                x = (x - width / 2) * camera.scale + width / 2
+                y = b.position[1] - camera.position[1]
+                y = (y - height / 2) * camera.scale + height / 2
+                radius = b.radius * camera.scale
+                if x - radius < 0:
+                    b.position.x = ((radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
+                    b.velocity.x *= -1 * COR
+                elif x + radius > width:
+                    b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
+                    b.velocity.x *= -1 * COR
+                if y - radius < 0:
+                    b.position.y = ((radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
+                    b.velocity.y *= -1 * COR
+                elif y + radius > height:
+                    b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
+                    b.velocity.y *= -1 * COR
 
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
