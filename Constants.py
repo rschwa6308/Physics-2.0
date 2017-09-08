@@ -4,9 +4,9 @@ G = 0.5
 
 Density = 0.1
 
-COR = 1.0         # Coefficient of Restitution (https://en.wikipedia.org/wiki/Coefficient_of_restitution)
+COR = 1.0 # Coefficient of Restitution
 
-# define starting window width and height
+# Define initial width and height
 try:
     # Windows
     import ctypes

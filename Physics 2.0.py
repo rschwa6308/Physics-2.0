@@ -201,23 +201,17 @@ def main():
         # Wall collision
         if settings_window.walls.get():
             for b in bodies:
-                x = b.position[0] - camera.position[0]
-                x = (x - width / 2) * camera.scale + width / 2
-                y = b.position[1] - camera.position[1]
-                y = (y - height / 2) * camera.scale + height / 2
+                dims = V2(width, height)
+                x, y = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2
                 radius = b.radius * camera.scale
-                if x - radius < 0:
-                    b.position.x = ((radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
-                    b.velocity.x *= -1 * COR
-                elif x + radius > width:
-                    b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
-                    b.velocity.x *= -1 * COR
-                if y - radius < 0:
-                    b.position.y = ((radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
-                    b.velocity.y *= -1 * COR
-                elif y + radius > height:
-                    b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
-                    b.velocity.y *= -1 * COR
+                if x < radius or x + radius > width:
+                    b.velocity.x *= -COR
+                    c = 1 if x < radius else -1
+                    b.position.x = c * (radius - width / 2) / camera.scale + width / 2 + camera.position[0]
+                if y < radius or y + radius > height:
+                    b.velocity.y *= -COR
+                    c = 1 if y < radius else -1
+                    b.position.y = c * (radius - height / 2) / camera.scale + height / 2 + camera.position[1]
 
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:

@@ -38,7 +38,6 @@ class Settings:
         self.submenu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Options", menu=self.submenu)
         self.submenu.add_command(label="Set Background Color", command=self.set_bg_color)
-        # self.submenu.add_command(label="Toggle Walls", command=self.toggle_walls)
         self.submenu.add_checkbutton(label="Walls", variable=self.walls)
         self.submenu.add_checkbutton(label="Mutual Gravitation", variable=self.gravity_on)
         self.submenu.add_checkbutton(label="Gravitational Field", variable=self.g_field)
@@ -202,7 +201,7 @@ class BodyProperties:
         self.canvas = tk.Canvas(self.root, width=104, height=104)
         self.update_canvas()
 
-        tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)  # TODO: change button text?
+        tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)
 
         tk.Button(self.root, text="Delete", command=self.delete_body).grid(row=6, columnspan=3)
 
