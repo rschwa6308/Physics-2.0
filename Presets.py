@@ -3,15 +3,13 @@ from math import pi, sin, cos, sqrt
 
 from Bodies import *
 
-
-def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
+def cluster(planets, mass_range, dist_range, circular=True, planet_density=Density):
     bodies = []
-
     total_mass = 0
     for x in range(planets):
-        mass = uniform(min_mass, max_mass)
+        mass = uniform(*mass_range)
         total_mass += mass
-        distance = uniform(min_distance, max_distance)
+        distance = uniform(*dist_range)
         angle = uniform(-1*pi, pi)
         position = V2(width/2 + distance * cos(angle), height/2 - distance * sin(angle))
         if circular:
@@ -25,21 +23,19 @@ def cluster(planets, min_mass, max_mass, min_distance, max_distance, circular=Tr
     return bodies
 
 
-def diffusion_gradient(num, mass, color_a, color_b):
+def diffusion_gradient(num, mass, colors):
     bodies = []
     for x in range(num // 2):
-        bodies.append(Body(mass, (uniform(0, width / 2 - 1), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=color_a))
-    for x in range(num // 2):
-        bodies.append(Body(mass, (uniform(width / 2 + 1, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=color_b))
+        for y in (0,1):
+            bodies.append(Body(mass, ((uniform(width / 2 + 1, width) if y else uniform(0, width / 2 - 1)), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), color=colors[y]))
     return bodies
 
 
-def density_gradient(num, min_mass, max_mass, density_a, density_b, color_a, color_b):
+def density_gradient(num, mass_range, densities, colors):
     bodies = []
     for x in range(num // 2):
-        bodies.append(Body(uniform(min_mass, max_mass), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=density_a, color=color_a))
-    for x in range(num // 2):
-        bodies.append(Body(uniform(min_mass, max_mass), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=density_b, color=color_b))
+        for y in (0,1):
+            bodies.append(Body(uniform(*mass_range), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), density=densities[y], color=colors[y]))
     return bodies
 
 

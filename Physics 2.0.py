@@ -54,12 +54,11 @@ def main():
     camera = Camera()
 
     # Construct bodies list
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
     # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
-    # bodies = cluster(100, 10, 20, 5, 500, False)
+    # bodies = cluster(100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = diffusion_gradient(120, 1000, (255, 0, 0), (0, 0, 255))
-    bodies = density_gradient(120, 500, 1000, 0.1, 0.3, (255, 0, 0), (0, 0, 255))
+    # bodies = diffusion_gradient(120, 1000, ((255, 0, 0), (0, 0, 255)))
+    bodies = density_gradient(120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
