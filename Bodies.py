@@ -60,7 +60,6 @@ class Body:
             for win in prop_wins:
                 if win.body is other:
                     win.body = self
-                    win.original = self.copy()
         else:
             # Explanation can be found here --->        http://ericleong.me/research/circle-circle/
             if (x2 - x).length() == 0:

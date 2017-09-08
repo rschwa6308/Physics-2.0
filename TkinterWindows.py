@@ -166,10 +166,7 @@ class Settings:
 class BodyProperties:
     def __init__(self, body, bodies, queue_position, camera):
         self.camera = camera
-
-        self.original = body.copy()
         self.body = body
-
         self.bodies = bodies
 
         self.root = tk.Toplevel()
@@ -202,7 +199,6 @@ class BodyProperties:
         self.update_canvas()
 
         tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)
-
         tk.Button(self.root, text="Delete", command=self.delete_body).grid(row=6, columnspan=3)
 
         self.width = 220
@@ -214,8 +210,9 @@ class BodyProperties:
         self.camera.move_to_body(self.body)
 
     def delete_body(self):
-        if messagebox.askokcancel("Delete Body", "Are you sure you want to delete \"{0}\"".format(self.body.name)):
+        if messagebox.askokcancel("Delete Body", 'Are you sure you want to delete "{}"?'.format(self.body.name)):
             self.bodies.remove(self.body)
+            self.destroy()
 
     def update_canvas(self):
         self.canvas.delete("all")
