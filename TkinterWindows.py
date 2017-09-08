@@ -148,8 +148,8 @@ class Settings:
 
     def set_bg_color(self):
         new = colorchooser.askcolor()[0]
-        if new is not None:
-            self.bg_color = colorchooser.askcolor()[0]
+        if new:
+            self.bg_color = new
 
     def quit(self):
         pg.quit()
@@ -221,21 +221,14 @@ class BodyProperties:
     def update_canvas(self):
         self.canvas.delete("all")
         self.canvas.create_oval((2, 2, 102, 102))
-        self.canvas.create_line((52, 2, 52, 102), fill="Dark Gray", dash=(2, 2))
-        self.canvas.create_line((2, 52, 102, 52), fill="Dark Gray", dash=(2, 2))
-
-        if self.velocity.get():
-            mag_vel = abs(hypot(self.body.velocity[0], self.body.velocity[1]))
-            scale_factor = 40 * (1 - 2 ** -mag_vel) / mag_vel if mag_vel != 0 else 0
-            x_vel, y_vel = [scale_factor * self.body.velocity[n] for n in (0, 1)]
-            self.canvas.create_line((52, 52, 52 + x_vel, 52 + y_vel), fill="Blue", arrow="last")
-
-        if self.acceleration.get():
-            mag_acc = abs(hypot(self.body.acceleration[0], self.body.acceleration[1]))
-            scale_factor = 40 * (1 - 2 ** -(mag_acc * 1000000)) / mag_acc if mag_acc != 0 else 0
-            x_acc, y_acc = [scale_factor * self.body.acceleration[n] for n in (0, 1)]
-            self.canvas.create_line((52, 52, 52 + x_acc, 52 + y_acc), fill="Red", arrow="last")
-
+        for c in ((52, 2, 52, 102), (2, 52, 102, 52)):
+            self.canvas.create_line(c, fill="Dark Gray", dash=(2, 2))
+        for attr in ['velocity','acceleration']:
+            if getattr(self, attr).get():
+                mag = getattr(self.body, attr).length()
+                scale_factor = 40 * (1 - 2 ** -(mag * (1 if attr=='velocity' else 1000000) ))/ mag if mag else 0
+                x, y = scale_factor * getattr(self.body, attr)
+                self.canvas.create_line((52, 52, 52 + x, 52 + y), fill="Blue" if attr=='velocity' else "Red", arrow="last")
         self.canvas.grid(row=3, column=1, rowspan=2, columnspan=4)
 
     def update(self):
