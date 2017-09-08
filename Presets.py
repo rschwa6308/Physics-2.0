@@ -11,15 +11,14 @@ def cluster(planets, mass_range, dist_range, circular=True, planet_density=Densi
         total_mass += mass
         distance = uniform(*dist_range)
         angle = uniform(-1*pi, pi)
-        position = V2(width/2 + distance * cos(angle), height/2 - distance * sin(angle))
+        position = (width/2 + distance * cos(angle), height/2 - distance * sin(angle))
         if circular:
             speed = sqrt(total_mass * G / distance)
-            velocity = V2(speed * sin(angle), speed * cos(angle))
+            velocity = (speed * sin(angle), speed * cos(angle))
         else:
-            velocity = V2(uniform(-2, 2), uniform(-2, 2))
+            velocity = (uniform(-2, 2), uniform(-2, 2))
         planet = Body(mass, position, velocity, density=planet_density, name="planet " + str(x))
         bodies.append(planet)
-
     return bodies
 
 
@@ -39,52 +38,38 @@ def density_gradient(num, mass_range, densities, colors):
     return bodies
 
 
-def star_system(star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance, circular=True, planet_density=Density):
+def star_system(star_mass, star_density, planets, mass_range, dist_range, circular=True, planet_density=Density):
     bodies = []
-
-    star = Body(star_mass, [width/2, height/2], [0, 0], star_density, (255, 255, 0), "Star")
+    star = Body(star_mass, (width/2, height/2),  (0, 0), star_density, (255, 255, 0), "Star")
     bodies.append(star)
-
     for x in range(planets):
-        mass = uniform(min_mass, max_mass)
-        distance = uniform(min_distance, max_distance)
+        mass = uniform(*mass_range)
+        distance = uniform(*dist_range)
         angle = uniform(-1*pi, pi)
-        position = V2(star.position[0] + distance * cos(angle), star.position[1] - distance * sin(angle))
+        position = (star.position[0] + distance * cos(angle), star.position[1] - distance * sin(angle))
         if circular:
             speed = sqrt(star_mass * G / distance)
-            velocity = V2(speed * sin(angle), speed * cos(angle))
+            velocity = (speed * sin(angle), speed * cos(angle))
         else:
-            velocity = V2(uniform(-2, 2), uniform(-2, 2))
+            velocity = (uniform(-2, 2), uniform(-2, 2))
         planet = Body(mass, position, velocity, density=planet_density, name="planet " + str(x))
         bodies.append(planet)
-
     return bodies
 
 
-def binary_system(star_mass_a, star_mass_b, planets, min_mass, max_mass):
+def binary_system(star_masses, star_density, planets, mass_range, planet_density=Density):
     bodies = []
-
-    star_a = Body(star_mass_a, [0, 0], [0, 0], density=0.04)
-    star_b = Body(star_mass_a, [0, 0], [0, 0], density=0.04)
-
-    star_a.position = V2([width/2 - 4*star_a.radius, height/2])
-    star_b.position = V2([width/2 + 4*star_b.radius, height/2])
-
-    distance = abs(star_b.position[0] - star_a.position[0])
-
-    star_a.velocity = V2([0, sqrt(G * star_mass_b / distance)])
-    star_b.velocity = V2([0, -1 * sqrt(G * star_mass_a / distance)])
-
-    bodies.extend([star_a, star_b])
-
-    # planets_list = [Body(uniform(min_mass, max_mass), [width/2 + uniform(-3 * distance, 3 * distance), height/2 + uniform(-3 * distance, 3 * distance)], [uniform(-1, 1), uniform(-1, 1)]) for _ in range(planets)]
-    # bodies.extend(planets_list)
+    stars = [Body(m, [0,0], [0,0], star_density) for m in star_masses]
+    for s in 0,1:
+        stars[s].position = V2(width/2 + (-4 if s else 4) * stars[s].radius, height/2)
+    distance = (stars[0].position - stars[1].position)[0] * 3
+    for s in 0,1:
+        stars[s].velocity = V2(0, (-1 if s else 1) * sqrt(G * stars[1-s].mass / distance))
+    bodies += stars
     for _ in range(planets):
-        mass = uniform(min_mass, max_mass)
-        position = [width/2 + uniform(-3 * distance, 3 * distance), height/2 + uniform(-3 * distance, 3 * distance)]
-        velocity = [uniform(-1, 1), uniform(-1, 1)]
-
-        planet = Body(mass, position, velocity)
+        mass = uniform(*mass_range)
+        position = (width/2 + uniform(-distance, distance), height/2 + uniform(-distance, distance))
+        velocity = (uniform(-1, 1), uniform(-1, 1))
+        planet = Body(mass, position, velocity, planet_density)
         bodies.append(planet)
-
     return bodies
