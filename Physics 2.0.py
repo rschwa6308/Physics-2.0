@@ -5,7 +5,6 @@ from random import shuffle
 from Presets import *
 from TkinterWindows import *
 
-
 def display(settings_window, screen, bodies, cam):
     # Clear last frame
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
@@ -14,13 +13,9 @@ def display(settings_window, screen, bodies, cam):
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
     # Display all bodies
     for b in bodies:
-        # calculate coordinates and radius adjusted for camera
-        x = b.position[0] - cam.position[0]
-        x = (x - width / 2) * cam.scale + width / 2
-        y = b.position[1] - cam.position[1]
-        y = (y - height / 2) * cam.scale + height / 2
-        radius = b.radius * cam.scale
-        pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
+        # Calculate coordinates and radius adjusted for camera
+        x, y = (b.position - cam.position - dims / 2) * cam.scale + dims / 2
+        pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
     pg.display.update()
 
 
@@ -45,7 +40,8 @@ class Camera:
 
 
 def main():
-    global width, height
+    global width, height, dims
+    dims = V2(width, height)
 
     # Initialize pygame
     pg.init()
@@ -117,6 +113,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
                 width, height = event.w, event.h
+                dims = V2(width, height)
                 screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
                 if event.key in scroll_keys:
@@ -144,21 +141,15 @@ def main():
                 done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    x, y = pg.mouse.get_pos()
-                    x = camera.position[0] + (x - width / 2) / camera.scale + width / 2
-                    y = camera.position[1] + (y - height / 2) / camera.scale + height / 2
+                    x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
-                        if b.click_collision((x, y)):
-                            if b not in [win.body for win in properties_windows]:
-                                properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
-
+                        if b.click_collision((x, y)) and b not in [win.body for win in properties_windows]:
+                            properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
                 elif event.button == 4:
-                    camera.scale *= 1.1
-                    camera.scale = min(camera.scale, 100)
+                    camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1
                 elif event.button == 5:
-                    camera.scale /= 1.1
-                    camera.scale = max(float(camera.scale), 0.01)
+                    camera.scale = max(camera.scale / 1.1, 0.01)
                     scroll_constant *= 1.1
 
         # Apply velocity to camera
@@ -201,7 +192,6 @@ def main():
         # Wall collision
         if settings_window.walls.get():
             for b in bodies:
-                dims = V2(width, height)
                 x, y = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2
                 radius = b.radius * camera.scale
                 if x < radius or x + radius > width:
