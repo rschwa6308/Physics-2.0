@@ -64,7 +64,7 @@ def main():
     settings_window = Settings(bodies, camera)
 
     # Initialize body properties window list
-    properties_windows = []
+    settings_window.properties_windows = []
 
     # Initialize collision setting to True
     collision = 1
@@ -104,11 +104,11 @@ def main():
             COR = settings_window.get_COR()
             collision = settings_window.get_collision()
 
-        for window in properties_windows:
+        for window in settings_window.properties_windows:
             if window.alive:
                 window.update()
             else:
-                properties_windows.remove(window)
+                settings_window.properties_windows.remove(window)
 
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -143,8 +143,8 @@ def main():
                 if event.button == 1:
                     x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
-                        if b.click_collision((x, y)) and b not in [win.body for win in properties_windows]:
-                            properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
+                        if b.click_collision((x, y)) and b not in [win.body for win in settings_window.properties_windows]:
+                            settings_window.properties_windows.append(BodyProperties(b, bodies, len(settings_window.properties_windows), camera))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1
@@ -163,7 +163,7 @@ def main():
         for b in range(len(bodies)):
             for o in range(len(bodies) - 1, b, -1):
                 if collision and bodies[o].test_collision(bodies[b]):
-                    bodies[o].collide(bodies[b], COR, properties_windows)
+                    bodies[o].collide(bodies[b], COR, settings_window.properties_windows)
                     if COR == 0:            # Only remove second body if collision is perfectly inelastic
                         bodies.pop(b)
                         break

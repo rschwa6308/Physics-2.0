@@ -8,7 +8,6 @@ from Constants import *
 from JsonSaving import *
 from Bodies import *
 
-
 class Settings:
     def __init__(self, bodies, camera):
         self.bodies = bodies
@@ -114,7 +113,6 @@ class Settings:
         self.camera.move_to_com(self.bodies)
 
     def save(self):
-        name = self.name.get()
         if self.filename == "":
             self.save_as()
         else:
@@ -125,8 +123,8 @@ class Settings:
         save_object = Save(self)
         filename = filedialog.asksaveasfilename(defaultextension=".sim",
                                                 filetypes=(("Simulation file", "*.sim"), ("All files", "*.*")))
-        self.filename = filename
         if filename:
+            self.filename = filename
             self.name.set(os.path.split(filename)[-1])
             save_object.save_as(filename)
 
@@ -135,6 +133,9 @@ class Settings:
         self.filename = filename
         self.name.set(os.path.split(filename)[-1])
         if filename:
+            for window in self.properties_windows:
+                window.destroy()
+            self.properties_windows = []
             with open(filename) as file:
                 data = json.load(file)
                 self.gravity_slider.set(data["settings"]["G"] * 100.0)
@@ -142,6 +143,7 @@ class Settings:
                 cam_data = data["settings"]["camera"]
                 self.camera.position = cam_data["position"]
                 self.camera.scale = cam_data["scale"]
+                self.bg_color = data["settings"]["background color"] if "background color" in data["settings"] else (255,255,255)
                 self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
                                   in data["bodies"]]
 

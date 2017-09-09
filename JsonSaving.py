@@ -6,11 +6,13 @@ class Save:
         time = settings_window.get_time()
         cam = settings_window.camera
         bods = settings_window.bodies
+        bg_color = settings_window.bg_color
         
         self.data = {}
         self.data["settings"] = {
             "G": grav,
             "time factor": time,
+            "background color": bg_color,
             "camera": {
                 "position": [cam.position[n] for n in (0, 1)],
                 "scale": cam.scale
