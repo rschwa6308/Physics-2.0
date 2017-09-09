@@ -5,7 +5,6 @@ from random import shuffle
 from Presets import *
 from TkinterWindows import *
 
-
 def display(settings_window, screen, bodies, cam):
     # Clear last frame
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
@@ -14,13 +13,9 @@ def display(settings_window, screen, bodies, cam):
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
     # Display all bodies
     for b in bodies:
-        # calculate coordinates and radius adjusted for camera
-        x = b.position[0] - cam.position[0]
-        x = (x - width / 2) * cam.scale + width / 2
-        y = b.position[1] - cam.position[1]
-        y = (y - height / 2) * cam.scale + height / 2
-        radius = b.radius * cam.scale
-        pg.draw.circle(screen, b.color, (int(x), int(y)), int(radius), 0)
+        # Calculate coordinates and radius adjusted for camera
+        x, y = (b.position - cam.position - dims / 2) * cam.scale + dims / 2
+        pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
     pg.display.update()
 
 
@@ -45,7 +40,8 @@ class Camera:
 
 
 def main():
-    global width, height
+    global width, height, dims
+    dims = V2(width, height)
 
     # Initialize pygame
     pg.init()
@@ -54,12 +50,12 @@ def main():
     camera = Camera()
 
     # Construct bodies list
-    #                   (star_mass, star_density, planets, min_mass, max_mass, min_distance, max_distance)
-    # bodies = star_system(5000, 0.1, 100, 1, 10, 75, 500, planet_density=0.4)
-    # bodies = cluster(100, 10, 20, 5, 500, False)
+    bodies = star_system(5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
+    # bodies = binary_system((5000, 2500), 0.3, 100, (75, 100), 0.4)
+    # bodies = cluster(100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = diffusion_gradient(120, 1000, (255, 0, 0), (0, 0, 255))
-    bodies = density_gradient(120, 500, 1000, 0.1, 0.3, (255, 0, 0), (0, 0, 255))
+    # bodies = diffusion_gradient(120, 1000, ((255, 0, 0), (0, 0, 255)))
+    # bodies = density_gradient(120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
@@ -117,6 +113,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
                 width, height = event.w, event.h
+                dims = V2(width, height)
                 screen = pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
                 if event.key in scroll_keys:
@@ -144,21 +141,15 @@ def main():
                 done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    x, y = pg.mouse.get_pos()
-                    x = camera.position[0] + (x - width / 2) / camera.scale + width / 2
-                    y = camera.position[1] + (y - height / 2) / camera.scale + height / 2
+                    x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
-                        if b.click_collision((x, y)):
-                            if b not in [win.body for win in properties_windows]:
-                                properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
-
+                        if b.click_collision((x, y)) and b not in [win.body for win in properties_windows]:
+                            properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
                 elif event.button == 4:
-                    camera.scale *= 1.1
-                    camera.scale = min(camera.scale, 100)
+                    camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1
                 elif event.button == 5:
-                    camera.scale /= 1.1
-                    camera.scale = max(float(camera.scale), 0.01)
+                    camera.scale = max(camera.scale / 1.1, 0.01)
                     scroll_constant *= 1.1
 
         # Apply velocity to camera
@@ -201,23 +192,16 @@ def main():
         # Wall collision
         if settings_window.walls.get():
             for b in bodies:
-                x = b.position[0] - camera.position[0]
-                x = (x - width / 2) * camera.scale + width / 2
-                y = b.position[1] - camera.position[1]
-                y = (y - height / 2) * camera.scale + height / 2
+                x, y = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2
                 radius = b.radius * camera.scale
-                if x - radius < 0:
-                    b.position.x = ((radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
-                    b.velocity.x *= -1 * COR
-                elif x + radius > width:
-                    b.position.x = ((width - radius) - width / 2) / camera.scale + width / 2 + camera.position[0]
-                    b.velocity.x *= -1 * COR
-                if y - radius < 0:
-                    b.position.y = ((radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
-                    b.velocity.y *= -1 * COR
-                elif y + radius > height:
-                    b.position.y = ((height - radius) - height / 2) / camera.scale + height / 2 + camera.position[1]
-                    b.velocity.y *= -1 * COR
+                if x < radius or x + radius > width:
+                    b.velocity.x *= -COR
+                    c = 1 if x < radius else -1
+                    b.position.x = c * (radius - width / 2) / camera.scale + width / 2 + camera.position[0]
+                if y < radius or y + radius > height:
+                    b.velocity.y *= -COR
+                    c = 1 if y < radius else -1
+                    b.position.y = c * (radius - height / 2) / camera.scale + height / 2 + camera.position[1]
 
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
