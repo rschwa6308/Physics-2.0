@@ -1,6 +1,6 @@
 # Physics-2.0
 
-[![BCH compliance](https://bettercodehub.com/edge/badge/StardustGogeta/Physics-2.0?branch=master)](https://bettercodehub.com/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/rschwa6308/Physics-2.0?branch=master)](https://bettercodehub.com/)
 
 Physics-2.0 is a simple 2D n-body gravity simulator made in Python with Pygame.  Bodies follow Newton's law of universal gravitation and conservation of momentum.  This application can be used to demonstrate simple systems like binary stars, and complex systems like planetary accretion and stellar dynamics.  Physics-2.0 can be used in the classroom to help students develop an intuitive understanding of gravitation.
 
