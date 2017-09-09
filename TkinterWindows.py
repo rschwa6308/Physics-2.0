@@ -22,10 +22,10 @@ class Settings:
         self.physics_frame = tk.LabelFrame(self.root)
 
         self.bg_color = bg_color
-        self.walls = tk.BooleanVar(False)
+        self.walls = tk.BooleanVar()
         self.gravity_on = tk.BooleanVar()
         self.gravity_on.set(True)
-        self.g_field = tk.BooleanVar(False)
+        self.g_field = tk.BooleanVar()
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -140,10 +140,15 @@ class Settings:
                 data = json.load(file)
                 self.gravity_slider.set(data["settings"]["G"] * 100.0)
                 self.time_slider.set(data["settings"]["time factor"] * 100.0)
+                self.COR_slider.set(data["settings"]["coefficient of restitution"])
+                self.collision.set(data["settings"]["collision"])
                 cam_data = data["settings"]["camera"]
                 self.camera.position = cam_data["position"]
                 self.camera.scale = cam_data["scale"]
-                self.bg_color = data["settings"]["background color"] if "background color" in data["settings"] else (255,255,255)
+                self.bg_color = data["settings"]["background color"]
+                self.walls.set(data["settings"]["walls"])
+                self.gravity_on.set(data["settings"]["gravity"])
+                self.g_field.set(data["settings"]["gravitational field"])
                 self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
                                   in data["bodies"]]
 
