@@ -1,9 +1,3 @@
-from random import randint, uniform, shuffle
-import pygame as pg
-from pygame.math import Vector2 as V2
-from math import hypot, pi, sin, cos, sqrt
-from time import time
-
 from Constants import *
 
 class Body:

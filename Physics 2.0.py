@@ -41,9 +41,6 @@ def main():
     global width, height, dims
     dims = V2(width, height)
 
-    # Initialize pygame
-    pg.init()
-
     # Initialize camera object
     camera = Camera()
 

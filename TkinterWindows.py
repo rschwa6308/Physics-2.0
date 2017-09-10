@@ -27,7 +27,7 @@ class Settings(Menu):
         self.root.title("Simulation Settings")
         self.physics_frame = tk.LabelFrame(self.root)
 
-        self.bg_color = bg_color
+        self.bg_color = (255,255,255)
         self.walls = tk.BooleanVar()
         self.gravity_on = tk.BooleanVar()
         self.gravity_on.set(True)
@@ -89,7 +89,7 @@ class Settings(Menu):
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 260, monitor_width / 2 - width / 2 - 315, monitor_height / 2 - height / 2 - 20))
+            '%dx%d+%d+%d' % (305, 260, width / 3 - 315, height / 6 - 20))
 
     def get_gravity(self):
         try:
@@ -209,8 +209,8 @@ class BodyProperties(Menu):
 
         self.width = 220
         self.height = 250
-        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width,
-                                            monitor_height / 2 - 290 + (self.height + 31) * queue_position))
+        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, width / 3 - 10 - self.width,
+                                            height * 2/3 - 290 + (self.height + 31) * queue_position))
 
     def focus(self):
         self.camera.move_to_body(self.body)
