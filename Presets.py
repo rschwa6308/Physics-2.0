@@ -23,18 +23,10 @@ class Preset:
         return bodies
 
     def diffusion_gradient(self, num, mass, colors):
-        bodies = []
-        for x in range(num // 2):
-            for y in 0, 1:
-                bodies.append((mass, (uniform(width * y/2, width * (y+1)/2-1), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), Density, colors[y]))
-        return bodies
+        return [(mass, (uniform(width * y/2, width * (y+1)/2-1), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), Density, colors[y]) for _ in range(num//2) for y in (0,1)]
 
     def density_gradient(self, num, mass_range, densities, colors):
-        bodies = []
-        for x in range(num // 2):
-            for y in 0, 1:
-                bodies.append((uniform(*mass_range), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), densities[y], colors[y]))
-        return bodies
+        return [(uniform(*mass_range), (uniform(0, width), uniform(0, height)), (uniform(-1, 1), uniform(-1, 1)), densities[y], colors[y]) for _ in range(num//2) for y in (0,1)]
 
     def star_system(self, star_mass, star_density, planets, mass_range, dist_range, circular=True, planet_density=Density):
         bodies = []
@@ -57,7 +49,7 @@ class Preset:
         stars = [(m, [0,0], [0,0], star_density) for m in star_masses]
         for s in 0, 1:
             stars[s][1] = V2(width/2 + (-4 if s else 4) * (star_masses[s]/star_density)**(1/3), height/2)
-        distance = (stars[0].position - stars[1].position)[0] * 3
+        distance = (stars[0][1] - stars[1][1])[0] * 3
         for s in 0, 1:
             stars[s][2] = V2(0, (1 - 2*s) * sqrt(G * star_masses[1-s] / distance))
         bodies += stars
