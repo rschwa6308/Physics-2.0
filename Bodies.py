@@ -11,7 +11,7 @@ class Body:
 
         self.density = density
 
-        self.color = tuple(randint(0, 255) for _ in '111') if color is None else color
+        self.color = color if color else tuple(randint(0, 255) for _ in '111')
 
         self.name = name
 
