@@ -85,6 +85,8 @@ def main():
     scrolling = [0, 0, 0, 0]
     scroll_constant = 1
 
+    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
+
     # Initialize simulation sentinel and frame counter
     done = False
     frame_count = 0
@@ -113,25 +115,13 @@ def main():
             elif event.type == pg.KEYDOWN:
                 if event.key in scroll_keys:
                     scrolling[scroll_keys.index(event.key)] = 1
-                elif event.key == pg.K_LEFT:
-                    camera.velocity[0] = -3 / camera.scale
-                elif event.key == pg.K_RIGHT:
-                    camera.velocity[0] = 3 / camera.scale
-                elif event.key == pg.K_UP:
-                    camera.velocity[1] = -3 / camera.scale
-                elif event.key == pg.K_DOWN:
-                    camera.velocity[1] = 3 / camera.scale
+                elif event.key in scroll_keys2:
+                    camera.velocity += V2((3/camera.scale,0) if event.key in scroll_keys2[:2] else (0,3/camera.scale)).elementwise() * ((scroll_keys2.index(event.key) not in (1,2)) * 2 - 1)
             elif event.type == pg.KEYUP:
                 if event.key in scroll_keys:
                     scrolling[scroll_keys.index(event.key)] = 0
-                elif event.key == pg.K_LEFT:
-                    camera.velocity[0] = 0
-                elif event.key == pg.K_RIGHT:
-                    camera.velocity[0] = 0
-                elif event.key == pg.K_UP:
-                    camera.velocity[1] = 0
-                elif event.key == pg.K_DOWN:
-                    camera.velocity[1] = 0
+                elif event.key in scroll_keys2:
+                    camera.velocity = camera.velocity.elementwise() * ((0,1) if event.key in scroll_keys2[:2] else (1,0))
             elif event.type == pg.QUIT:
                 done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
@@ -159,7 +149,7 @@ def main():
             for o in range(len(bodies) - 1, b, -1):
                 if collision and bodies[o].test_collision(bodies[b]):
                     bodies[o].collide(bodies[b], COR, settings_window.properties_windows)
-                    if COR == 0:            # Only remove second body if collision is perfectly inelastic
+                    if COR == 0: # Only remove second body if collision is perfectly inelastic
                         bodies.pop(b)
                         break
                 if settings_window.gravity_on.get():
@@ -170,17 +160,14 @@ def main():
         # Uniform Gravitational field if option is enabled
         if settings_window.g_field.get():
             for b in bodies:
-                b.acceleration.y += G / 50.0
-
-        # Apply acceleration
-        for b in bodies:
-            b.apply_acceleration(time_factor)
+                b.acceleration.y += G / 50
 
         # Display current frame
         display(settings_window, screen, bodies, camera)
 
-        # Apply velocity (update position)
+        # Apply acceleration and velocity
         for body in bodies:
+            body.apply_acceleration(time_factor)
             body.apply_velocity(time_factor)
             body.position += scroll
 
