@@ -144,7 +144,7 @@ def main():
                     x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
                         if b.click_collision((x, y)) and b not in [win.body for win in settings_window.properties_windows]:
-                            settings_window.properties_windows.append(BodyProperties(b, bodies, len(settings_window.properties_windows), camera))
+                            settings_window.properties_windows.append(BodyProperties(bodies, camera, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1

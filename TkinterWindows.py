@@ -1,24 +1,31 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-from tkinter import colorchooser
+from tkinter import filedialog, messagebox, colorchooser
 import os
 
 from Constants import *
 from JsonSaving import *
 from Bodies import *
 
-class Settings:
-    def __init__(self, bodies, camera):
+class Menu:
+    def __init__(self, bodies, camera, *args):
         self.bodies = bodies
         self.camera = camera
-
-        self.root = tk.Tk()
-        self.root.title("Simulation Settings")
-
+        self.create_root()
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.alive = True
+        self.configure(*args)
 
+    def destroy(self):
+        self.root.destroy()
+        self.alive = False
+        
+
+class Settings(Menu):
+    def create_root(self):
+        self.root = tk.Tk()
+    
+    def configure(self):
+        self.root.title("Simulation Settings")
         self.physics_frame = tk.LabelFrame(self.root)
 
         self.bg_color = bg_color
@@ -165,22 +172,14 @@ class Settings:
         self.set_bodies(len(self.bodies))
         self.root.update()
 
-    def destroy(self):
-        self.alive = False
-        self.root.destroy()
 
-
-class BodyProperties:
-    def __init__(self, body, bodies, queue_position, camera):
-        self.camera = camera
-        self.body = body
-        self.bodies = bodies
-
+class BodyProperties(Menu):
+    def create_root(self):
         self.root = tk.Toplevel()
-        self.root.title(self.body.name.title() if self.body.name is not None else "Unnamed Body")
-
-        self.root.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.alive = True
+        
+    def configure(self, queue_position, body):
+        self.body = body
+        self.root.title(self.body.name.title() if self.body.name else "Unnamed Body")
 
         tk.Label(self.root, text="Mass: ").grid(row=1)
         self.mass_slider = tk.Scale(self.root, from_=1, to=self.body.mass * 10, orient=tk.HORIZONTAL, length=100)
@@ -207,6 +206,7 @@ class BodyProperties:
 
         tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)
         tk.Button(self.root, text="Delete", command=self.delete_body).grid(row=6, columnspan=3)
+        # TODO: Add option for tracking specific bodies
 
         self.width = 220
         self.height = 250
@@ -226,7 +226,7 @@ class BodyProperties:
         self.canvas.create_oval((2, 2, 102, 102))
         for c in ((52, 2, 52, 102), (2, 52, 102, 52)):
             self.canvas.create_line(c, fill="Dark Gray", dash=(2, 2))
-        for attr in ['velocity','acceleration']:
+        for attr in 'velocity','acceleration':
             if getattr(self, attr).get():
                 mag = getattr(self.body, attr).length()
                 scale_factor = 40 * (1 - 2 ** -(mag * (1 if attr=='velocity' else 1000000) ))/ mag if mag else 0
@@ -240,7 +240,3 @@ class BodyProperties:
         self.body.density = self.density_slider.get()
         self.body.update_radius()
         self.update_canvas()
-
-    def destroy(self):
-        self.root.destroy()
-        self.alive = False
