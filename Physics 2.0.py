@@ -1,17 +1,15 @@
 from functools import reduce
 from operator import add
-from random import shuffle
 
-from Presets import *
 from TkinterWindows import *
 
+# Import Structure
+# Constants -> Bodies -> Presets --(+JsonSaving)--> TkinterWindows -> Physics 2.0
+
 def display(settings_window, screen, bodies, cam):
-    # Clear last frame
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
-    # Draw walls if on
     if settings_window.walls.get():
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
-    # Display all bodies
     for b in bodies:
         # Calculate coordinates and radius adjusted for camera
         x, y = (b.position - cam.position - dims / 2) * cam.scale + dims / 2

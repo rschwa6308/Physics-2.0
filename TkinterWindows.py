@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
 import os
 
-from Constants import *
 from JsonSaving import *
-from Bodies import *
+from Presets import *
 
 class Menu:
     def __init__(self, bodies, camera, *args):
