@@ -1,8 +1,8 @@
 languages:
   - name: python
     production:
-        exclude:
+      exclude:
         - Test.py
     test:
-        include:
+      include:
         - Test.py
