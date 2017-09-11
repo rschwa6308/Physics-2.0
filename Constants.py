@@ -1,4 +1,7 @@
-import ctypes
+from random import randint, uniform, shuffle
+import pygame as pg
+from pygame.math import Vector2 as V2
+from math import hypot, pi, sin, cos, sqrt
 
 G = 0.5
 
@@ -7,20 +10,9 @@ Density = 0.1
 COR = 1.0 # Coefficient of Restitution
 
 # Define initial width and height
-try:
-    # Windows
-    import ctypes
-    dim = ctypes.windll.user32.GetSystemMetrics
-    monitor_width, monitor_height = dim(0), dim(1)
-except:
-    # Linux
-    import subprocess, re
-    output = subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4',shell=True, stdout=subprocess.PIPE).communicate()[0]
-    monitor_width, monitor_height = re.findall(r'[0-9]+',str(output))
-
-width, height = int(monitor_width * 0.6), int(monitor_height * 0.75)
-
-bg_color = (255, 255, 255)
+pg.init()
+info = pg.display.Info()
+width, height = int(info.current_w * 0.6), int(info.current_h * 0.75)
 
 # Set simulation hard clock speed (fps)
 clock_speed = 144

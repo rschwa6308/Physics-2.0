@@ -1,32 +1,37 @@
 import tkinter as tk
-from tkinter import filedialog
-from tkinter import messagebox
-from tkinter import colorchooser
+from tkinter import filedialog, messagebox, colorchooser
 import os
 
-from Constants import *
 from JsonSaving import *
-from Bodies import *
+from Presets import *
 
-
-class Settings:
-    def __init__(self, bodies, camera):
+class Menu:
+    def __init__(self, bodies, camera, *args):
         self.bodies = bodies
         self.camera = camera
-
-        self.root = tk.Tk()
-        self.root.title("Simulation Settings")
-
+        self.create_root()
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.alive = True
+        self.configure(*args)
 
+    def destroy(self):
+        self.root.destroy()
+        self.alive = False
+        
+
+class Settings(Menu):
+    def create_root(self):
+        self.root = tk.Tk()
+    
+    def configure(self):
+        self.root.title("Simulation Settings")
         self.physics_frame = tk.LabelFrame(self.root)
 
-        self.bg_color = bg_color
-        self.walls = tk.BooleanVar(False)
+        self.bg_color = (255,255,255)
+        self.walls = tk.BooleanVar()
         self.gravity_on = tk.BooleanVar()
         self.gravity_on.set(True)
-        self.g_field = tk.BooleanVar(False)
+        self.g_field = tk.BooleanVar()
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -84,28 +89,7 @@ class Settings:
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 260, monitor_width / 2 - width / 2 - 315, monitor_height / 2 - height / 2 - 20))
-
-    def get_gravity(self):
-        try:
-            return self.gravity_slider.get() / 100.0
-        except:
-            return G
-
-    def get_time(self):
-        try:
-            return self.time_slider.get() / 100.0
-        except:
-            return 1
-
-    def get_COR(self):
-        try:
-            return self.COR_slider.get()
-        except:
-            return COR
-
-    def get_collision(self):
-        return self.collision.get()
+            '%dx%d+%d+%d' % (305, 260, width / 3 - 315, height / 6 - 20))
 
     def set_bodies(self, n):
         self.bodies_label_text.set("Bodies: " + str(n))
@@ -114,7 +98,6 @@ class Settings:
         self.camera.move_to_com(self.bodies)
 
     def save(self):
-        name = self.name.get()
         if self.filename == "":
             self.save_as()
         else:
@@ -125,8 +108,8 @@ class Settings:
         save_object = Save(self)
         filename = filedialog.asksaveasfilename(defaultextension=".sim",
                                                 filetypes=(("Simulation file", "*.sim"), ("All files", "*.*")))
-        self.filename = filename
         if filename:
+            self.filename = filename
             self.name.set(os.path.split(filename)[-1])
             save_object.save_as(filename)
 
@@ -135,13 +118,22 @@ class Settings:
         self.filename = filename
         self.name.set(os.path.split(filename)[-1])
         if filename:
+            for window in self.properties_windows:
+                window.destroy()
+            self.properties_windows = []
             with open(filename) as file:
                 data = json.load(file)
-                self.gravity_slider.set(data["settings"]["G"] * 100.0)
-                self.time_slider.set(data["settings"]["time factor"] * 100.0)
+                self.gravity_slider.set(data["settings"]["G"])
+                self.time_slider.set(data["settings"]["time factor"])
+                self.COR_slider.set(data["settings"]["coefficient of restitution"])
+                self.collision.set(data["settings"]["collision"])
                 cam_data = data["settings"]["camera"]
                 self.camera.position = cam_data["position"]
                 self.camera.scale = cam_data["scale"]
+                self.bg_color = data["settings"]["background color"]
+                self.walls.set(data["settings"]["walls"])
+                self.gravity_on.set(data["settings"]["gravity"])
+                self.g_field.set(data["settings"]["gravitational field"])
                 self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
                                   in data["bodies"]]
 
@@ -158,22 +150,14 @@ class Settings:
         self.set_bodies(len(self.bodies))
         self.root.update()
 
-    def destroy(self):
-        self.alive = False
-        self.root.destroy()
 
-
-class BodyProperties:
-    def __init__(self, body, bodies, queue_position, camera):
-        self.camera = camera
-        self.body = body
-        self.bodies = bodies
-
+class BodyProperties(Menu):
+    def create_root(self):
         self.root = tk.Toplevel()
-        self.root.title(self.body.name.title() if self.body.name is not None else "Unnamed Body")
-
-        self.root.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.alive = True
+        
+    def configure(self, queue_position, body):
+        self.body = body
+        self.root.title(self.body.name.title() if self.body.name else "Unnamed Body")
 
         tk.Label(self.root, text="Mass: ").grid(row=1)
         self.mass_slider = tk.Scale(self.root, from_=1, to=self.body.mass * 10, orient=tk.HORIZONTAL, length=100)
@@ -200,11 +184,12 @@ class BodyProperties:
 
         tk.Button(self.root, text="Focus", command=self.focus).grid(row=5, columnspan=3)
         tk.Button(self.root, text="Delete", command=self.delete_body).grid(row=6, columnspan=3)
+        # TODO: Add option for tracking specific bodies
 
         self.width = 220
         self.height = 250
-        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, monitor_width / 2 - width / 2 - 10 - self.width,
-                                            monitor_height / 2 - 290 + (self.height + 31) * queue_position))
+        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, width / 3 - 10 - self.width,
+                                            height * 2/3 - 290 + (self.height + 31) * queue_position))
 
     def focus(self):
         self.camera.move_to_body(self.body)
@@ -219,7 +204,7 @@ class BodyProperties:
         self.canvas.create_oval((2, 2, 102, 102))
         for c in ((52, 2, 52, 102), (2, 52, 102, 52)):
             self.canvas.create_line(c, fill="Dark Gray", dash=(2, 2))
-        for attr in ['velocity','acceleration']:
+        for attr in 'velocity','acceleration':
             if getattr(self, attr).get():
                 mag = getattr(self.body, attr).length()
                 scale_factor = 40 * (1 - 2 ** -(mag * (1 if attr=='velocity' else 1000000) ))/ mag if mag else 0
@@ -233,7 +218,3 @@ class BodyProperties:
         self.body.density = self.density_slider.get()
         self.body.update_radius()
         self.update_canvas()
-
-    def destroy(self):
-        self.root.destroy()
-        self.alive = False

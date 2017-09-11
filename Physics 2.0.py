@@ -1,17 +1,15 @@
 from functools import reduce
 from operator import add
-from random import shuffle
 
-from Presets import *
 from TkinterWindows import *
 
+# Import Structure
+# Constants -> Bodies -> Presets --(+JsonSaving)--> TkinterWindows -> Physics 2.0
+
 def display(settings_window, screen, bodies, cam):
-    # Clear last frame
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
-    # Draw walls if on
     if settings_window.walls.get():
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
-    # Display all bodies
     for b in bodies:
         # Calculate coordinates and radius adjusted for camera
         x, y = (b.position - cam.position - dims / 2) * cam.scale + dims / 2
@@ -43,19 +41,16 @@ def main():
     global width, height, dims
     dims = V2(width, height)
 
-    # Initialize pygame
-    pg.init()
-
     # Initialize camera object
     camera = Camera()
 
     # Construct bodies list
-    bodies = star_system(5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
-    # bodies = binary_system((5000, 2500), 0.3, 100, (75, 100), 0.4)
-    # bodies = cluster(100, (10, 20), (5, 500), False)
+    #bodies = Preset().generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
+    # bodies = Preset().generate("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
+    # bodies = Preset().generate("cluster", 100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = diffusion_gradient(120, 1000, ((255, 0, 0), (0, 0, 255)))
-    # bodies = density_gradient(120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
+    # bodies = Preset().generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
+    bodies = Preset().generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
@@ -64,7 +59,7 @@ def main():
     settings_window = Settings(bodies, camera)
 
     # Initialize body properties window list
-    properties_windows = []
+    settings_window.properties_windows = []
 
     # Initialize collision setting to True
     collision = 1
@@ -90,6 +85,8 @@ def main():
     scrolling = [0, 0, 0, 0]
     scroll_constant = 1
 
+    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
+
     # Initialize simulation sentinel and frame counter
     done = False
     frame_count = 0
@@ -99,16 +96,16 @@ def main():
 
         if settings_window.alive:
             settings_window.update()
-            G = settings_window.get_gravity()
-            time_factor = settings_window.get_time()
-            COR = settings_window.get_COR()
-            collision = settings_window.get_collision()
+            G = settings_window.gravity_slider.get() / 100.0
+            time_factor = settings_window.time_slider.get() / 100.0
+            COR = settings_window.COR_slider.get()
+            collision = settings_window.collision.get()
 
-        for window in properties_windows:
+        for window in settings_window.properties_windows:
             if window.alive:
                 window.update()
             else:
-                properties_windows.remove(window)
+                settings_window.properties_windows.remove(window)
 
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -118,33 +115,21 @@ def main():
             elif event.type == pg.KEYDOWN:
                 if event.key in scroll_keys:
                     scrolling[scroll_keys.index(event.key)] = 1
-                elif event.key == pg.K_LEFT:
-                    camera.velocity[0] = -3 / camera.scale
-                elif event.key == pg.K_RIGHT:
-                    camera.velocity[0] = 3 / camera.scale
-                elif event.key == pg.K_UP:
-                    camera.velocity[1] = -3 / camera.scale
-                elif event.key == pg.K_DOWN:
-                    camera.velocity[1] = 3 / camera.scale
+                elif event.key in scroll_keys2:
+                    camera.velocity += V2((3/camera.scale,0) if event.key in scroll_keys2[:2] else (0,3/camera.scale)).elementwise() * ((scroll_keys2.index(event.key) not in (1,2)) * 2 - 1)
             elif event.type == pg.KEYUP:
                 if event.key in scroll_keys:
                     scrolling[scroll_keys.index(event.key)] = 0
-                elif event.key == pg.K_LEFT:
-                    camera.velocity[0] = 0
-                elif event.key == pg.K_RIGHT:
-                    camera.velocity[0] = 0
-                elif event.key == pg.K_UP:
-                    camera.velocity[1] = 0
-                elif event.key == pg.K_DOWN:
-                    camera.velocity[1] = 0
+                elif event.key in scroll_keys2:
+                    camera.velocity = camera.velocity.elementwise() * ((0,1) if event.key in scroll_keys2[:2] else (1,0))
             elif event.type == pg.QUIT:
                 done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
-                        if b.click_collision((x, y)) and b not in [win.body for win in properties_windows]:
-                            properties_windows.append(BodyProperties(b, bodies, len(properties_windows), camera))
+                        if b.click_collision((x, y)) and b not in [win.body for win in settings_window.properties_windows]:
+                            settings_window.properties_windows.append(BodyProperties(bodies, camera, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1
@@ -163,8 +148,8 @@ def main():
         for b in range(len(bodies)):
             for o in range(len(bodies) - 1, b, -1):
                 if collision and bodies[o].test_collision(bodies[b]):
-                    bodies[o].collide(bodies[b], COR, properties_windows)
-                    if COR == 0:            # Only remove second body if collision is perfectly inelastic
+                    bodies[o].collide(bodies[b], COR, settings_window.properties_windows)
+                    if COR == 0: # Only remove second body if collision is perfectly inelastic
                         bodies.pop(b)
                         break
                 if settings_window.gravity_on.get():
@@ -175,17 +160,14 @@ def main():
         # Uniform Gravitational field if option is enabled
         if settings_window.g_field.get():
             for b in bodies:
-                b.acceleration.y += G / 50.0
-
-        # Apply acceleration
-        for b in bodies:
-            b.apply_acceleration(time_factor)
+                b.acceleration.y += G / 50
 
         # Display current frame
         display(settings_window, screen, bodies, camera)
 
-        # Apply velocity (update position)
+        # Apply acceleration and velocity
         for body in bodies:
+            body.apply_acceleration(time_factor)
             body.apply_velocity(time_factor)
             body.position += scroll
 

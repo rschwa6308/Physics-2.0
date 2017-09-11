@@ -1,12 +1,4 @@
-from random import randint
-import pygame as pg
-from pygame.math import Vector2 as V2
-from math import hypot
-from copy import copy
-from time import time
-
 from Constants import *
-
 
 class Body:
     def __init__(self, mass, position, velocity, density=Density, color=None, name=None):
@@ -19,7 +11,7 @@ class Body:
 
         self.density = density
 
-        self.color = tuple(randint(0, 255) for _ in '111') if color is None else color
+        self.color = color if color else tuple(randint(0, 255) for _ in '111')
 
         self.name = name
 
