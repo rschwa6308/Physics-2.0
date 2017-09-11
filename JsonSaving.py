@@ -6,10 +6,10 @@ class Save:
         
         self.data = {}
         self.data["settings"] = {
-            "G": settings_window.get_gravity(),
-            "time factor": settings_window.get_time(),
-            "coefficient of restitution": settings_window.get_COR(),
-            "collision": settings_window.get_collision(),
+            "G": settings_window.gravity_slider.get(),
+            "time factor": settings_window.time_slider.get(),
+            "coefficient of restitution": settings_window.COR_slider.get(),
+            "collision": settings_window.collision.get(),
             "background color": settings_window.bg_color,
             "walls": settings_window.walls.get(),
             "gravity": settings_window.gravity_on.get(),

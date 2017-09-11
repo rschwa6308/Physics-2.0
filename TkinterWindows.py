@@ -91,27 +91,6 @@ class Settings(Menu):
         self.root.geometry(
             '%dx%d+%d+%d' % (305, 260, width / 3 - 315, height / 6 - 20))
 
-    def get_gravity(self):
-        try:
-            return self.gravity_slider.get() / 100.0
-        except:
-            return G
-
-    def get_time(self):
-        try:
-            return self.time_slider.get() / 100.0
-        except:
-            return 1
-
-    def get_COR(self):
-        try:
-            return self.COR_slider.get()
-        except:
-            return COR
-
-    def get_collision(self):
-        return self.collision.get()
-
     def set_bodies(self, n):
         self.bodies_label_text.set("Bodies: " + str(n))
 
@@ -144,8 +123,8 @@ class Settings(Menu):
             self.properties_windows = []
             with open(filename) as file:
                 data = json.load(file)
-                self.gravity_slider.set(data["settings"]["G"] * 100.0)
-                self.time_slider.set(data["settings"]["time factor"] * 100.0)
+                self.gravity_slider.set(data["settings"]["G"])
+                self.time_slider.set(data["settings"]["time factor"])
                 self.COR_slider.set(data["settings"]["coefficient of restitution"])
                 self.collision.set(data["settings"]["collision"])
                 cam_data = data["settings"]["camera"]

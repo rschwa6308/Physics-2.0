@@ -96,10 +96,10 @@ def main():
 
         if settings_window.alive:
             settings_window.update()
-            G = settings_window.get_gravity()
-            time_factor = settings_window.get_time()
-            COR = settings_window.get_COR()
-            collision = settings_window.get_collision()
+            G = settings_window.gravity_slider.get() / 100.0
+            time_factor = settings_window.time_slider.get() / 100.0
+            COR = settings_window.COR_slider.get()
+            collision = settings_window.collision.get()
 
         for window in settings_window.properties_windows:
             if window.alive:
