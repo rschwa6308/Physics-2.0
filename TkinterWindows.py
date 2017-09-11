@@ -25,6 +25,7 @@ class Settings(Menu):
     
     def configure(self):
         self.root.title("Simulation Settings")
+        self.properties_windows = []
         self.physics_frame = tk.LabelFrame(self.root)
 
         self.bg_color = (255,255,255)
@@ -91,8 +92,8 @@ class Settings(Menu):
         self.root.geometry(
             '%dx%d+%d+%d' % (305, 260, width / 3 - 315, height / 6 - 20))
 
-    def set_bodies(self, n):
-        self.bodies_label_text.set("Bodies: " + str(n))
+    def set_body_count(self):
+        self.bodies_label_text.set("Bodies: " + str(len(self.bodies)))
 
     def center_cam(self):
         self.camera.move_to_com(self.bodies)
@@ -134,8 +135,7 @@ class Settings(Menu):
                 self.walls.set(data["settings"]["walls"])
                 self.gravity_on.set(data["settings"]["gravity"])
                 self.g_field.set(data["settings"]["gravitational field"])
-                self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b
-                                  in data["bodies"]]
+                self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b in data["bodies"]]
 
     def set_bg_color(self):
         new = colorchooser.askcolor()[0]
@@ -147,7 +147,7 @@ class Settings(Menu):
         self.destroy()
 
     def update(self):
-        self.set_bodies(len(self.bodies))
+        self.set_body_count()
         self.root.update()
 
 

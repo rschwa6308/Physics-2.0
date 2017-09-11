@@ -58,15 +58,6 @@ def main():
     # Initialize settings window
     settings_window = Settings(bodies, camera)
 
-    # Initialize body properties window list
-    settings_window.properties_windows = []
-
-    # Initialize collision setting to True
-    collision = 1
-
-    # Initialize body count
-    settings_window.set_bodies(len(bodies))
-
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
@@ -76,16 +67,14 @@ def main():
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2.0")
 
-    # Initialize simulation clock and time factor
+    # Initialize simulation clock
     clock = pg.time.Clock()
-    time_factor = 1
 
     scroll = V2(0, 0)
     scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
+    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
     scrolling = [0, 0, 0, 0]
     scroll_constant = 1
-
-    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
 
     # Initialize simulation sentinel and frame counter
     done = False
@@ -188,7 +177,7 @@ def main():
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
             for b in bodies:
-                if max(b.position[0], b.position[1]) > 100000:  # TODO: find a good value from this boundary
+                if b.position.length() > 100000:  # TODO: find a good value from this boundary
                     bodies.remove(b)
 
         # Accelerate scrolling
