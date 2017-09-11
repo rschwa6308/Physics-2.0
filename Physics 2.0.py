@@ -39,6 +39,9 @@ class Camera:
 
 def main():
     global width, height, dims
+    pg.init()
+    info = pg.display.Info()
+    width, height = int(info.current_w * 0.6), int(info.current_h * 0.75)
     dims = V2(width, height)
 
     # Initialize camera object
@@ -50,13 +53,13 @@ def main():
     # bodies = Preset().generate("cluster", 100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
     # bodies = Preset().generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
-    bodies = Preset().generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
+    bodies = Preset(dims).generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
 
     # Initialize settings window
-    settings_window = Settings(bodies, camera)
+    settings_window = Settings(bodies, camera, dims)
 
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -118,7 +121,7 @@ def main():
                     x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
                         if b.click_collision((x, y)) and b not in [win.body for win in settings_window.properties_windows]:
-                            settings_window.properties_windows.append(BodyProperties(bodies, camera, len(settings_window.properties_windows), b))
+                            settings_window.properties_windows.append(BodyProperties(bodies, camera, dims, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1

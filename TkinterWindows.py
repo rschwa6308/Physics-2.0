@@ -6,9 +6,10 @@ from JsonSaving import *
 from Presets import *
 
 class Menu:
-    def __init__(self, bodies, camera, *args):
+    def __init__(self, bodies, camera, dims, *args):
         self.bodies = bodies
         self.camera = camera
+        self.width, self.height = dims
         self.create_root()
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.alive = True
@@ -90,7 +91,7 @@ class Settings(Menu):
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 260, width / 3 - 315, height / 6 - 20))
+            '%dx%d+%d+%d' % (305, 260, self.width / 3 - 315, self.height / 6 - 20))
 
     def set_body_count(self):
         self.bodies_label_text.set("Bodies: " + str(len(self.bodies)))
@@ -186,10 +187,10 @@ class BodyProperties(Menu):
         tk.Button(self.root, text="Delete", command=self.delete_body).grid(row=6, columnspan=3)
         # TODO: Add option for tracking specific bodies
 
-        self.width = 220
-        self.height = 250
-        self.root.geometry('%dx%d+%d+%d' % (self.width, self.height, width / 3 - 10 - self.width,
-                                            height * 2/3 - 290 + (self.height + 31) * queue_position))
+        self.W = 220
+        self.H = 250
+        self.root.geometry('%dx%d+%d+%d' % (self.W, self.H, self.width / 3 - 10 - self.W,
+                                            self.height * 2/3 - 290 + (self.H + 31) * queue_position))
 
     def focus(self):
         self.camera.move_to_body(self.body)
