@@ -12,37 +12,37 @@ def display(settings_window, screen, bodies, cam):
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
     for b in bodies:
         # Calculate coordinates and radius adjusted for camera
-        x, y = (b.position - cam.position - dims / 2) * cam.scale + dims / 2
+        x, y = (b.position - cam.position - cam.dims / 2) * cam.scale + cam.dims / 2
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
     pg.display.update()
 
 
 class Camera:
-    def __init__(self, position=None, scale=None):
+    def __init__(self, dims, position=None, scale=None):
         self.position = V2(0, 0)
         self.velocity = V2(0, 0)
+        self.dims = dims
         self.scale = 1
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
-        self.position = reduce(add, (b.position * b.mass for b in bodies)) / total_mass - V2(width, height) / 2
+        self.position = reduce(add, (b.position * b.mass for b in bodies)) / total_mass - self.dims / 2
 
     def move_to_body(self, body):
-        x, y = body.position
-        x -= width / 2
-        y -= height / 2
-        self.position = V2(x, y)
+        self.position = body.position - self.dims / 2
 
     def apply_velocity(self):
         self.position += self.velocity
 
 
 def main():
-    global width, height, dims
+    pg.init()
+    info = pg.display.Info()
+    width, height = int(info.current_w * 0.6), int(info.current_h * 0.75)
     dims = V2(width, height)
 
     # Initialize camera object
-    camera = Camera()
+    camera = Camera(dims)
 
     # Construct bodies list
     #bodies = Preset().generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
@@ -50,22 +50,13 @@ def main():
     # bodies = Preset().generate("cluster", 100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
     # bodies = Preset().generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
-    bodies = Preset().generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
+    bodies = Preset(dims).generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
 
     # Initialize settings window
-    settings_window = Settings(bodies, camera)
-
-    # Initialize body properties window list
-    settings_window.properties_windows = []
-
-    # Initialize collision setting to True
-    collision = 1
-
-    # Initialize body count
-    settings_window.set_bodies(len(bodies))
+    settings_window = Settings(bodies, camera, dims)
 
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -76,16 +67,14 @@ def main():
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2.0")
 
-    # Initialize simulation clock and time factor
+    # Initialize simulation clock
     clock = pg.time.Clock()
-    time_factor = 1
 
     scroll = V2(0, 0)
     scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
+    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
     scrolling = [0, 0, 0, 0]
     scroll_constant = 1
-
-    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
 
     # Initialize simulation sentinel and frame counter
     done = False
@@ -129,7 +118,7 @@ def main():
                     x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
                         if b.click_collision((x, y)) and b not in [win.body for win in settings_window.properties_windows]:
-                            settings_window.properties_windows.append(BodyProperties(bodies, camera, len(settings_window.properties_windows), b))
+                            settings_window.properties_windows.append(BodyProperties(bodies, camera, dims, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
                     scroll_constant /= 1.1
@@ -188,7 +177,7 @@ def main():
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
             for b in bodies:
-                if max(b.position[0], b.position[1]) > 100000:  # TODO: find a good value from this boundary
+                if b.position.length() > 100000:  # TODO: find a good value from this boundary
                     bodies.remove(b)
 
         # Accelerate scrolling
