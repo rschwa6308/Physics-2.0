@@ -12,40 +12,37 @@ def display(settings_window, screen, bodies, cam):
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
     for b in bodies:
         # Calculate coordinates and radius adjusted for camera
-        x, y = (b.position - cam.position - dims / 2) * cam.scale + dims / 2
+        x, y = (b.position - cam.position - cam.dims / 2) * cam.scale + cam.dims / 2
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
     pg.display.update()
 
 
 class Camera:
-    def __init__(self, position=None, scale=None):
+    def __init__(self, dims, position=None, scale=None):
         self.position = V2(0, 0)
         self.velocity = V2(0, 0)
+        self.dims = dims
         self.scale = 1
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
-        self.position = reduce(add, (b.position * b.mass for b in bodies)) / total_mass - V2(width, height) / 2
+        self.position = reduce(add, (b.position * b.mass for b in bodies)) / total_mass - self.dims / 2
 
     def move_to_body(self, body):
-        x, y = body.position
-        x -= width / 2
-        y -= height / 2
-        self.position = V2(x, y)
+        self.position = body.position - self.dims / 2
 
     def apply_velocity(self):
         self.position += self.velocity
 
 
 def main():
-    global width, height, dims
     pg.init()
     info = pg.display.Info()
     width, height = int(info.current_w * 0.6), int(info.current_h * 0.75)
     dims = V2(width, height)
 
     # Initialize camera object
-    camera = Camera()
+    camera = Camera(dims)
 
     # Construct bodies list
     #bodies = Preset().generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
