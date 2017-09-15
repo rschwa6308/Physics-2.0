@@ -205,12 +205,10 @@ class BodyProperties(Menu):
         self.canvas.create_oval((2, 2, 102, 102))
         for c in ((52, 2, 52, 102), (2, 52, 102, 52)):
             self.canvas.create_line(c, fill="Dark Gray", dash=(2, 2))
-        for attr in 'velocity','acceleration':
-            if getattr(self, attr).get():
-                mag = getattr(self.body, attr).length()
-                scale_factor = 40 * (1 - 2 ** -(mag * (1 if attr=='velocity' else 1000000) ))/ mag if mag else 0
-                x, y = scale_factor * getattr(self.body, attr)
-                self.canvas.create_line((52, 52, 52 + x, 52 + y), fill="Blue" if attr=='velocity' else "Red", arrow="last")
+        for attr, color in ['velocity','blue'],['acceleration','red']:
+            a = getattr(self.body, attr)
+            if getattr(self, attr).get() and a != (0,0): # If arrow is enabled and vector is not of length zero, draw the arrow using a logistic formula
+                self.canvas.create_line((52, 52, *((52,52)+40*(1-2**-(a.length()*1000000**(attr[0]!='v')))*a.normalize())), fill=color, arrow="last")
         self.canvas.grid(row=3, column=1, rowspan=2, columnspan=4)
 
     def update(self):
