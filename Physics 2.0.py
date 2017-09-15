@@ -9,7 +9,7 @@ from TkinterWindows import *
 def display(settings_window, screen, bodies, cam):
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
     if settings_window.walls.get():
-        pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
+        pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, *cam.dims), 3)
     for b in bodies:
         # Calculate coordinates and radius adjusted for camera
         x, y = (b.position - cam.position - cam.dims / 2) * cam.scale + cam.dims / 2
@@ -45,11 +45,11 @@ def main():
     camera = Camera(dims)
 
     # Construct bodies list
-    #bodies = Preset().generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
-    # bodies = Preset().generate("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
-    # bodies = Preset().generate("cluster", 100, (10, 20), (5, 500), False)
+    # bodies = Preset(dims).generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
+    # bodies = Preset(dims).generate("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
+    # bodies = Preset(dims).generate("cluster", 100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = Preset().generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
+    # bodies = Preset(dims).generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
     bodies = Preset(dims).generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order

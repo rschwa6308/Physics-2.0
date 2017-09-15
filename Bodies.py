@@ -26,11 +26,10 @@ class Body:
         return self.position.distance_to(mouse_pos) < self.radius
 
     def force_of(self, other, G):
-        x, y = (other.position[a] - self.position[a] for a in (0,1))
-        r = hypot(x,y)
+        d = other.position - self.position
+        r = d.length()
         if r == 0: return V2(0, 0)
-        acc = G/r**3
-        return V2(acc * x, acc * y)
+        return G/r**3 * d
 
     def test_collision(self, other):
         return self.position.distance_to(other.position) < self.radius + other.radius # Zero-tolerance collision
