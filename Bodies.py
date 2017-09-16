@@ -2,14 +2,11 @@ from Constants import *
 
 class Body:
     def __init__(self, mass, position, velocity, density=Density, color=None, name=None):
-        self.mass, self.density, self.radius, self.color, self.name = mass, density, int((mass/density)**(1/3)), name, color if color else tuple(randint(0, 255) for _ in '111')
+        self.mass, self.density, self.radius, self.color, self.name = mass, density, int((mass/density)**(1/3)), color if color else tuple(randint(0, 255) for _ in '111'), name
         self.position, self.velocity, self.acceleration = V2(position), V2(velocity), V2(0, 0)
 
-    def copy(self):
-        return Body(self.mass, self.position, self.velocity, self.density, self.color, None if self.name is None else self.name + " copy")     # inheritance of 'name' for debugging purposes only
-
     def draw_on(self, screen):
-        pg.draw.circle(screen, self.color, (int(self.position[0]), int(self.position[1])), int(self.radius), 0)
+        pg.draw.circle(screen, self.color, list(map(int, self.position)), int(self.radius), 0)
 
     def click_collision(self, mouse_pos):
         return self.position.distance_to(mouse_pos) < self.radius
