@@ -71,7 +71,7 @@ def main():
     clock = pg.time.Clock()
 
     scroll = V2(0, 0)
-    scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
+    scroll_keys = [pg.K_a, pg.K_w, pg.K_d, pg.K_s]
     scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
     scrolling = [0, 0, 0, 0]
     scroll_constant = 1
@@ -163,17 +163,13 @@ def main():
         # Wall collision
         if settings_window.walls.get():
             for b in bodies:
-                x, y = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2
-                radius = b.radius * camera.scale
-                if x < radius or x + radius > width:
-                    b.velocity.x *= -COR
-                    c = 1 if x < radius else -1
-                    b.position.x = c * (radius - width / 2) / camera.scale + width / 2 + camera.position[0]
-                if y < radius or y + radius > height:
-                    b.velocity.y *= -COR
-                    c = 1 if y < radius else -1
-                    b.position.y = c * (radius - height / 2) / camera.scale + height / 2 + camera.position[1]
-
+                d, r = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2, b.radius * camera.scale
+                for i in 0, 1:
+                    x = d[i] # x is the dimension (x,y) currently being tested / edited
+                    if x <= r or x >= dims[i] - r:
+                        b.velocity[i] *= -COR # Reflect the perpendicular velocity
+                        b.position[i] = (2*(x<r)-1) * (r-dims[i]/2) / camera.scale + dims[i] / 2 + camera.position[i] # Place body back into frame
+                
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
             for b in bodies:
@@ -181,14 +177,7 @@ def main():
                     bodies.remove(b)
 
         # Accelerate scrolling
-        if scrolling[0]:
-            scroll[0] -= scroll_constant
-        if scrolling[1]:
-            scroll[0] += scroll_constant
-        if scrolling[2]:
-            scroll[1] += scroll_constant
-        if scrolling[3]:
-            scroll[1] -= scroll_constant
+        scroll += scroll_constant * (V2(scrolling[:2])-scrolling[2:])
 
         # Decelerate scrolling
         scroll *= .95
