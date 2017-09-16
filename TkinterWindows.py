@@ -7,12 +7,9 @@ from Presets import *
 
 class Menu:
     def __init__(self, bodies, camera, dims, *args):
-        self.bodies = bodies
-        self.camera = camera
-        self.width, self.height = dims
+        self.bodies, self.camera, self.dims, self.alive = bodies, camera, dims, True
         self.create_root()
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.alive = True
         self.configure(*args)
 
     def destroy(self):
@@ -26,14 +23,10 @@ class Settings(Menu):
     
     def configure(self):
         self.root.title("Simulation Settings")
-        self.properties_windows = []
-        self.physics_frame = tk.LabelFrame(self.root)
+        self.properties_windows, self.physics_frame = [], tk.LabelFrame(self.root)
 
-        self.bg_color = (255,255,255)
-        self.walls = tk.BooleanVar()
-        self.gravity_on = tk.BooleanVar()
+        self.bg_color, self.walls, self.gravity_on, self.g_field = (255,255,255), tk.BooleanVar(), tk.BooleanVar(), tk.BooleanVar()
         self.gravity_on.set(True)
-        self.g_field = tk.BooleanVar()
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -91,7 +84,7 @@ class Settings(Menu):
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 260, self.width / 3 - 315, self.height / 6 - 20))
+            '%dx%d+%d+%d' % (305, 260, self.dims[0] / 3 - 315, self.dims[1] / 6 - 20))
 
     def set_body_count(self):
         self.bodies_label_text.set("Bodies: " + str(len(self.bodies)))
@@ -189,8 +182,8 @@ class BodyProperties(Menu):
 
         self.W = 220
         self.H = 250
-        self.root.geometry('%dx%d+%d+%d' % (self.W, self.H, self.width / 3 - 10 - self.W,
-                                            self.height * 2/3 - 290 + (self.H + 31) * queue_position))
+        self.root.geometry('%dx%d+%d+%d' % (self.W, self.H, self.dims[0] / 3 - 10 - self.W,
+                                            self.dims[1] * 2/3 - 290 + (self.H + 31) * queue_position))
 
     def focus(self):
         self.camera.move_to_body(self.body)

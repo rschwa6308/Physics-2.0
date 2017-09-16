@@ -142,8 +142,7 @@ def main():
 
         # Apply acceleration and velocity
         for body in bodies:
-            body.apply_acceleration(time_factor)
-            body.apply_velocity(time_factor)
+            body.apply_motion(time_factor)
             body.position += Scroll
 
         # Wall collision
