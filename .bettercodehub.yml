@@ -3,7 +3,9 @@ languages:
     component_depth: 2
     production:
       exclude:
-        - Test.py
+        - Unit_Tests.py
+        - src/tests/*
     test:
       include:
-        - Test.py
+        - Unit_Tests.py
+        - src/tests/*
