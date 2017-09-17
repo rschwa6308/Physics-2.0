@@ -51,3 +51,7 @@ class Body:
     def apply_motion(self, time_factor):
         self.velocity += self.acceleration * time_factor
         self.position += self.velocity * time_factor
+
+def generate_bodies(body_args_list):
+    return list(map(lambda args2: Body(*args2), body_args_list))
+

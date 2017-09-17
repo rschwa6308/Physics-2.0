@@ -1,5 +1,4 @@
-from random import randint, uniform, shuffle
-import pygame as pg
+from random import randint, uniform
 from pygame.math import Vector2 as V2
 from math import hypot, pi, sin, cos, sqrt
 

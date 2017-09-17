@@ -1,9 +1,8 @@
-import tkinter as tk
+import os, tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
-import os
 
-from .json_saving import *
-from ..core.presets import *
+from .json_saving import Save, load_save
+from ..core.bodies import generate_bodies
 
 class Menu:
     def __init__(self, bodies, camera, dims, *args):
@@ -21,9 +20,9 @@ class Settings(Menu):
     def create_root(self):
         self.root = tk.Tk()
     
-    def configure(self):
+    def configure(self, constants):
         self.root.title("Simulation Settings")
-        self.properties_windows, self.physics_frame = [], tk.LabelFrame(self.root)
+        self.properties_windows, self.physics_frame, G, COR = [], tk.LabelFrame(self.root), *constants
 
         self.bg_color, self.walls, self.gravity_on, self.g_field = (255,255,255), tk.BooleanVar(), tk.BooleanVar(), tk.BooleanVar()
         self.gravity_on.set(True)
@@ -117,19 +116,7 @@ class Settings(Menu):
                 window.destroy()
             self.properties_windows = []
             with open(filename) as file:
-                data = json.load(file)
-                self.gravity_slider.set(data["settings"]["G"])
-                self.time_slider.set(data["settings"]["time factor"])
-                self.COR_slider.set(data["settings"]["coefficient of restitution"])
-                self.collision.set(data["settings"]["collision"])
-                cam_data = data["settings"]["camera"]
-                self.camera.position = cam_data["position"]
-                self.camera.scale = cam_data["scale"]
-                self.bg_color = data["settings"]["background color"]
-                self.walls.set(data["settings"]["walls"])
-                self.gravity_on.set(data["settings"]["gravity"])
-                self.g_field.set(data["settings"]["gravitational field"])
-                self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b in data["bodies"]]
+                self.bodies[:] = generate_bodies(load_save(self, file))
 
     def set_bg_color(self):
         new = colorchooser.askcolor()[0]

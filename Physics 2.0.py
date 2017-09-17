@@ -1,7 +1,12 @@
 from functools import reduce
 from operator import add
+from random import shuffle
+from pygame.math import Vector2 as V2
+import pygame as pg
 
 from src.display.tkinter_windows import *
+from src.core.presets import Preset
+from src.core import constants
 
 # Import Structure
 # Constants -> Bodies -> Presets --(+JsonSaving)--> TkinterWindows -> Physics 2.0
@@ -42,18 +47,18 @@ def main():
     camera = Camera(dims)
 
     # Construct bodies list
-    # bodies = Preset(dims).generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
-    # bodies = Preset(dims).generate("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
-    # bodies = Preset(dims).generate("cluster", 100, (10, 20), (5, 500), False)
+    # bodies = Preset(dims).preset("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
+    # bodies = Preset(dims).preset("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
+    # bodies = Preset(dims).preset("cluster", 100, (10, 20), (5, 500), False)
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = Preset(dims).generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
-    bodies = Preset(dims).generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
+    # bodies = Preset(dims).preset("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
+    bodies = Preset(dims).preset("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
 
     # Initialize settings window and clock
-    settings_window, clock = Settings(bodies, camera, dims), pg.time.Clock()
+    settings_window, clock = Settings(bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock()
 
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -70,7 +75,7 @@ def main():
     done = False
     frame_count = 0
     while not done:
-        clock.tick(clock_speed)
+        clock.tick(constants.clock_speed)
         frame_count += 1
 
         if settings_window.alive:

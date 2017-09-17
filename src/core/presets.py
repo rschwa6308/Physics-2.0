@@ -3,9 +3,9 @@ from .bodies import *
 class Preset:
     def __init__(self, dims):
         self.width, self.height = dims
-    
-    def generate(self, preset_type, *args):
-        return list(map(lambda args2: Body(*args2), getattr(self, preset_type)(*args)))
+
+    def preset(self, preset_type, *args):
+        return generate_bodies(getattr(self, preset_type)(*args))
 
     def cluster(self, planets, mass_range, dist_range, circular=True, planet_density=Density):
         bodies = []
