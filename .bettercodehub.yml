@@ -1,6 +1,6 @@
+component_depth: 2
 languages:
   - name: python
-    component_depth: 2
     production:
       exclude:
         - Unit_Tests.py
