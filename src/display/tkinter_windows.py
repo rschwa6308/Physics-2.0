@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
 import os
 
-from ..core.json_saving import *
+from .json_saving import *
 from ..core.presets import *
 
 class Menu:
