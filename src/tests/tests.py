@@ -1,4 +1,4 @@
-from Bodies import *
+from ..core.bodies import *
 
 def test_body_movement(): # Testing body movement behavior
     print("Testing body movement...")
@@ -12,5 +12,3 @@ def test_body_movement(): # Testing body movement behavior
     test_body.apply_motion(6)
     assert test_body.position == (25, 4)
     print("Body movement - SUCCESS")
-
-test_body_movement()

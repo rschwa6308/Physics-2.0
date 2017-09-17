@@ -1,4 +1,4 @@
-from Bodies import *
+from .bodies import *
 
 class Preset:
     def __init__(self, dims):

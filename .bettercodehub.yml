@@ -1,5 +1,6 @@
 languages:
   - name: python
+    component_depth: 2
     production:
       exclude:
         - Test.py

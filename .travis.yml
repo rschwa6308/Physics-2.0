@@ -3,4 +3,4 @@ python:
   - 3.6
 install: pip install pygame
 script:
-  - python Tests.py
+  - python Unit_Tests.py

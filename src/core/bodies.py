@@ -1,4 +1,4 @@
-from Constants import *
+from .constants import *
 
 class Body:
     def __init__(self, mass, position, velocity, density=Density, color=None, name=None):

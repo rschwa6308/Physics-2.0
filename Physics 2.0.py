@@ -1,7 +1,7 @@
 from functools import reduce
 from operator import add
 
-from TkinterWindows import *
+from src.display.tkinter_windows import *
 
 # Import Structure
 # Constants -> Bodies -> Presets --(+JsonSaving)--> TkinterWindows -> Physics 2.0
