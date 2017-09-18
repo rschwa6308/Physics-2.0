@@ -6,7 +6,6 @@ import pygame as pg
 
 from src.display.tkinter_windows import *
 from src.core.presets import System, Gradient
-from src.core.bodies import Body
 from src.core import constants
 
 # Import Structure
@@ -48,11 +47,11 @@ def main():
     camera = Camera(dims)
 
     # Construct bodies list
-    bodies = System(dims, 100, (1,10), (75,500)).preset("unary", 5000, 0.3)
-    bodies = System(dims, 50, (10,15), (450,500)).preset("binary", (5000, 2500), 0.4)
-    bodies = System(dims, 100, (10,20), (5,500)).preset("cluster")
-    bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    bodies = Gradient(dims, 120, (500,1000)).preset("diffusion")
+    # bodies = System(dims, 100, (1,10), (75,500)).preset("unary", 5000, 0.3)
+    # bodies = System(dims, 50, (10,15), (450,500)).preset("binary", (5000, 2500), 0.4)
+    # bodies = System(dims, 100, (10,20), (5,500)).preset("cluster")
+    # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
+    # bodies = Gradient(dims, 120, (500,1000)).preset("diffusion")
     bodies = Gradient(dims, 120, (500,1000)).preset("density", (0.1, 0.3))
     
     # Eliminates patterns that come from constant computation order
