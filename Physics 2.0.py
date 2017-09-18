@@ -5,7 +5,8 @@ from pygame.math import Vector2 as V2
 import pygame as pg
 
 from src.display.tkinter_windows import *
-from src.core.presets import Preset
+from src.core.presets import System, Gradient
+from src.core.bodies import Body
 from src.core import constants
 
 # Import Structure
@@ -47,12 +48,12 @@ def main():
     camera = Camera(dims)
 
     # Construct bodies list
-    # bodies = Preset(dims).preset("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
-    # bodies = Preset(dims).preset("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
-    # bodies = Preset(dims).preset("cluster", 100, (10, 20), (5, 500), False)
-    # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = Preset(dims).preset("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
-    bodies = Preset(dims).preset("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
+    bodies = System(dims, 100, (1,10), (75,500)).preset("unary", 5000, 0.3)
+    bodies = System(dims, 50, (10,15), (450,500)).preset("binary", (5000, 2500), 0.4)
+    bodies = System(dims, 100, (10,20), (5,500)).preset("cluster")
+    bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
+    bodies = Gradient(dims, 120, (500,1000)).preset("diffusion")
+    bodies = Gradient(dims, 120, (500,1000)).preset("density", (0.1, 0.3))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
@@ -80,7 +81,8 @@ def main():
 
         if settings_window.alive:
             settings_window.update()
-            G, time_factor, COR, collision = settings_window.gravity_slider.get() / 100, settings_window.time_slider.get() / 100, settings_window.COR_slider.get(), settings_window.collision.get()
+            try: G, time_factor, COR, collision = settings_window.gravity_slider.get() / 100, settings_window.time_slider.get() / 100, settings_window.COR_slider.get(), settings_window.collision.get()
+            except: pass
 
         for window in settings_window.properties_windows:
             if window.alive:
@@ -109,6 +111,8 @@ def main():
                     pos = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
                         if b.click_collision(pos) and b not in [win.body for win in settings_window.properties_windows]:
+                            if not settings_window.alive: # Respawn the main window if it is dead
+                                settings_window = Settings(bodies, camera, dims, [constants.G, constants.COR]) # This still does not fix all errors, and all settings are reset to defaults
                             settings_window.properties_windows.append(BodyProperties(bodies, camera, dims, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
