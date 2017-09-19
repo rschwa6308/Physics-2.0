@@ -2,14 +2,11 @@ from functools import reduce
 from operator import add
 from random import shuffle
 from pygame.math import Vector2 as V2
-import pygame as pg
+import pygame as pg, os
 
-from src.display.tkinter_windows import *
+from src.display.tkinter_windows import Settings, BodyProperties
 from src.core.presets import System, Gradient
 from src.core import constants
-
-# Import Structure
-# Constants -> Bodies -> Presets --(+JsonSaving)--> TkinterWindows -> Physics 2.0
 
 def display(settings_window, screen, bodies, cam):
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
