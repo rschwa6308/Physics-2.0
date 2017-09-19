@@ -1,18 +1,14 @@
-import tkinter as tk
+import os, tkinter as tk
 from tkinter import filedialog, messagebox, colorchooser
-import os
 
-from JsonSaving import *
-from Presets import *
+from .json_saving import Save, load_save
+from ..core.bodies import generate_bodies
 
 class Menu:
     def __init__(self, bodies, camera, dims, *args):
-        self.bodies = bodies
-        self.camera = camera
-        self.width, self.height = dims
+        self.bodies, self.camera, self.dims, self.alive = bodies, camera, dims, True
         self.create_root()
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.alive = True
         self.configure(*args)
 
     def destroy(self):
@@ -24,16 +20,12 @@ class Settings(Menu):
     def create_root(self):
         self.root = tk.Tk()
     
-    def configure(self):
+    def configure(self, constants):
         self.root.title("Simulation Settings")
-        self.properties_windows = []
-        self.physics_frame = tk.LabelFrame(self.root)
+        self.properties_windows, self.physics_frame, G, COR = [], tk.LabelFrame(self.root), *constants
 
-        self.bg_color = (255,255,255)
-        self.walls = tk.BooleanVar()
-        self.gravity_on = tk.BooleanVar()
+        self.bg_color, self.walls, self.gravity_on, self.g_field = (255,255,255), tk.BooleanVar(), tk.BooleanVar(), tk.BooleanVar()
         self.gravity_on.set(True)
-        self.g_field = tk.BooleanVar()
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -91,7 +83,7 @@ class Settings(Menu):
 
         # Set window size and screen position
         self.root.geometry(
-            '%dx%d+%d+%d' % (305, 260, self.width / 3 - 315, self.height / 6 - 20))
+            '%dx%d+%d+%d' % (305, 260, self.dims[0] / 3 - 315, self.dims[1] / 6 - 20))
 
     def set_body_count(self):
         self.bodies_label_text.set("Bodies: " + str(len(self.bodies)))
@@ -124,19 +116,7 @@ class Settings(Menu):
                 window.destroy()
             self.properties_windows = []
             with open(filename) as file:
-                data = json.load(file)
-                self.gravity_slider.set(data["settings"]["G"])
-                self.time_slider.set(data["settings"]["time factor"])
-                self.COR_slider.set(data["settings"]["coefficient of restitution"])
-                self.collision.set(data["settings"]["collision"])
-                cam_data = data["settings"]["camera"]
-                self.camera.position = cam_data["position"]
-                self.camera.scale = cam_data["scale"]
-                self.bg_color = data["settings"]["background color"]
-                self.walls.set(data["settings"]["walls"])
-                self.gravity_on.set(data["settings"]["gravity"])
-                self.g_field.set(data["settings"]["gravitational field"])
-                self.bodies[:] = [Body(b["mass"], b["position"], b["velocity"], b["density"], b["color"], b["name"]) for b in data["bodies"]]
+                self.bodies[:] = generate_bodies(load_save(self, file))
 
     def set_bg_color(self):
         new = colorchooser.askcolor()[0]
@@ -189,8 +169,8 @@ class BodyProperties(Menu):
 
         self.W = 220
         self.H = 250
-        self.root.geometry('%dx%d+%d+%d' % (self.W, self.H, self.width / 3 - 10 - self.W,
-                                            self.height * 2/3 - 290 + (self.H + 31) * queue_position))
+        self.root.geometry('%dx%d+%d+%d' % (self.W, self.H, self.dims[0] / 3 - 10 - self.W,
+                                            self.dims[1] * 2/3 - 290 + (self.H + 31) * queue_position))
 
     def focus(self):
         self.camera.move_to_body(self.body)
@@ -205,12 +185,10 @@ class BodyProperties(Menu):
         self.canvas.create_oval((2, 2, 102, 102))
         for c in ((52, 2, 52, 102), (2, 52, 102, 52)):
             self.canvas.create_line(c, fill="Dark Gray", dash=(2, 2))
-        for attr in 'velocity','acceleration':
-            if getattr(self, attr).get():
-                mag = getattr(self.body, attr).length()
-                scale_factor = 40 * (1 - 2 ** -(mag * (1 if attr=='velocity' else 1000000) ))/ mag if mag else 0
-                x, y = scale_factor * getattr(self.body, attr)
-                self.canvas.create_line((52, 52, 52 + x, 52 + y), fill="Blue" if attr=='velocity' else "Red", arrow="last")
+        for attr, color in ['velocity','blue'],['acceleration','red']:
+            a = getattr(self.body, attr)
+            if getattr(self, attr).get() and a != (0,0): # If arrow is enabled and vector is not of length zero, draw the arrow using a logistic formula
+                self.canvas.create_line((52, 52, *((52,52)+40*(1-2**-(a.length()*1000000**(attr[0]!='v')))*a.normalize())), fill=color, arrow="last")
         self.canvas.grid(row=3, column=1, rowspan=2, columnspan=4)
 
     def update(self):

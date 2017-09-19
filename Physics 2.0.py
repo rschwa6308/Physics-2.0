@@ -1,7 +1,12 @@
 from functools import reduce
 from operator import add
+from random import shuffle
+from pygame.math import Vector2 as V2
+import pygame as pg
 
-from TkinterWindows import *
+from src.display.tkinter_windows import *
+from src.core.presets import System, Gradient
+from src.core import constants
 
 # Import Structure
 # Constants -> Bodies -> Presets --(+JsonSaving)--> TkinterWindows -> Physics 2.0
@@ -9,7 +14,7 @@ from TkinterWindows import *
 def display(settings_window, screen, bodies, cam):
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
     if settings_window.walls.get():
-        pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, width, height), 3)
+        pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, *cam.dims), 3)
     for b in bodies:
         # Calculate coordinates and radius adjusted for camera
         x, y = (b.position - cam.position - cam.dims / 2) * cam.scale + cam.dims / 2
@@ -18,11 +23,8 @@ def display(settings_window, screen, bodies, cam):
 
 
 class Camera:
-    def __init__(self, dims, position=None, scale=None):
-        self.position = V2(0, 0)
-        self.velocity = V2(0, 0)
-        self.dims = dims
-        self.scale = 1
+    def __init__(self, dims):
+        self.position, self.velocity, self.dims, self.scale = V2(0, 0), V2(0, 0), dims, 1
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
@@ -45,18 +47,18 @@ def main():
     camera = Camera(dims)
 
     # Construct bodies list
-    #bodies = Preset().generate("star_system", 5000, 0.3, 100, (1, 10), (75, 500), 1, 0.4)
-    # bodies = Preset().generate("binary_system", (5000, 2500), 0.3, 100, (75, 100), 0.4)
-    # bodies = Preset().generate("cluster", 100, (10, 20), (5, 500), False)
+    # bodies = System(dims, 100, (1,10), (75,500)).preset("unary", 5000, 0.3)
+    # bodies = System(dims, 50, (10,15), (450,500)).preset("binary", (5000, 2500), 0.4)
+    # bodies = System(dims, 100, (10,20), (5,500)).preset("cluster")
     # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = Preset().generate("diffusion_gradient", 120, 1000, ((255, 0, 0), (0, 0, 255)))
-    bodies = Preset(dims).generate("density_gradient", 120, (500, 1000), (0.1, 0.3), ((255, 0, 0), (0, 0, 255)))
+    # bodies = Gradient(dims, 120, (500,1000)).preset("diffusion")
+    bodies = Gradient(dims, 120, (500,1000)).preset("density", (0.1, 0.3))
     
     # Eliminates patterns that come from constant computation order
     shuffle(bodies)
 
-    # Initialize settings window
-    settings_window = Settings(bodies, camera, dims)
+    # Initialize settings window and clock
+    settings_window, clock = Settings(bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock()
 
     # Center display in monitor
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -67,28 +69,19 @@ def main():
     screen = pg.display.set_mode((width, height), pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2.0")
 
-    # Initialize simulation clock
-    clock = pg.time.Clock()
-
-    scroll = V2(0, 0)
-    scroll_keys = [pg.K_d, pg.K_a, pg.K_w, pg.K_s]
-    scroll_keys2 = [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
-    scrolling = [0, 0, 0, 0]
-    scroll_constant = 1
+    Scroll, scroll_k, scroll_k2, scroll_down, scroll_scale = V2(0, 0), [pg.K_a, pg.K_w, pg.K_d, pg.K_s], [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN], [0, 0, 0, 0], 1
 
     # Initialize simulation sentinel and frame counter
     done = False
     frame_count = 0
     while not done:
-        clock.tick(clock_speed)
+        clock.tick(constants.clock_speed)
         frame_count += 1
 
         if settings_window.alive:
             settings_window.update()
-            G = settings_window.gravity_slider.get() / 100.0
-            time_factor = settings_window.time_slider.get() / 100.0
-            COR = settings_window.COR_slider.get()
-            collision = settings_window.collision.get()
+            try: G, time_factor, COR, collision = settings_window.gravity_slider.get() / 100, settings_window.time_slider.get() / 100, settings_window.COR_slider.get(), settings_window.collision.get()
+            except: pass
 
         for window in settings_window.properties_windows:
             if window.alive:
@@ -99,32 +92,33 @@ def main():
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
                 width, height = event.w, event.h
-                dims = V2(width, height)
-                screen = pg.display.set_mode((width, height), pg.RESIZABLE)
+                dims, screen = V2(width, height), pg.display.set_mode((width, height), pg.RESIZABLE)
             elif event.type == pg.KEYDOWN:
-                if event.key in scroll_keys:
-                    scrolling[scroll_keys.index(event.key)] = 1
-                elif event.key in scroll_keys2:
-                    camera.velocity += V2((3/camera.scale,0) if event.key in scroll_keys2[:2] else (0,3/camera.scale)).elementwise() * ((scroll_keys2.index(event.key) not in (1,2)) * 2 - 1)
+                if event.key in scroll_k:
+                    scroll_down[scroll_k.index(event.key)] = 1
+                elif event.key in scroll_k2:
+                    camera.velocity += V2((3/camera.scale,0) if event.key in scroll_k2[:2] else (0,3/camera.scale)).elementwise() * ((scroll_k2.index(event.key) not in (1,2)) * 2 - 1)
             elif event.type == pg.KEYUP:
-                if event.key in scroll_keys:
-                    scrolling[scroll_keys.index(event.key)] = 0
-                elif event.key in scroll_keys2:
-                    camera.velocity = camera.velocity.elementwise() * ((0,1) if event.key in scroll_keys2[:2] else (1,0))
+                if event.key in scroll_k:
+                    scroll_down[scroll_k.index(event.key)] = 0
+                elif event.key in scroll_k2:
+                    camera.velocity = camera.velocity.elementwise() * ((0,1) if event.key in scroll_k2[:2] else (1,0))
             elif event.type == pg.QUIT:
                 done = True
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    x, y = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
+                    pos = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
                     for b in bodies:
-                        if b.click_collision((x, y)) and b not in [win.body for win in settings_window.properties_windows]:
+                        if b.click_collision(pos) and b not in [win.body for win in settings_window.properties_windows]:
+                            if not settings_window.alive: # Respawn the main window if it is dead
+                                settings_window = Settings(bodies, camera, dims, [constants.G, constants.COR]) # This still does not fix all errors, and all settings are reset to defaults
                             settings_window.properties_windows.append(BodyProperties(bodies, camera, dims, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
-                    scroll_constant /= 1.1
+                    scroll_scale /= 1.1
                 elif event.button == 5:
                     camera.scale = max(camera.scale / 1.1, 0.01)
-                    scroll_constant *= 1.1
+                    scroll_scale *= 1.1
 
         # Apply velocity to camera
         camera.apply_velocity()
@@ -156,42 +150,27 @@ def main():
 
         # Apply acceleration and velocity
         for body in bodies:
-            body.apply_acceleration(time_factor)
-            body.apply_velocity(time_factor)
-            body.position += scroll
+            body.apply_motion(time_factor)
+            body.position += Scroll
 
         # Wall collision
         if settings_window.walls.get():
             for b in bodies:
-                x, y = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2
-                radius = b.radius * camera.scale
-                if x < radius or x + radius > width:
-                    b.velocity.x *= -COR
-                    c = 1 if x < radius else -1
-                    b.position.x = c * (radius - width / 2) / camera.scale + width / 2 + camera.position[0]
-                if y < radius or y + radius > height:
-                    b.velocity.y *= -COR
-                    c = 1 if y < radius else -1
-                    b.position.y = c * (radius - height / 2) / camera.scale + height / 2 + camera.position[1]
-
+                d, r = ((b.position - camera.position) - dims / 2) * camera.scale + dims / 2, b.radius * camera.scale
+                for i in 0, 1:
+                    x = d[i] # x is the dimension (x,y) currently being tested / edited
+                    if x <= r or x >= dims[i] - r:
+                        b.velocity[i] *= -COR # Reflect the perpendicular velocity
+                        b.position[i] = (2*(x<r)-1) * (r-dims[i]/2) / camera.scale + dims[i] / 2 + camera.position[i] # Place body back into frame
+                
         # Kill a body if too far from origin (only check every 100 ticks)
         if frame_count % 100 == 0:
             for b in bodies:
                 if b.position.length() > 100000:  # TODO: find a good value from this boundary
                     bodies.remove(b)
 
-        # Accelerate scrolling
-        if scrolling[0]:
-            scroll[0] -= scroll_constant
-        if scrolling[1]:
-            scroll[0] += scroll_constant
-        if scrolling[2]:
-            scroll[1] += scroll_constant
-        if scrolling[3]:
-            scroll[1] -= scroll_constant
-
-        # Decelerate scrolling
-        scroll *= .95
+        # Update scrolling
+        Scroll = (Scroll + scroll_scale * (V2(scroll_down[:2])-scroll_down[2:])) * .95
 
     pg.quit()
     if settings_window.alive: settings_window.destroy()

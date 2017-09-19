@@ -35,3 +35,16 @@ class Save:
     def save_as(self, filename):
         with open(filename, "w") as outfile:
             json.dump(self.data, outfile)
+
+def load_save(window, file):
+    data = json.load(file)
+    s = data["settings"]
+    window.gravity_slider.set(s["G"])
+    window.time_slider.set(s["time factor"])
+    window.COR_slider.set(s["coefficient of restitution"])
+    window.collision.set(s["collision"])
+    window.camera.position, window.camera.scale, window.bg_color = s["camera"]["position"], s["camera"]["scale"], s["background color"]
+    window.walls.set(s["walls"])
+    window.gravity_on.set(s["gravity"])
+    window.g_field.set(s["gravitational field"])
+    return ((b[prop] for prop in ["mass","position","velocity","density","color","name"]) for b in data["bodies"])
