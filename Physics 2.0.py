@@ -28,7 +28,6 @@ def display(settings_window, screen, bodies, cam):
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
     pg.display.update()
 
-
 class Camera:
     def __init__(self, dims):
         self.position, self.velocity, self.dims, self.scale = V2(0, 0), V2(0, 0), dims, 1
@@ -46,8 +45,6 @@ class Camera:
 
 def main():
     screen, dims = init_display()
-
-    # Initialize camera object
     camera = Camera(dims)
 
     # Construct bodies list
@@ -123,20 +120,20 @@ def main():
         for b, body in enumerate(bodies):
             for o in range(len(bodies)-1, b, -1):
                 if collision and bodies[o].test_collision(body):
-                    bodies[o].collide(bodies[b], COR, settings_window.properties_windows)
-                    if COR == 0: # Only remove second body if collision is perfectly inelastic
+                    if not COR: # Only remove second body if collision is perfectly inelastic
+                        bodies[o].merge(bodies[b], settings_window.properties_windows)
                         bodies.pop(b)
                         break
+                    bodies[o].collide(bodies[b], COR)
                 if gravity:
-                        force = body.force_of(bodies[o], G)
+                        force = body.force_of(bodies[o], G) # This is a misnomer; `force` is actually acceleration / mass
                         body.acceleration += bodies[o].mass * force
                         bodies[o].acceleration -= body.mass * force
+            body.acceleration.y += G / 50 * g_field # Uniform gravitational field
             body.apply_motion(time_factor)
             body.position += Scroll
             if not frame_count % 100 and body.position.length() > 100000:  # TODO: find a good value from this boundary
                 bodies.remove(body)
-            if g_field: # Uniform gravitational field
-                body.acceleration.y += G / 50
             if walls: # Wall collision
                 d, r = ((body.position - camera.position) - dims / 2) * camera.scale + dims / 2, body.radius * camera.scale
                 for i in 0, 1:
