@@ -11,6 +11,13 @@ class Menu:
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.configure(*args)
 
+    def createLabelSlider(self, name, sliderDetails, res = 1):
+        AttrName, Root, Row, From, To, Length, Val = sliderDetails
+        tk.Label(Root, text=name).grid(row=Row)
+        self.__dict__[AttrName] = tk.Scale(Root, from_=From, to=To, orient=tk.HORIZONTAL, length=Length, resolution=res)
+        self.__dict__[AttrName].set(Val)
+        self.__dict__[AttrName].grid(row=Row, column=1)
+
     def destroy(self):
         self.root.destroy()
         self.alive = False
@@ -48,21 +55,9 @@ class Settings(Menu):
         tk.Label(self.root, textvariable=self.name).grid(row=0, column=0, columnspan=5000)
 
         # Physics Frame Content
-        tk.Label(self.physics_frame, text="Gravity: ").grid(row=0, column=0)
-        self.gravity_slider = tk.Scale(self.physics_frame, from_=-1000, to=1000, orient=tk.HORIZONTAL, length=200)
-        self.gravity_slider.set(G * 100)
-        self.gravity_slider.grid(row=0, column=1)
-
-        tk.Label(self.physics_frame, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
-        self.time_slider = tk.Scale(self.physics_frame, from_=-0, to=500, orient=tk.HORIZONTAL,
-                                    length=200)  # from_ can be set negative for rewind
-        self.time_slider.set(0)
-        self.time_slider.grid(row=1, column=1)
-
-        tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
-        self.COR_slider = tk.Scale(self.physics_frame, from_=0, to=2, resolution=0.01, orient=tk.HORIZONTAL, length=200)
-        self.COR_slider.set(COR)
-        self.COR_slider.grid(row=2, column=1)
+        self.createLabelSlider('Gravity: ', ('gravity_slider', self.physics_frame, 0, -1000, 1000, 200, G*100))
+        self.createLabelSlider('Time Factor (%): ', ('time_slider', self.physics_frame, 1, 0, 500, 200, 0))
+        self.createLabelSlider('Elasticity (CoR): ', ('COR_slider', self.physics_frame, 2, 0, 2, 200, COR), .01)
 
         self.collision = tk.IntVar()
         self.collision.set(1)
@@ -140,15 +135,9 @@ class BodyProperties(Menu):
         self.body = body
         self.root.title(self.body.name.title() if self.body.name else "Unnamed Body")
 
-        tk.Label(self.root, text="Mass: ").grid(row=1)
-        self.mass_slider = tk.Scale(self.root, from_=1, to=self.body.mass * 10, orient=tk.HORIZONTAL, length=100)
-        self.mass_slider.set(self.body.mass)
-        self.mass_slider.grid(row=1, column=1)
-
-        tk.Label(self.root, text="Density: ").grid(row=2)
-        self.density_slider = tk.Scale(self.root, from_=.01, to=self.body.density * 10, resolution=0.01, orient=tk.HORIZONTAL, length=100)
-        self.density_slider.set(self.body.density)
-        self.density_slider.grid(row=2, column=1)
+         # AttrName, Root, Row, From, To, Length, Val
+        self.createLabelSlider('Mass: ', ('mass_slider', self.root, 1, 1, self.body.mass*10, 100, self.body.mass))
+        self.createLabelSlider('Density: ', ('density_slider', self.root, 2, .01, self.body.density * 10, 100, self.body.density), .01)
 
         self.velocity = tk.BooleanVar()
         self.velocity.set(True)
