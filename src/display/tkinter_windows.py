@@ -11,6 +11,20 @@ class Menu:
         self.root.protocol("WM_DELETE_WINDOW", self.destroy)
         self.configure(*args)
 
+    def createLabelSlider(self, sliderDetails):
+        name, AttrName, Root, Row, From, To, Length, Val, Res = sliderDetails
+        tk.Label(Root, text=name).grid(row=Row)
+        self.__dict__[AttrName] = tk.Scale(Root, from_=From, to=To, orient=tk.HORIZONTAL, length=Length, resolution=Res)
+        self.__dict__[AttrName].set(Val)
+        self.__dict__[AttrName].grid(row=Row, column=1)
+
+    def createBoolean(self, Details):
+        name, AttrName, Root, Row, Column, PadY, Grid, Val = Details
+        self.__dict__[AttrName] = tk.BooleanVar()
+        self.__dict__[AttrName].set(Val)
+        if Grid: tk.Checkbutton(Root, text=name, variable=self.__dict__[AttrName]).grid(row=Row, column=Column, pady=PadY, sticky=tk.W)
+        else: Root.add_checkbutton(label=name, variable=self.__dict__[AttrName])
+
     def destroy(self):
         self.root.destroy()
         self.alive = False
@@ -22,10 +36,7 @@ class Settings(Menu):
     
     def configure(self, constants):
         self.root.title("Simulation Settings")
-        self.properties_windows, self.physics_frame, G, COR = [], tk.LabelFrame(self.root), *constants
-
-        self.bg_color, self.walls, self.gravity_on, self.g_field = (255,255,255), tk.BooleanVar(), tk.BooleanVar(), tk.BooleanVar()
-        self.gravity_on.set(True)
+        self.properties_windows, self.physics_frame, G, COR, self.bg_color = [], tk.LabelFrame(self.root), *constants,  (255,255,255)
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -37,9 +48,9 @@ class Settings(Menu):
         self.submenu = tk.Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label="Options", menu=self.submenu)
         self.submenu.add_command(label="Set Background Color", command=self.set_bg_color)
-        self.submenu.add_checkbutton(label="Walls", variable=self.walls)
-        self.submenu.add_checkbutton(label="Mutual Gravitation", variable=self.gravity_on)
-        self.submenu.add_checkbutton(label="Gravitational Field", variable=self.g_field)
+        self.createBoolean(('Walls', 'walls', self.submenu, 0,0,0,0,0))
+        self.createBoolean(('Mutual Gravitation', 'gravity_on', self.submenu, 0,0,0,0,1))
+        self.createBoolean(('Gravitational Field', 'g_field', self.submenu, 0,0,0,0,0))
 
         # File Frame Content
         self.filename = ""
@@ -48,26 +59,10 @@ class Settings(Menu):
         tk.Label(self.root, textvariable=self.name).grid(row=0, column=0, columnspan=5000)
 
         # Physics Frame Content
-        tk.Label(self.physics_frame, text="Gravity: ").grid(row=0, column=0)
-        self.gravity_slider = tk.Scale(self.physics_frame, from_=-1000, to=1000, orient=tk.HORIZONTAL, length=200)
-        self.gravity_slider.set(G * 100)
-        self.gravity_slider.grid(row=0, column=1)
-
-        tk.Label(self.physics_frame, text="Time Factor (%): ").grid(row=1, sticky=tk.E)
-        self.time_slider = tk.Scale(self.physics_frame, from_=-0, to=500, orient=tk.HORIZONTAL,
-                                    length=200)  # from_ can be set negative for rewind
-        self.time_slider.set(0)
-        self.time_slider.grid(row=1, column=1)
-
-        tk.Label(self.physics_frame, text="Elasticity (CoR): ").grid(row=2, column=0)
-        self.COR_slider = tk.Scale(self.physics_frame, from_=0, to=2, resolution=0.01, orient=tk.HORIZONTAL, length=200)
-        self.COR_slider.set(COR)
-        self.COR_slider.grid(row=2, column=1)
-
-        self.collision = tk.IntVar()
-        self.collision.set(1)
-        self.collision_checkbutton = tk.Checkbutton(self.physics_frame, text="Collisions", variable=self.collision)
-        self.collision_checkbutton.grid(row=3, column=1, pady=5, sticky=tk.W)
+        self.createLabelSlider(('Gravity: ', 'gravity_slider', self.physics_frame, 0, -1000, 1000, 200, G*100, 1))
+        self.createLabelSlider(('Time Factor (%): ', 'time_slider', self.physics_frame, 1, 0, 500, 200, 0, 1))
+        self.createLabelSlider(('Elasticity (CoR): ', 'COR_slider', self.physics_frame, 2, 0, 2, 200, COR, .01))
+        self.createBoolean(('Collisions', 'collision', self.physics_frame, 3,1,5,1,1))
 
         self.bodies_label_text = tk.StringVar()
         self.bodies_label = tk.Label(self.physics_frame, textvariable=self.bodies_label_text)
@@ -140,25 +135,10 @@ class BodyProperties(Menu):
         self.body = body
         self.root.title(self.body.name.title() if self.body.name else "Unnamed Body")
 
-        tk.Label(self.root, text="Mass: ").grid(row=1)
-        self.mass_slider = tk.Scale(self.root, from_=1, to=self.body.mass * 10, orient=tk.HORIZONTAL, length=100)
-        self.mass_slider.set(self.body.mass)
-        self.mass_slider.grid(row=1, column=1)
-
-        tk.Label(self.root, text="Density: ").grid(row=2)
-        self.density_slider = tk.Scale(self.root, from_=.01, to=self.body.density * 10, resolution=0.01, orient=tk.HORIZONTAL, length=100)
-        self.density_slider.set(self.body.density)
-        self.density_slider.grid(row=2, column=1)
-
-        self.velocity = tk.BooleanVar()
-        self.velocity.set(True)
-        self.velocity_checkbutton = tk.Checkbutton(self.root, text="Velocity", variable=self.velocity)
-        self.velocity_checkbutton.grid(row=3, column=0, sticky=tk.W)
-
-        self.acceleration = tk.BooleanVar()
-        self.acceleration.set(True)
-        self.acceleration_checkbutton = tk.Checkbutton(self.root, text="Acceleration", variable=self.acceleration)
-        self.acceleration_checkbutton.grid(row=4, column=0, sticky=tk.W)
+        self.createLabelSlider(('Mass: ', 'mass_slider', self.root, 1, 1, self.body.mass*10, 100, self.body.mass, 1))
+        self.createLabelSlider(('Density: ', 'density_slider', self.root, 2, .01, self.body.density * 10, 100, self.body.density, .01))
+        self.createBoolean(('Velocity', 'velocity', self.root, 3,0,0,1,1))
+        self.createBoolean(('Acceleration', 'acceleration', self.root, 4,0,0,1,1))
 
         self.canvas = tk.Canvas(self.root, width=104, height=104)
         self.update_canvas()
