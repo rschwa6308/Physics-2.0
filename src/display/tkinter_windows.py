@@ -177,3 +177,6 @@ class BodyProperties(Menu):
         self.body.density = self.density_slider.get()
         self.body.update_radius()
         self.update_canvas()
+
+def create_menu(menu_type, *args):
+    return globals()[menu_type](*args)

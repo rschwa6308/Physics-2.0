@@ -4,7 +4,7 @@ from random import shuffle
 from pygame.math import Vector2 as V2
 import pygame as pg, os
 
-from src.display.tkinter_windows import Settings, BodyProperties
+from src.display.tkinter_windows import create_menu
 from src.core.presets import System, Gradient
 from src.core import constants
 
@@ -57,7 +57,7 @@ def main():
     shuffle(bodies)
 
     # Initialize settings window and clock
-    settings_window, clock = Settings(bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock()
+    settings_window, clock = create_menu("Settings", bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock()
 
     Scroll, scroll_k, scroll_k2, scroll_down, scroll_scale = V2(0, 0), [pg.K_a, pg.K_w, pg.K_d, pg.K_s], [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN], [0, 0, 0, 0], 1
 
@@ -100,8 +100,8 @@ def main():
                     for b in bodies:
                         if b.click_collision(pos) and b not in [win.body for win in settings_window.properties_windows]:
                             if not settings_window.alive: # Respawn the main window if it is dead
-                                settings_window = Settings(bodies, camera, dims, [G, COR]) # This still does not fix all errors, and all settings are reset to defaults
-                            settings_window.properties_windows.append(BodyProperties(bodies, camera, dims, len(settings_window.properties_windows), b))
+                                settings_window = create_menu("Settings", bodies, camera, dims, [G, COR]) # This still does not fix all errors, and all settings are reset to defaults
+                            settings_window.properties_windows.append(create_menu("BodyProperties", bodies, camera, dims, len(settings_window.properties_windows), b))
                 elif event.button == 4:
                     camera.scale = min(camera.scale * 1.1, 100)
                     scroll_scale /= 1.1

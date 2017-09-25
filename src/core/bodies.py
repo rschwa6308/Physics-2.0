@@ -5,6 +5,9 @@ class Body:
         self.mass, self.density, self.radius, self.color, self.name = mass, density, int((mass/density)**(1/3)), color if color else tuple(randint(0, 255) for _ in '111'), name
         self.position, self.velocity, self.acceleration = V2(position), V2(velocity), V2(0, 0)
 
+    def __repr__(self):
+        return self.name if self.name else "Unnamed Body"
+
     def draw_on(self, screen):
         pg.draw.circle(screen, self.color, list(map(int, self.position)), int(self.radius), 0)
 
