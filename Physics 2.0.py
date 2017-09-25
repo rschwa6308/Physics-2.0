@@ -18,7 +18,7 @@ def init_display():
     pg.display.set_caption("Physics Simulator 2.0")
     return screen, V2(dims)
 
-def display(settings_window, screen, bodies, cam):
+def refresh_display(settings_window, screen, bodies, cam):
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
     if settings_window.walls.get():
         pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 0, *cam.dims), 3)
@@ -27,6 +27,19 @@ def display(settings_window, screen, bodies, cam):
         x, y = (b.position - cam.position - cam.dims / 2) * cam.scale + cam.dims / 2
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
     pg.display.update()
+
+def update_windows(settings_window):
+    arr = []
+    if settings_window.alive:
+        settings_window.update()
+        try: arr = [settings_window.gravity_slider.get() / 100, settings_window.time_slider.get() / 100, settings_window.COR_slider.get(),
+                     settings_window.collision.get(), settings_window.walls.get(), settings_window.g_field.get(), settings_window.gravity_on.get()]
+        except: pass
+    for window in settings_window.properties_windows:
+        if window.alive: window.update()
+        else: settings_window.properties_windows.remove(window)
+    return arr
+    
 
 class Camera:
     def __init__(self, dims):
@@ -67,16 +80,7 @@ def main():
         clock.tick(constants.clock_speed)
         frame_count += 1
 
-        if settings_window.alive:
-            settings_window.update()
-            try: G, time_factor, COR, collision, walls, g_field, gravity = settings_window.gravity_slider.get() / 100, settings_window.time_slider.get() / 100, settings_window.COR_slider.get(), settings_window.collision.get(), settings_window.walls.get(), settings_window.g_field.get(), settings_window.gravity_on.get()
-            except: pass
-
-        for window in settings_window.properties_windows:
-            if window.alive:
-                window.update()
-            else:
-                settings_window.properties_windows.remove(window)
+        G, time_factor, COR, collision, walls, g_field, gravity = update_windows(settings_window)
 
         for event in pg.event.get():
             if event.type == pg.VIDEORESIZE:
@@ -142,8 +146,7 @@ def main():
                         body.velocity[i] *= -COR # Reflect the perpendicular velocity
                         body.position[i] = (2*(x<r)-1) * (r-dims[i]/2) / camera.scale + dims[i] / 2 + camera.position[i] # Place body back into frame
 
-        # Display current frame
-        display(settings_window, screen, bodies, camera)
+        refresh_display(settings_window, screen, bodies, camera)
 
         # Update scrolling
         Scroll = (Scroll + scroll_scale * (V2(scroll_down[:2])-scroll_down[2:])) * .95
