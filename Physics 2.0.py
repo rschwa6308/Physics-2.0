@@ -40,6 +40,23 @@ def update_windows(settings_window):
         else: settings_window.properties_windows.remove(window)
     return arr
 
+def handle_mouse(*args):
+    settings_window, camera, event, bodies, dims, G, COR, scroll_scale = args
+    if event.button == 1:
+        pos = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
+        for b in bodies:
+            if b.click_collision(pos) and b not in [win.body for win in settings_window.properties_windows]:
+                if not settings_window.alive: # Respawn the main window if it is dead
+                    settings_window.__init__(bodies, camera, dims, [G, COR]) # This still does not fix all errors
+                settings_window.properties_windows.append(create_menu("BodyProperties", bodies, camera, dims, len(settings_window.properties_windows), b))
+    elif event.button == 4:
+        camera.scale = min(camera.scale * 1.1, 100)
+        scroll_scale /= 1.1
+    elif event.button == 5:
+        camera.scale = max(camera.scale / 1.1, 0.01)
+        scroll_scale *= 1.1
+    return scroll_scale
+
 def handle_events(*args):
     settings_window, camera, scroll_down, scroll_scale, done, dims, screen, bodies, G, COR = args
     scroll_k, scroll_k2 = [pg.K_a, pg.K_w, pg.K_d, pg.K_s], [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
@@ -56,20 +73,8 @@ def handle_events(*args):
         elif event.type == pg.QUIT:
             done = True
         elif event.type == pg.MOUSEBUTTONDOWN:
-            if event.button == 1:
-                pos = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
-                for b in bodies:
-                    if b.click_collision(pos) and b not in [win.body for win in settings_window.properties_windows]:
-                        if not settings_window.alive: # Respawn the main window if it is dead
-                            settings_window.__init__(bodies, camera, dims, [G, COR]) # This still does not fix all errors
-                        settings_window.properties_windows.append(create_menu("BodyProperties", bodies, camera, dims, len(settings_window.properties_windows), b))
-            elif event.button == 4:
-                camera.scale = min(camera.scale * 1.1, 100)
-                scroll_scale /= 1.1
-            elif event.button == 5:
-                camera.scale = max(camera.scale / 1.1, 0.01)
-                scroll_scale *= 1.1
-    return camera, scroll_down, scroll_scale, done, dims, screen
+            scroll_scale = handle_mouse(settings_window, camera, event, bodies, dims, G, COR, scroll_scale)
+    return scroll_down, scroll_scale, done, dims, screen
 
 def handle_bodies(*args):
     G, COR, time_factor, collision, walls, g_field, gravity, Scroll, bodies, camera, dims, frame_count, settings_window = args
@@ -86,9 +91,9 @@ def handle_bodies(*args):
                     break
                 bodies[o].collide(bodies[b], COR)
             if gravity:
-                    force = body.force_of(bodies[o], G) # This is a misnomer; `force` is actually acceleration / mass
-                    body.acceleration += bodies[o].mass * force
-                    bodies[o].acceleration -= body.mass * force
+                force = body.force_of(bodies[o], G) # This is a misnomer; `force` is actually acceleration / mass
+                body.acceleration += bodies[o].mass * force
+                bodies[o].acceleration -= body.mass * force
         body.acceleration.y += G / 50 * g_field # Uniform gravitational field
         body.apply_motion(time_factor)
         body.position += Scroll
@@ -139,7 +144,7 @@ def main():
         
         camera.apply_velocity()
         G, COR, misc_settings = update_windows(settings_window)
-        camera, scroll_down, scroll_scale, done, dims, screen = handle_events(settings_window, camera, scroll_down, scroll_scale, done, dims, screen, bodies, G, COR)
+        scroll_down, scroll_scale, done, dims, screen = handle_events(settings_window, camera, scroll_down, scroll_scale, done, dims, screen, bodies, G, COR)
         handle_bodies(G, COR, *misc_settings, Scroll, bodies, camera, dims, frame_count, settings_window)
         refresh_display(settings_window, screen, bodies, camera)
 
