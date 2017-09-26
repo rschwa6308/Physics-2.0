@@ -41,7 +41,7 @@ def update_windows(settings_window):
     return arr
 
 def handle_mouse(*args):
-    settings_window, camera, event, bodies, dims, G, COR, scroll_scale = args
+    settings_window, camera, event, bodies, dims, G, COR, scroll = args
     if event.button == 1:
         pos = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
         for b in bodies:
@@ -51,33 +51,30 @@ def handle_mouse(*args):
                 settings_window.properties_windows.append(create_menu("BodyProperties", bodies, camera, dims, len(settings_window.properties_windows), b))
     elif event.button == 4:
         camera.scale = min(camera.scale * 1.1, 100)
-        scroll_scale /= 1.1
+        scroll.scale /= 1.1
     elif event.button == 5:
         camera.scale = max(camera.scale / 1.1, 0.01)
-        scroll_scale *= 1.1
-    return scroll_scale
+        scroll.scale *= 1.1
 
 def handle_events(*args):
-    settings_window, camera, scroll_down, scroll_scale, done, dims, screen, bodies, G, COR = args
-    scroll_k, scroll_k2 = [pg.K_a, pg.K_w, pg.K_d, pg.K_s], [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
+    settings_window, camera, scroll, done, dims, screen, bodies, G, COR = args
     for event in pg.event.get():
         if event.type == pg.VIDEORESIZE:
             width, height = event.w, event.h
             dims, screen = V2(width, height), pg.display.set_mode((width, height), pg.RESIZABLE)
         elif event.type == pg.KEYDOWN:
-            if event.key in scroll_k: scroll_down[scroll_k.index(event.key)] = 1
-            elif event.key in scroll_k2: camera.velocity += V2((3/camera.scale,0) if event.key in scroll_k2[:2] else (0,3/camera.scale)).elementwise() * ((scroll_k2.index(event.key) not in (1,2)) * 2 - 1)
+            scroll.key(event.key, 1)
+            camera.key_down(event.key)
         elif event.type == pg.KEYUP:
-            if event.key in scroll_k: scroll_down[scroll_k.index(event.key)] = 0
-            elif event.key in scroll_k2: camera.velocity = camera.velocity.elementwise() * ((0,1) if event.key in scroll_k2[:2] else (1,0))
-        elif event.type == pg.QUIT:
-            done = True
+            scroll.key(event.key, 0)
+            camera.key_up(event.key)
         elif event.type == pg.MOUSEBUTTONDOWN:
-            scroll_scale = handle_mouse(settings_window, camera, event, bodies, dims, G, COR, scroll_scale)
-    return scroll_down, scroll_scale, done, dims, screen
+            handle_mouse(settings_window, camera, event, bodies, dims, G, COR, scroll)
+        done |= event.type == pg.QUIT
+    return done, dims, screen
 
 def handle_bodies(*args):
-    G, COR, time_factor, collision, walls, g_field, gravity, Scroll, bodies, camera, dims, frame_count, settings_window = args
+    G, COR, time_factor, collision, walls, g_field, gravity, scroll, bodies, camera, dims, frame_count, settings_window = args
 
     for body in bodies: # Reset previous calculations
         body.acceleration = V2(0, 0)
@@ -96,7 +93,7 @@ def handle_bodies(*args):
                 bodies[o].acceleration -= body.mass * force
         body.acceleration.y += G / 50 * g_field # Uniform gravitational field
         body.apply_motion(time_factor)
-        body.position += Scroll
+        body.position += scroll.val
         if not frame_count % 100 and body.position.length() > 100000:  # TODO: find a good value from this boundary
             bodies.remove(body)
         if walls: # Wall collision
@@ -107,9 +104,28 @@ def handle_bodies(*args):
                     body.velocity[i] *= -COR # Reflect the perpendicular velocity
                     body.position[i] = (2*(x<r)-1) * (r-dims[i]/2) / camera.scale + dims[i] / 2 + camera.position[i] # Place body back into frame
 
+class Scroll:
+    def __init__(self):
+        self.down, self.map, self.val, self.scale = [0, 0, 0, 0], [pg.K_a, pg.K_w, pg.K_d, pg.K_s], V2(0, 0), 1
+
+    def key(self, key, down):
+        if key in self.map:
+            self.down[self.map.index(key)] = down
+
+    def update_value(self):
+        self.val = (self.val + self.scale * (V2(self.down[:2])-self.down[2:])) * .95
+
 class Camera:
     def __init__(self, dims):
-        self.position, self.velocity, self.dims, self.scale = V2(0, 0), V2(0, 0), dims, 1
+        self.position, self.velocity, self.dims, self.scale, self.map = V2(0, 0), V2(0, 0), dims, 1, [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
+
+    def key_down(self, key):
+        if key in self.map:
+            self.velocity = V2((3/self.scale,0) if key in self.map[:2] else (0,3/self.scale)).elementwise() * ((self.map.index(key) not in (1,2)) * 2 - 1)
+
+    def key_up(self, key):
+        if key in self.map:
+            self.velocity = self.velocity.elementwise() * ((0,1) if key in self.map[:2] else (1,0))
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
@@ -124,7 +140,7 @@ class Camera:
 
 def main():
     screen, dims = init_display()
-    camera = Camera(dims)
+    camera, scroll = Camera(dims), Scroll()
 
     # Construct bodies list
     # bodies = System(dims, 100, (1,10), (75,500)).preset("unary", 5000, 0.3)
@@ -136,7 +152,6 @@ def main():
     shuffle(bodies)
 
     settings_window, clock, done, frame_count = create_menu("Settings", bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock(), False, 0
-    Scroll, scroll_down, scroll_scale = V2(0, 0), [0, 0, 0, 0], 1
     
     while not done:
         clock.tick(constants.clock_speed)
@@ -144,11 +159,10 @@ def main():
         
         camera.apply_velocity()
         G, COR, misc_settings = update_windows(settings_window)
-        scroll_down, scroll_scale, done, dims, screen = handle_events(settings_window, camera, scroll_down, scroll_scale, done, dims, screen, bodies, G, COR)
-        handle_bodies(G, COR, *misc_settings, Scroll, bodies, camera, dims, frame_count, settings_window)
+        done, dims, screen = handle_events(settings_window, camera, scroll, done, dims, screen, bodies, G, COR)
+        handle_bodies(G, COR, *misc_settings, scroll, bodies, camera, dims, frame_count, settings_window)
         refresh_display(settings_window, screen, bodies, camera)
-
-        Scroll = (Scroll + scroll_scale * (V2(scroll_down[:2])-scroll_down[2:])) * .95 # Update scrolling
+        scroll.update_value()
 
     pg.quit()
     if settings_window.alive: settings_window.destroy()
