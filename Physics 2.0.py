@@ -24,6 +24,8 @@ def refresh_display(settings_window, screen, bodies, cam):
         # Calculate coordinates and radius adjusted for camera
         x, y = (b.position - cam.position - cam.dims / 2) * cam.scale + cam.dims / 2
         pg.draw.circle(screen, b.color, (int(x), int(y)), int(b.radius * cam.scale), 0)
+        # The radius should be calculated in such a way that the camera can be zoomed indefinitely.
+        # Currently, the properties of an object can reach a distinct threshold, after which they become invisible.
     pg.display.update()
 
 def update_windows(settings_window):

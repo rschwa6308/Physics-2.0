@@ -39,6 +39,15 @@ class Menu:
         if Grid: tk.Checkbutton(Root, text=name, variable=self.__dict__[AttrName]).grid(row=Row, column=Column, pady=PadY, sticky=tk.W)
         else: Root.add_checkbutton(label=name, variable=self.__dict__[AttrName])
 
+    def createColor(self, *Details):
+        name, AttrName, Root, Row = Details
+        frame = tk.Frame(Root)
+        tk.Label(frame, text=name).grid(row=0, column=0)
+        tk.Button(frame, text="Select Color", command=lambda: self.color_choice(AttrName+"Val")).grid(row=0, column=1, padx=5, pady=5)
+        self.__dict__[AttrName+"Val"] = tk.StringVar(value='')
+        tk.Label(frame, textvariable= self.__dict__[AttrName+"Val"]).grid(row=0, column=2)
+        frame.grid(row=Row, columnspan=2)
+
     def destroy(self):
         self.root.destroy()
         self.alive = False
@@ -48,7 +57,8 @@ class CreateSystem(Menu):
         self.root = tk.Toplevel()
         self.choices = {"System":("Unary","Binary","Cluster"), "Gradient":("Density","Diffusion")}
         
-    def configure(self):
+    def configure(self, parent):
+        self.parent = parent
         d = list(self.choices.keys())[0]
         default = tk.StringVar(value=d)
         tk.Label(self.root, text="Choose system type:").grid(row=0, column=0)
@@ -56,6 +66,12 @@ class CreateSystem(Menu):
         self.opt.grid(row=0, column=1)
         self.opt.config(width=8)
         self.choice2(d)
+
+    def color_choice(self, AttrName):
+        c = tuple(int(x) for x in colorchooser.askcolor()[0])
+        if c:
+            self.__dict__[AttrName].set(str(c))
+            self.__dict__[AttrName+'True'] = c
 
     def choice2(self, chosen):
         c = self.choices[chosen]
@@ -76,6 +92,10 @@ class CreateSystem(Menu):
         row = 4 # Use this to track the number of rows used in the window
         if chosen == "Gradient":
             # Add color options
+           #tk.Checkbutton(root, bg='#FF0000').grid(row=1)
+            self.createColor('Color 1', 'color1', root, row); self.createColor('Color 2', 'color2', root, row+1)
+            self.color1Val.set("(255, 0, 0)"); self.color2Val.set("(0, 0, 255)"); self.color1ValTrue, self.color2ValTrue = (255,0,0), (0,0,255)
+            row += 2
             if chosen2 == "Density":
                 self.createEntryRange("Densities: ", 'densities', root, row, 0.1, 0.15)
                 row += 1
@@ -91,10 +111,10 @@ class CreateSystem(Menu):
                 if chosen2 == "Binary":
                     self.createLabelSlider("Star Mass 2: ", 'star_mass2', root, row, 0, 10000, 200, 500, 50)
                     row += 1
+                else:
+                    self.createBoolean('Circular?', 'circular', root, row, 0, 0, 1, 1)
         tk.Button(root, text="Submit", command=lambda: self.submit(chosen, chosen2)).grid(row=row, columnspan=2, pady=10)
         root.grid(row=2, columnspan=2)
-        self.root.grid_propagate(0)
-        self.root.grid_propagate(1)
 
     def submit(self, chosen, chosen2):
         new_bodies = []
@@ -103,11 +123,12 @@ class CreateSystem(Menu):
         mass_r = self.findEntries('mass_r')
         if chosen == "Gradient":
             # Add colors
+            colors = (self.color1ValTrue, self.color2ValTrue)
             if chosen2 == "Density":
                 densities = self.findEntries('densities')
-                new_bodies = Gradient(dims, num, mass_r).preset('Density', densities)
+                new_bodies = Gradient(dims, num, mass_r, colors).preset('Density', densities)
             else:
-                new_bodies = Gradient(dims, num, mass_r).preset('Diffusion')
+                new_bodies = Gradient(dims, num, mass_r, colors).preset('Diffusion')
         else:
             dist_r = self.findEntries('dist_r')
             density = self.density.get()
@@ -120,10 +141,16 @@ class CreateSystem(Menu):
                     star_mass2 = self.star_mass2.get()
                     new_bodies = System(dims, num, mass_r, dist_r, density).preset('Binary', (star_mass, star_mass2), star_density)
                 else:
-                    # Add circular option
-                    new_bodies = System(dims, num, mass_r, dist_r, density).preset('Unary', star_mass, star_density)
+                    circular = self.circular.get()
+                    new_bodies = System(dims, num, mass_r, dist_r, density).preset('Unary', star_mass, star_density, circular)
         if not self.bodies or messagebox.askokcancel("Discard Changes", "Are you sure you want to discard changes?"):
             self.bodies[:] = new_bodies
+            for window in self.parent.properties_windows:
+                window.destroy()
+            self.parent.properties_windows = []
+            self.parent.name.set("Unnamed Simulation")
+            self.parent.filename = ''
+
 
 class Settings(Menu):
     def create_root(self):
@@ -198,7 +225,7 @@ class Settings(Menu):
             save_object.save_as(filename)
 
     def new_file(self):
-        x = create_menu("CreateSystem", self.bodies, self.camera, self.dims)
+        x = create_menu("CreateSystem", self.bodies, self.camera, self.dims, self)
 
     def open_file(self):
         filename = filedialog.askopenfilename()
@@ -268,6 +295,12 @@ class BodyProperties(Menu):
             if getattr(self, attr).get() and a != (0,0): # If arrow is enabled and vector is not of length zero, draw the arrow using a logistic formula
                 self.canvas.create_line((52, 52, *((52,52)+40*(1-2**-(a.length()*1000000**(attr[0]!='v')))*a.normalize())), fill=color, arrow="last")
         self.canvas.grid(row=3, column=1, rowspan=2, columnspan=4)
+
+    def merge(self):
+        self.mass_slider.set(self.body.mass)
+        self.mass_slider.config(to=self.body.mass * 10)
+        self.density_slider.set(self.body.density)
+        self.density_slider.config(to=self.body.density * 10)
 
     def update(self):
         self.root.update()

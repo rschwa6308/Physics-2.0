@@ -25,10 +25,14 @@ class Body:
     def merge(self, other, prop_wins): # Special case: perfectly inelastic collision results in merging of the two bodies
         m, m2, v, v2, x, x2 = self.mass, other.mass, self.velocity, other.velocity, self.position, other.position; M = m + m2
         self.position, self.velocity, self.mass, self.radius, self.color = (x*m + x2*m2) / M,  (v*m + v2*m2) / M, M, int((M*M/(self.density * m + other.density * m2))**(1/3)), tuple(((self.color[x]*m + other.color[x]*m2)/M) for x in (0,1,2))
+        self.density = M/self.radius**3
         # Check to see if the deleted body belongs to a properties window; If so, set win.body to the combined body
         for win in prop_wins:
-            if win.body is other:
+            if win.body is self:
+                win.merge()
+            elif win.body is other:
                 win.body = self
+                win.merge()
                 
     def collide(self, other, COR):
         m, m2, v, v2, x, x2 = self.mass, other.mass, self.velocity, other.velocity, self.position, other.position; M = m + m2
