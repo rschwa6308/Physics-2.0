@@ -1,11 +1,9 @@
 from functools import reduce
 from operator import add
-from random import shuffle
 from pygame.math import Vector2 as V2
 import pygame as pg, os
 
 from src.display.tkinter_windows import create_menu
-from src.core.presets import System, Gradient
 from src.core import constants
 
 def init_display():
@@ -140,19 +138,10 @@ class Camera:
 
 def main():
     screen, dims = init_display()
-    camera, scroll = Camera(dims), Scroll()
-
-    # Construct bodies list
-    # bodies = System(dims, 100, (1,10), (75,500)).preset("unary", 5000, 0.3)
-    # bodies = System(dims, 50, (10,15), (450,500)).preset("binary", (5000, 2500), 0.4)
-    # bodies = System(dims, 100, (10,20), (5,500)).preset("cluster")
-    # bodies = [Body(200, (400, 300), (1, 0), 0.01, (0,0,0), "A"), Body(100, (900, 330), (-1, 0), 0.01, (255, 255, 0), "B")]
-    # bodies = Gradient(dims, 120, (500,1000)).preset("diffusion")
-    bodies = Gradient(dims, 120, (500,1000)).preset("density", (0.1, 0.3))
-    shuffle(bodies)
+    bodies, camera, scroll = [], Camera(dims), Scroll()
 
     settings_window, clock, done, frame_count = create_menu("Settings", bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock(), False, 0
-    
+
     while not done:
         clock.tick(constants.clock_speed)
         frame_count += 1
