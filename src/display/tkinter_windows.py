@@ -91,8 +91,6 @@ class CreateSystem(Menu):
         self.createEntryRange("Mass Range: ", 'mass_r', root, 3, 10, 15)
         row = 4 # Use this to track the number of rows used in the window
         if chosen == "Gradient":
-            # Add color options
-           #tk.Checkbutton(root, bg='#FF0000').grid(row=1)
             self.createColor('Color 1', 'color1', root, row); self.createColor('Color 2', 'color2', root, row+1)
             self.color1Val.set("(255, 0, 0)"); self.color2Val.set("(0, 0, 255)"); self.color1ValTrue, self.color2ValTrue = (255,0,0), (0,0,255)
             row += 2
@@ -107,7 +105,6 @@ class CreateSystem(Menu):
                 self.createLabelSlider("Star Density: ", 'star_density', root, row, .01, 1, 200, .4, .01)
                 self.createLabelSlider("Star Mass: ", 'star_mass', root, row+1, 0, 10000, 200, 500, 50)
                 row += 2
-                # Add circular checkbox
                 if chosen2 == "Binary":
                     self.createLabelSlider("Star Mass 2: ", 'star_mass2', root, row, 0, 10000, 200, 500, 50)
                     row += 1
@@ -122,7 +119,6 @@ class CreateSystem(Menu):
         num = self.num.get()
         mass_r = self.findEntries('mass_r')
         if chosen == "Gradient":
-            # Add colors
             colors = (self.color1ValTrue, self.color2ValTrue)
             if chosen2 == "Density":
                 densities = self.findEntries('densities')
