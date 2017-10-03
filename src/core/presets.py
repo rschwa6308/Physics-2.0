@@ -9,7 +9,7 @@ class Preset:
         return generate_bodies(getattr(self, preset_type)(*args))
 
 class Gradient(Preset):
-    def extra_args(self, colors=((255, 0, 0), (0, 0, 255))):
+    def extra_args(self, colors):
         self.colors = colors
 
     def Diffusion(self):

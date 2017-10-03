@@ -58,8 +58,7 @@ class CreateSystem(Menu):
         self.choices = {"System":("Unary","Binary","Cluster"), "Gradient":("Density","Diffusion")}
         
     def configure(self, parent):
-        self.parent = parent
-        d = list(self.choices.keys())[0]
+        self.parent, d = parent,  list(self.choices.keys())[0]
         default = tk.StringVar(value=d)
         tk.Label(self.root, text="Choose system type:").grid(row=0, column=0)
         self.opt = tk.OptionMenu(self.root, default, *self.choices, command=lambda x: self.choice2(x))
@@ -114,10 +113,7 @@ class CreateSystem(Menu):
         root.grid(row=2, columnspan=2)
 
     def submit(self, chosen, chosen2):
-        new_bodies = []
-        dims = self.dims
-        num = self.num.get()
-        mass_r = self.findEntries('mass_r')
+        new_bodies, dims, num, mass_r = [], self.dims, self.num.get(), self.findEntries('mass_r')
         if chosen == "Gradient":
             colors = (self.color1ValTrue, self.color2ValTrue)
             if chosen2 == "Density":
@@ -126,13 +122,11 @@ class CreateSystem(Menu):
             else:
                 new_bodies = Gradient(dims, num, mass_r, colors).preset('Diffusion')
         else:
-            dist_r = self.findEntries('dist_r')
-            density = self.density.get()
+            dist_r, density = self.findEntries('dist_r'), self.density.get()
             if chosen2 == "Cluster":
                 new_bodies = System(dims, num, mass_r, dist_r, density).preset('Cluster')
             else:
-                star_density = self.star_density.get()
-                star_mass = self.star_mass.get()
+                star_density, star_mass = self.star_density.get(), self.star_mass.get()
                 if chosen2 == "Binary":
                     star_mass2 = self.star_mass2.get()
                     new_bodies = System(dims, num, mass_r, dist_r, density).preset('Binary', (star_mass, star_mass2), star_density)
@@ -191,7 +185,6 @@ class Settings(Menu):
 
         # Misc Buttons
         tk.Button(self.root, text="Move Cam to COM", command=self.center_cam).grid(row=2, column=0)
-
         tk.Button(self.root, text="Quit", command=self.quit).grid(row=3, column=0, rowspan=1, columnspan=1, pady=20)
 
         # Set window size and screen position
@@ -225,9 +218,9 @@ class Settings(Menu):
 
     def open_file(self):
         filename = filedialog.askopenfilename()
-        self.filename = filename
-        self.name.set(os.path.split(filename)[-1])
-        if filename:
+        if filename and (not self.bodies or messagebox.askokcancel("Discard Changes", "Are you sure you want to discard changes?")):
+            self.filename = filename
+            self.name.set(os.path.split(filename)[-1])
             for window in self.properties_windows:
                 window.destroy()
             self.properties_windows = []
