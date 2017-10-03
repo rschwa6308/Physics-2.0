@@ -67,10 +67,12 @@ class CreateSystem(Menu):
         self.choice2(d)
 
     def color_choice(self, AttrName):
-        c = tuple(int(x) for x in colorchooser.askcolor()[0])
-        if c:
-            self.__dict__[AttrName].set(str(c))
-            self.__dict__[AttrName+'True'] = c
+        color = colorchooser.askcolor()
+        if color != (None, None):
+            c = tuple(int(x) for x in color[0])
+            if c:
+                self.__dict__[AttrName].set(str(c))
+                self.__dict__[AttrName+'True'] = c
 
     def choice2(self, chosen):
         c = self.choices[chosen]

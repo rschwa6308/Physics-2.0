@@ -96,6 +96,11 @@ def handle_bodies(*args):
         body.position += scroll.val
         if not frame_count % 100 and body.position.length() > 100000:  # TODO: find a good value from this boundary
             bodies.remove(body)
+            for window in settings_window.properties_windows:
+                if window.body is body:
+                    settings_window.properties_windows.remove(window)
+                    window.destroy()
+                    break
         if walls: # Wall collision
             d, r = ((body.position - camera.position) - dims / 2) * camera.scale + dims / 2, body.radius * camera.scale
             for i in 0, 1:
