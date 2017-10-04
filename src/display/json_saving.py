@@ -1,9 +1,10 @@
 import json
 
+
 class Save:
     def __init__(self, settings_window):
         cam = settings_window.camera
-        
+
         self.data = {}
         self.data["settings"] = {
             "G": settings_window.gravity_slider.get(),
@@ -19,7 +20,7 @@ class Save:
                 "scale": cam.scale
             }
         }
-        
+
         self.data["bodies"] = []
         for b in settings_window.bodies:
             self.data["bodies"].append({
@@ -36,6 +37,7 @@ class Save:
         with open(filename, "w") as outfile:
             json.dump(self.data, outfile)
 
+
 def load_save(window, file):
     data = json.load(file)
     s = data["settings"]
@@ -43,8 +45,9 @@ def load_save(window, file):
     window.time_slider.set(s["time factor"])
     window.COR_slider.set(s["coefficient of restitution"])
     window.collision.set(s["collision"])
-    window.camera.position, window.camera.scale, window.bg_color = s["camera"]["position"], s["camera"]["scale"], s["background color"]
+    window.camera.position, window.camera.scale, window.bg_color = s["camera"]["position"], s["camera"]["scale"], s[
+        "background color"]
     window.walls.set(s["walls"])
     window.gravity_on.set(s["gravity"])
     window.g_field.set(s["gravitational field"])
-    return ((b[prop] for prop in ["mass","position","velocity","density","color","name"]) for b in data["bodies"])
+    return ((b[prop] for prop in ["mass", "position", "velocity", "density", "color", "name"]) for b in data["bodies"])

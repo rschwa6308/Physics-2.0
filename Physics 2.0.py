@@ -6,6 +6,7 @@ import pygame as pg, os
 from src.display.tkinter_windows import create_menu
 from src.core import constants
 
+
 def init_display():
     pg.init()
     info = pg.display.Info()
@@ -15,6 +16,7 @@ def init_display():
     screen = pg.display.set_mode(dims, pg.RESIZABLE)
     pg.display.set_caption("Physics Simulator 2.0")
     return screen, V2(dims)
+
 
 def refresh_display(settings_window, screen, bodies, cam):
     screen.fill(settings_window.bg_color)  # comment out this line for a fun time ;)
@@ -28,17 +30,25 @@ def refresh_display(settings_window, screen, bodies, cam):
         # Currently, the properties of an object can reach a distinct threshold, after which they become invisible.
     pg.display.update()
 
+
 def update_windows(settings_window):
-    arr = [0,0,[0]*5]
+    arr = [0, 0, [0] * 5]
     if settings_window.alive:
         settings_window.update()
-        try: arr = [settings_window.gravity_slider.get() / 100, settings_window.COR_slider.get(), [settings_window.time_slider.get() / 100,
-                     settings_window.collision.get(), settings_window.walls.get(), settings_window.g_field.get(), settings_window.gravity_on.get()]]
-        except: pass
+        try:
+            arr = [settings_window.gravity_slider.get() / 100, settings_window.COR_slider.get(),
+                   [settings_window.time_slider.get() / 100,
+                    settings_window.collision.get(), settings_window.walls.get(), settings_window.g_field.get(),
+                    settings_window.gravity_on.get()]]
+        except:
+            pass
     for window in settings_window.properties_windows:
-        if window.alive: window.update()
-        else: settings_window.properties_windows.remove(window)
+        if window.alive:
+            window.update()
+        else:
+            settings_window.properties_windows.remove(window)
     return arr
+
 
 def handle_mouse(*args):
     settings_window, camera, event, bodies, dims, G, COR, scroll = args
@@ -46,15 +56,17 @@ def handle_mouse(*args):
         pos = camera.position + (pg.mouse.get_pos() - dims / 2) / camera.scale + dims / 2
         for b in bodies:
             if b.click_collision(pos) and b not in [win.body for win in settings_window.properties_windows]:
-                if not settings_window.alive: # Respawn the main window if it is dead
-                    settings_window.__init__(bodies, camera, dims, [G, COR]) # This still does not fix all errors
-                settings_window.properties_windows.append(create_menu("BodyProperties", bodies, camera, dims, len(settings_window.properties_windows), b))
+                if not settings_window.alive:  # Respawn the main window if it is dead
+                    settings_window.__init__(bodies, camera, dims, [G, COR])  # This still does not fix all errors
+                settings_window.properties_windows.append(
+                    create_menu("BodyProperties", bodies, camera, dims, len(settings_window.properties_windows), b))
     elif event.button == 4:
         camera.scale = min(camera.scale * 1.1, 100)
         scroll.scale /= 1.1
     elif event.button == 5:
         camera.scale = max(camera.scale / 1.1, 0.01)
         scroll.scale *= 1.1
+
 
 def handle_events(*args):
     settings_window, camera, scroll, done, dims, screen, bodies, G, COR = args
@@ -73,25 +85,26 @@ def handle_events(*args):
         done |= event.type == pg.QUIT
     return done, dims, screen
 
+
 def handle_bodies(*args):
     G, COR, time_factor, collision, walls, g_field, gravity, scroll, bodies, camera, dims, frame_count, settings_window = args
 
-    for body in bodies: # Reset previous calculations
+    for body in bodies:  # Reset previous calculations
         body.acceleration = V2(0, 0)
 
-    for b, body in enumerate(bodies): # Calculate forces and set acceleration, if mutual gravitation is enabled
-        for o in range(len(bodies)-1, b, -1):
+    for b, body in enumerate(bodies):  # Calculate forces and set acceleration, if mutual gravitation is enabled
+        for o in range(len(bodies) - 1, b, -1):
             if collision and bodies[o].test_collision(body):
-                if not COR: # Only remove second body if collision is perfectly inelastic
+                if not COR:  # Only remove second body if collision is perfectly inelastic
                     bodies[o].merge(bodies[b], settings_window.properties_windows)
                     bodies.pop(b)
                     break
                 bodies[o].collide(bodies[b], COR)
             if gravity:
-                force = body.force_of(bodies[o], G) # This is a misnomer; `force` is actually acceleration / mass
+                force = body.force_of(bodies[o], G)  # This is a misnomer; `force` is actually acceleration / mass
                 body.acceleration += bodies[o].mass * force
                 bodies[o].acceleration -= body.mass * force
-        body.acceleration.y += G / 50 * g_field # Uniform gravitational field
+        body.acceleration.y += G / 50 * g_field  # Uniform gravitational field
         body.apply_motion(time_factor)
         body.position += scroll.val
         if not frame_count % 100 and body.position.length() > 100000:  # TODO: find a good value from this boundary
@@ -101,13 +114,15 @@ def handle_bodies(*args):
                     settings_window.properties_windows.remove(window)
                     window.destroy()
                     break
-        if walls: # Wall collision
+        if walls:  # Wall collision
             d, r = ((body.position - camera.position) - dims / 2) * camera.scale + dims / 2, body.radius * camera.scale
             for i in 0, 1:
-                x = d[i] # x is the dimension (x,y) currently being tested / edited
+                x = d[i]  # x is the dimension (x,y) currently being tested / edited
                 if x <= r or x >= dims[i] - r:
-                    body.velocity[i] *= -COR # Reflect the perpendicular velocity
-                    body.position[i] = (2*(x<r)-1) * (r-dims[i]/2) / camera.scale + dims[i] / 2 + camera.position[i] # Place body back into frame
+                    body.velocity[i] *= -COR  # Reflect the perpendicular velocity
+                    body.position[i] = (2 * (x < r) - 1) * (r - dims[i] / 2) / camera.scale + dims[i] / 2 + \
+                                       camera.position[i]  # Place body back into frame
+
 
 class Scroll:
     def __init__(self):
@@ -118,19 +133,24 @@ class Scroll:
             self.down[self.map.index(key)] = down
 
     def update_value(self):
-        self.val = (self.val + self.scale * (V2(self.down[:2])-self.down[2:])) * .95
+        self.val = (self.val + self.scale * (V2(self.down[:2]) - self.down[2:])) * .95
+
 
 class Camera:
     def __init__(self, dims):
-        self.position, self.velocity, self.dims, self.scale, self.map = V2(0, 0), V2(0, 0), dims, 1, [pg.K_RIGHT, pg.K_LEFT, pg.K_UP, pg.K_DOWN]
+        self.position, self.velocity, self.dims, self.scale, self.map = V2(0, 0), V2(0, 0), dims, 1, [pg.K_RIGHT,
+                                                                                                      pg.K_LEFT,
+                                                                                                      pg.K_UP,
+                                                                                                      pg.K_DOWN]
 
     def key_down(self, key):
         if key in self.map:
-            self.velocity = V2((3/self.scale,0) if key in self.map[:2] else (0,3/self.scale)).elementwise() * ((self.map.index(key) not in (1,2)) * 2 - 1)
+            self.velocity = V2((3 / self.scale, 0) if key in self.map[:2] else (0, 3 / self.scale)).elementwise() * (
+            (self.map.index(key) not in (1, 2)) * 2 - 1)
 
     def key_up(self, key):
         if key in self.map:
-            self.velocity = self.velocity.elementwise() * ((0,1) if key in self.map[:2] else (1,0))
+            self.velocity = self.velocity.elementwise() * ((0, 1) if key in self.map[:2] else (1, 0))
 
     def move_to_com(self, bodies):
         total_mass = sum(b.mass for b in bodies)
@@ -147,12 +167,13 @@ def main():
     screen, dims = init_display()
     bodies, camera, scroll = [], Camera(dims), Scroll()
 
-    settings_window, clock, done, frame_count = create_menu("Settings", bodies, camera, dims, [constants.G, constants.COR]), pg.time.Clock(), False, 0
+    settings_window, clock, done, frame_count = create_menu("Settings", bodies, camera, dims,
+                                                            [constants.G, constants.COR]), pg.time.Clock(), False, 0
 
     while not done:
         clock.tick(constants.clock_speed)
         frame_count += 1
-        
+
         camera.apply_velocity()
         G, COR, misc_settings = update_windows(settings_window)
         done, dims, screen = handle_events(settings_window, camera, scroll, done, dims, screen, bodies, G, COR)
