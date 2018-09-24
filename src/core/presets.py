@@ -61,5 +61,5 @@ class System(Preset):
                              self.height / 2)
             stars[s][2] = V2(0, (1 - 2 * s) * sqrt(G * star_masses[1 - s] / distance))
         return stars + [((uniform(*self.m_range), (
-        self.width / 2 + uniform(-distance, distance), self.height / 2 + uniform(-distance, distance)),
+            self.width / 2 + uniform(-distance, distance), self.height / 2 + uniform(-distance, distance)),
                           (uniform(-1, 1), uniform(-1, 1)), self.density)) for _ in range(self.num)]

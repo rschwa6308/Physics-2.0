@@ -163,7 +163,7 @@ class Settings(Menu):
     def configure(self, constants):
         self.root.title("Simulation Settings")
         self.properties_windows, self.physics_frame, G, COR, self.bg_color = [], tk.LabelFrame(self.root), *constants, (
-        255, 255, 255)
+            255, 255, 255)
 
         # Top Bar Menu
         self.menu = tk.Menu(self.root)
@@ -234,7 +234,8 @@ class Settings(Menu):
     def open_file(self):
         filename = filedialog.askopenfilename()
         if filename and (
-            not self.bodies or messagebox.askokcancel("Discard Changes", "Are you sure you want to discard changes?")):
+                not self.bodies or messagebox.askokcancel("Discard Changes",
+                                                          "Are you sure you want to discard changes?")):
             self.filename = filename
             self.name.set(os.path.split(filename)[-1])
             for window in self.properties_windows:
@@ -298,7 +299,8 @@ class BodyProperties(Menu):
         for attr, color in ['velocity', 'blue'], ['acceleration', 'red']:
             a = getattr(self.body, attr)
             if getattr(self, attr).get() and a != (
-            0, 0):  # If arrow is enabled and vector is not of length zero, draw the arrow using a logistic formula
+                    0,
+                    0):  # If arrow is enabled and vector is not of length zero, draw the arrow using a logistic formula
                 self.canvas.create_line(
                     (52, 52, *((52, 52) + 40 * (1 - 2 ** -(a.length() * 1000000 ** (attr[0] != 'v'))) * a.normalize())),
                     fill=color, arrow="last")
