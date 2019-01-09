@@ -48,7 +48,8 @@ class Body:
         n = (x2 - x).normalize()
         p = 2 * (v.dot(n) - v2.dot(n)) / M
         # TODO: properly incorporate COR.  This is currently incorrect, and is only a proof of concept
-        self.velocity, other.velocity = v - (p * m2 * n) * COR, v2 + (p * m * n) * COR
+        #self.velocity, other.velocity = v - (p * m2 * n) * COR, v2 + (p * m * n) * COR
+        self.velocity, other.velocity = (v - (p * m2 * n)) * COR, (v2 + (p * m * n)) * COR
         # Set position of bodies to outer boundary to prevent bodies from getting stuck together
         # this method of splitting the offset evenly works, but is imprecise.  It should be based off of velocity.
         offset = (self.radius + other.radius - (x2 - x).length()) * n

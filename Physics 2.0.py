@@ -146,7 +146,7 @@ class Camera:
     def key_down(self, key):
         if key in self.map:
             self.velocity = V2((3 / self.scale, 0) if key in self.map[:2] else (0, 3 / self.scale)).elementwise() * (
-            (self.map.index(key) not in (1, 2)) * 2 - 1)
+                (self.map.index(key) not in (1, 2)) * 2 - 1)
 
     def key_up(self, key):
         if key in self.map:
